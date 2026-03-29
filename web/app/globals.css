@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #08090d;
+  --color-surface: #0c0e14;
+  --color-surface-raised: #10131b;
+  --color-border: #1a2030;
+  --color-stroke: #2a3a4a;
+  --color-accent: #4a9ead;
+  --color-accent-dim: #2a6a7a;
+  --color-text-muted: #5a6a7a;
+  --color-text: #8a9aaa;
+  --color-text-bright: #b0c0d0;
+  --font-family-mono: "JetBrains Mono", "IBM Plex Mono", "Fira Code", ui-monospace, monospace;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap");
+}
+
+html {
+  font-family: var(--font-family-mono);
+  background: var(--color-void);
+  color: var(--color-text);
+}
+
+body {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Scanline overlay - very subtle */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  z-index: 50;
+}
+
+/* Selection accent */
+::selection {
+  background: rgba(74, 158, 173, 0.3);
+  color: var(--color-text-bright);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-stroke);
+}
+
+/* Small caps utility */
+.small-caps {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
