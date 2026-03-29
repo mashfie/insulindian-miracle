@@ -106,6 +106,13 @@ class SimulationConfig:
     boomtown_collapse_threshold: int = 0
     boomtown_decay_multiplier: float = 1.0
     thompson_posterior_decay: float = 0.995
+    discounted_ucb_gamma: float = 0.97
+    sliding_window_ucb_window: int = 40
+    discounted_thompson_posterior_decay: float = 0.94
+    linucb_alpha: float = 1.15
+    linear_bandit_ridge: float = 1.0
+    linear_thompson_observation_variance: float = 9.0
+    linear_thompson_sampling_scale: float = 1.0
     reform_sensitivity: float = 3.0
     reform_step: float = 0.18
     reform_duration: int = 5

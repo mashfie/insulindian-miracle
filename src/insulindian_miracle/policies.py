@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 import math
 from typing import Protocol
@@ -17,6 +18,35 @@ class Policy(Protocol):
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
         ...
+
+
+CONTEXTUAL_FEATURE_DIM = 11
+
+
+def _contextual_feature_vector(index: int, states: list[SiteState], config: SimulationConfig) -> np.ndarray:
+    state = states[index]
+    return np.asarray(
+        [
+            1.0,
+            base_geography(state.site, config),
+            state.resource_rent,
+            state.institution.extraction,
+            state.institution.openness,
+            state.institution.adaptability,
+            state.productive_capital,
+            math.log1p(max(state.population, 1)),
+            min(max(network_bonus(index, states, config), 0.0), 3.0),
+            float(state.site.boomtown),
+            float(state.site.trade_cluster),
+        ],
+        dtype=float,
+    )
+
+
+def _contextual_feature_matrix(states: list[SiteState], config: SimulationConfig) -> np.ndarray:
+    if not states:
+        return np.zeros((0, CONTEXTUAL_FEATURE_DIM), dtype=float)
+    return np.vstack([_contextual_feature_vector(index, states, config) for index in range(len(states))])
 
 
 @dataclass(slots=True)
@@ -126,6 +156,153 @@ class GaussianThompsonPolicy:
         self.mean_precision = self.prior_mean_precision + self.posterior_decay * (self.mean_precision - self.prior_mean_precision)
         self.precisions[chosen_arm] += obs_precision
         self.mean_precision[chosen_arm] += reward * obs_precision
+
+
+@dataclass(slots=True)
+class DiscountedUCBPolicy:
+    arm_count: int
+    seed: int
+    gamma: float = 0.97
+    exploration: float = 2.0
+    name: str = "discounted-ucb"
+    counts: np.ndarray = field(init=False, repr=False)
+    reward_sums: np.ndarray = field(init=False, repr=False)
+    total_mass: float = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        del self.seed
+        self.gamma = min(max(self.gamma, 0.0), 1.0)
+        self.counts = np.zeros(self.arm_count, dtype=float)
+        self.reward_sums = np.zeros(self.arm_count, dtype=float)
+        self.total_mass = 0.0
+
+    def select_arm(self, states: list[SiteState]) -> int:
+        del states
+        unseen = np.where(self.counts <= 1e-9)[0]
+        if unseen.size:
+            return int(unseen[0])
+        means = self.reward_sums / np.maximum(self.counts, 1e-9)
+        bonus = np.sqrt((self.exploration * np.log(self.total_mass + 1.0)) / np.maximum(self.counts, 1e-9))
+        return int(np.argmax(means + bonus))
+
+    def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
+        del states
+        self.counts *= self.gamma
+        self.reward_sums *= self.gamma
+        self.total_mass = self.total_mass * self.gamma + 1.0
+        self.counts[chosen_arm] += 1.0
+        self.reward_sums[chosen_arm] += reward
+
+
+@dataclass(slots=True)
+class SlidingWindowUCBPolicy:
+    arm_count: int
+    seed: int
+    window_size: int = 40
+    exploration: float = 2.0
+    name: str = "sliding-window-ucb"
+    reward_windows: list[deque[float]] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        del self.seed
+        self.window_size = max(1, int(self.window_size))
+        self.reward_windows = [deque(maxlen=self.window_size) for _ in range(self.arm_count)]
+
+    def select_arm(self, states: list[SiteState]) -> int:
+        del states
+        unseen = [index for index, window in enumerate(self.reward_windows) if not window]
+        if unseen:
+            return int(unseen[0])
+        counts = np.asarray([len(window) for window in self.reward_windows], dtype=float)
+        means = np.asarray([float(np.mean(window)) for window in self.reward_windows], dtype=float)
+        total_mass = max(float(counts.sum()), 1.0)
+        bonus = np.sqrt((self.exploration * np.log(total_mass + 1.0)) / np.maximum(counts, 1.0))
+        return int(np.argmax(means + bonus))
+
+    def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
+        del states
+        self.reward_windows[chosen_arm].append(float(reward))
+
+
+@dataclass(slots=True)
+class DiscountedGaussianThompsonPolicy(GaussianThompsonPolicy):
+    name: str = "discounted-gaussian-thompson"
+
+
+@dataclass(slots=True)
+class LinUCBPolicy:
+    arm_count: int
+    seed: int
+    config: SimulationConfig
+    alpha: float = 1.15
+    ridge: float = 1.0
+    name: str = "linucb"
+    covariance: np.ndarray = field(init=False, repr=False)
+    reward_vector: np.ndarray = field(init=False, repr=False)
+    last_features: np.ndarray = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        del self.seed
+        self.ridge = max(self.ridge, 1e-6)
+        self.covariance = self.ridge * np.eye(CONTEXTUAL_FEATURE_DIM, dtype=float)
+        self.reward_vector = np.zeros(CONTEXTUAL_FEATURE_DIM, dtype=float)
+        self.last_features = np.zeros((self.arm_count, CONTEXTUAL_FEATURE_DIM), dtype=float)
+
+    def select_arm(self, states: list[SiteState]) -> int:
+        features = _contextual_feature_matrix(states, self.config)
+        self.last_features = features
+        inverse = np.linalg.inv(self.covariance)
+        theta = inverse @ self.reward_vector
+        bonuses = np.sqrt(np.einsum("ij,jk,ik->i", features, inverse, features))
+        scores = features @ theta + self.alpha * bonuses
+        return int(np.argmax(scores))
+
+    def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
+        del states
+        feature = self.last_features[chosen_arm]
+        self.covariance += np.outer(feature, feature)
+        self.reward_vector += reward * feature
+
+
+@dataclass(slots=True)
+class LinearThompsonPolicy:
+    arm_count: int
+    seed: int
+    config: SimulationConfig
+    ridge: float = 1.0
+    observation_variance: float = 9.0
+    sampling_scale: float = 1.0
+    name: str = "linear-thompson"
+    rng: np.random.Generator = field(init=False, repr=False)
+    precision: np.ndarray = field(init=False, repr=False)
+    reward_precision: np.ndarray = field(init=False, repr=False)
+    last_features: np.ndarray = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self.rng = np.random.default_rng(self.seed)
+        self.ridge = max(self.ridge, 1e-6)
+        self.observation_variance = max(self.observation_variance, 1e-6)
+        self.sampling_scale = max(self.sampling_scale, 1e-6)
+        self.precision = self.ridge * np.eye(CONTEXTUAL_FEATURE_DIM, dtype=float)
+        self.reward_precision = np.zeros(CONTEXTUAL_FEATURE_DIM, dtype=float)
+        self.last_features = np.zeros((self.arm_count, CONTEXTUAL_FEATURE_DIM), dtype=float)
+
+    def select_arm(self, states: list[SiteState]) -> int:
+        features = _contextual_feature_matrix(states, self.config)
+        self.last_features = features
+        covariance = np.linalg.inv(self.precision)
+        mean = covariance @ self.reward_precision
+        chol = np.linalg.cholesky(covariance + 1e-9 * np.eye(CONTEXTUAL_FEATURE_DIM, dtype=float))
+        theta = mean + self.sampling_scale * (chol @ self.rng.normal(size=CONTEXTUAL_FEATURE_DIM))
+        scores = features @ theta
+        return int(np.argmax(scores))
+
+    def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
+        del states
+        feature = self.last_features[chosen_arm]
+        obs_precision = 1.0 / self.observation_variance
+        self.precision += obs_precision * np.outer(feature, feature)
+        self.reward_precision += obs_precision * reward * feature
 
 
 @dataclass(slots=True)
@@ -581,8 +758,35 @@ def build_policy(name: str, arm_count: int, seed: int, config: SimulationConfig)
         return EpsilonGreedyPolicy(arm_count=arm_count, seed=seed)
     if normalized in {"ucb", "ucb1"}:
         return UCB1Policy(arm_count=arm_count, seed=seed)
+    if normalized in {"discounted-ucb", "ducb"}:
+        return DiscountedUCBPolicy(arm_count=arm_count, seed=seed, gamma=config.discounted_ucb_gamma)
+    if normalized in {"sliding-window-ucb", "sliding-ucb", "sw-ucb"}:
+        return SlidingWindowUCBPolicy(arm_count=arm_count, seed=seed, window_size=config.sliding_window_ucb_window)
     if normalized in {"ts", "thompson", "gaussian-thompson"}:
         return GaussianThompsonPolicy(arm_count=arm_count, seed=seed, posterior_decay=config.thompson_posterior_decay)
+    if normalized in {"discounted-gaussian-thompson", "discounted-thompson", "discounted-ts"}:
+        return DiscountedGaussianThompsonPolicy(
+            arm_count=arm_count,
+            seed=seed,
+            posterior_decay=config.discounted_thompson_posterior_decay,
+        )
+    if normalized in {"linucb", "linear-ucb"}:
+        return LinUCBPolicy(
+            arm_count=arm_count,
+            seed=seed,
+            config=config,
+            alpha=config.linucb_alpha,
+            ridge=config.linear_bandit_ridge,
+        )
+    if normalized in {"linear-thompson", "linear-ts"}:
+        return LinearThompsonPolicy(
+            arm_count=arm_count,
+            seed=seed,
+            config=config,
+            ridge=config.linear_bandit_ridge,
+            observation_variance=config.linear_thompson_observation_variance,
+            sampling_scale=config.linear_thompson_sampling_scale,
+        )
     if normalized in {"whittle", "whittle-index"}:
         return WhittleIndexPolicy(arm_count=arm_count, seed=seed, config=config)
     if normalized in {"oracle", "myopic-oracle"}:

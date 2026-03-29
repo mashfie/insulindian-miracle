@@ -14,7 +14,17 @@ from .scenarios import apply_scenario, get_scenario
 from .terrain import generate_terrain, select_candidate_sites
 
 
-DEFAULT_POLICIES = ["epsilon-greedy", "ucb1", "gaussian-thompson", "whittle-index"]
+DEFAULT_POLICIES = [
+    "epsilon-greedy",
+    "ucb1",
+    "discounted-ucb",
+    "sliding-window-ucb",
+    "gaussian-thompson",
+    "discounted-gaussian-thompson",
+    "linucb",
+    "linear-thompson",
+    "whittle-index",
+]
 ORACLE_POLICY = "myopic-oracle"
 
 

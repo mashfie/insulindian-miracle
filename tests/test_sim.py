@@ -45,6 +45,22 @@ def test_build_policy_supports_whittle():
     assert policy.name == "whittle-index"
 
 
+def test_build_policy_supports_new_policy_families():
+    config = SimulationConfig()
+
+    names = [
+        "discounted-ucb",
+        "sliding-window-ucb",
+        "discounted-gaussian-thompson",
+        "linucb",
+        "linear-thompson",
+    ]
+
+    policies = [build_policy(name, arm_count=3, seed=7, config=config) for name in names]
+
+    assert [policy.name for policy in policies] == names
+
+
 def test_whittle_surrogate_prefers_stronger_site():
     sites = [
         Site(
@@ -101,6 +117,21 @@ def test_run_simulation_is_reproducible():
 
     assert first.cumulative_reward == second.cumulative_reward
     assert first.selected_sites == second.selected_sites
+
+
+def test_new_policies_run_end_to_end():
+    config = SimulationConfig(horizon=12, num_sites=6, seed=47)
+
+    for policy_name in [
+        "discounted-ucb",
+        "sliding-window-ucb",
+        "discounted-gaussian-thompson",
+        "linucb",
+        "linear-thompson",
+    ]:
+        result = run_simulation(config, policy_name=policy_name)
+        assert len(result.selected_sites) == config.horizon
+        assert len(result.site_outcomes) == config.num_sites
 
 
 def test_run_simulation_reports_site_outcomes_and_metrics():
@@ -250,7 +281,32 @@ def test_open_cluster_run_marks_trade_cluster_sites():
     assert any(outcome.trade_cluster for outcome in result.site_outcomes)
 
 
+def test_merchant_republic_run_marks_trade_cluster_sites():
+    config = SimulationConfig(horizon=24, num_sites=8, seed=21)
+    result = run_simulation(config, policy_name="linucb", scenario_name="merchant-republic")
+
+    assert any(outcome.trade_cluster for outcome in result.site_outcomes)
+
+
+def test_megacity_trap_increases_top_site_share_relative_to_balanced_system():
+    config = SimulationConfig(horizon=40, num_sites=8, seed=59)
+    trap = run_simulation(config, policy_name="whittle-index", scenario_name="megacity-trap")
+    balanced = run_simulation(config, policy_name="whittle-index", scenario_name="balanced-urban-system")
+
+    assert trap.metrics["top_site_share"] > balanced.metrics["top_site_share"]
+
+
 def test_run_benchmark_returns_all_policies():
     scores = run_benchmark(seed=9)
 
-    assert set(scores) == {"epsilon-greedy", "ucb1", "gaussian-thompson", "whittle-index"}
+    assert set(scores) == {
+        "epsilon-greedy",
+        "ucb1",
+        "discounted-ucb",
+        "sliding-window-ucb",
+        "gaussian-thompson",
+        "discounted-gaussian-thompson",
+        "linucb",
+        "linear-thompson",
+        "whittle-index",
+    }

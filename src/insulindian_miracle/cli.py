@@ -8,7 +8,7 @@ from .analysis import run_hypothesis_suite
 from .model import SimulationConfig
 from .research import fetch_papers, synthesize_theory
 from .scenarios import list_scenarios
-from .sim import run_benchmark, run_experiment, run_simulation, run_sweep, write_json
+from .sim import DEFAULT_POLICIES, run_benchmark, run_experiment, run_simulation, run_sweep, write_json
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -38,7 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
     sweep_parser = sim_subparsers.add_parser("sweep")
     sweep_parser.add_argument("--config")
     sweep_parser.add_argument("--scenario", default=None)
-    sweep_parser.add_argument("--policies", nargs="+", default=["epsilon-greedy", "ucb1", "gaussian-thompson", "whittle-index"])
+    sweep_parser.add_argument("--policies", nargs="+", default=list(DEFAULT_POLICIES))
     sweep_parser.add_argument("--runs", type=int, default=3)
     sweep_parser.add_argument("--output")
 
@@ -50,13 +50,13 @@ def build_parser() -> argparse.ArgumentParser:
     experiment_parser = sim_subparsers.add_parser("experiment")
     experiment_parser.add_argument("--config")
     experiment_parser.add_argument("--scenario", default="baseline")
-    experiment_parser.add_argument("--policies", nargs="+", default=["epsilon-greedy", "ucb1", "gaussian-thompson", "whittle-index"])
+    experiment_parser.add_argument("--policies", nargs="+", default=list(DEFAULT_POLICIES))
     experiment_parser.add_argument("--runs", type=int, default=12)
     experiment_parser.add_argument("--output")
 
     hypotheses_parser = sim_subparsers.add_parser("hypotheses")
     hypotheses_parser.add_argument("--config")
-    hypotheses_parser.add_argument("--policies", nargs="+", default=["epsilon-greedy", "ucb1", "gaussian-thompson", "whittle-index"])
+    hypotheses_parser.add_argument("--policies", nargs="+", default=list(DEFAULT_POLICIES))
     hypotheses_parser.add_argument("--runs", type=int, default=12)
     hypotheses_parser.add_argument("--include-experiments", action="store_true")
     hypotheses_parser.add_argument("--output")
