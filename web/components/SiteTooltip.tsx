@@ -25,7 +25,12 @@ export default function SiteTooltip({ site }: SiteTooltipProps) {
   }
 
   return (
-    <div className="flex flex-col gap-0.5 text-[9px] font-mono">
+    <div
+      className="flex flex-col gap-0.5 text-[9px] font-mono"
+      style={{
+        animation: "card-enter-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) both",
+      }}
+    >
       <div className="text-accent small-caps text-[11px] mb-1">
         site {site.id}
       </div>
