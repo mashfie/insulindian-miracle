@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "generated_from": "peninsula-bandits-CLAUDE.md",
+  "entries": [
+    {
+      "id": "lattimore2020bandit",
+      "category": "bandits",
+      "tier": "core",
+      "type": "book",
+      "title": "Bandit Algorithms",
+      "authors": [
+        "Tor Lattimore",
+        "Csaba Szepesvari"
+      ],
+      "year": 2020,
+      "landing_url": "https://banditalgs.com",
+      "download_url": "https://tor-lattimore.com/downloads/book/book.pdf",
+      "open_access": true,
+      "implementation_phase": "backend-foundation",
+      "notes": "Core reference for stochastic bandits, regret, and policy interfaces.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\lattimore2020bandit.pdf",
+      "fetched_at": "2026-03-29T00:06:56.934436+00:00",
+      "last_error": null
+    },
+    {
+      "id": "russo2018thompson",
+      "category": "bandits",
+      "tier": "core",
+      "type": "paper",
+      "title": "A Tutorial on Thompson Sampling",
+      "authors": [
+        "Daniel Russo",
+        "Benjamin Van Roy",
+        "Abbas Kazerouni",
+        "Ian Osband",
+        "Zheng Wen"
+      ],
+      "year": 2018,
+      "landing_url": "https://web.stanford.edu/~bvr/pubs/TS_Tutorial.pdf",
+      "download_url": "https://web.stanford.edu/~bvr/pubs/TS_Tutorial.pdf",
+      "open_access": true,
+      "implementation_phase": "policy-layer",
+      "notes": "Primary guide for continuous-reward Thompson Sampling design.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\russo2018thompson.pdf",
+      "fetched_at": "2026-03-29T00:07:09.379341+00:00",
+      "last_error": null
+    },
+    {
+      "id": "auer2002ucb1",
+      "category": "bandits",
+      "tier": "core",
+      "type": "paper",
+      "title": "Finite-time Analysis of the Multiarmed Bandit Problem",
+      "authors": [
+        "Peter Auer",
+        "Nicol\u00f2 Cesa-Bianchi",
+        "Paul Fischer"
+      ],
+      "year": 2002,
+      "landing_url": "https://doi.org/10.1023/A:1013689704352",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "policy-layer",
+      "notes": "Defines UCB1 and the optimism-under-uncertainty baseline.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "agrawal2012thompson",
+      "category": "bandits",
+      "tier": "supporting",
+      "type": "paper",
+      "title": "Analysis of Thompson Sampling for the Multi-armed Bandit Problem",
+      "authors": [
+        "Shipra Agrawal",
+        "Navin Goyal"
+      ],
+      "year": 2012,
+      "landing_url": "https://proceedings.mlr.press/v23/agrawal12.html",
+      "download_url": "https://proceedings.mlr.press/v23/agrawal12/agrawal12.pdf",
+      "open_access": true,
+      "implementation_phase": "policy-layer",
+      "notes": "Useful for sanity-checking TS design and assumptions.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\agrawal2012thompson.pdf",
+      "fetched_at": "2026-03-29T00:07:11.202568+00:00",
+      "last_error": null
+    },
+    {
+      "id": "whittle1988restless",
+      "category": "bandits",
+      "tier": "core",
+      "type": "paper",
+      "title": "Restless Bandits: Activity Allocation in a Changing World",
+      "authors": [
+        "Peter Whittle"
+      ],
+      "year": 1988,
+      "landing_url": "https://doi.org/10.2307/3214163",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "restless-whittle",
+      "notes": "Foundational restless-bandit framing; use as conceptual anchor, not an implementation recipe.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "akbarzadeh2020whittle",
+      "category": "bandits",
+      "tier": "core",
+      "type": "paper",
+      "title": "Conditions for Indexability of Restless Bandits and an O(K^3) Algorithm to Compute Whittle Index",
+      "authors": [
+        "Nima Akbarzadeh",
+        "Aditya Mahajan"
+      ],
+      "year": 2020,
+      "landing_url": "https://arxiv.org/abs/2008.06111",
+      "download_url": "https://arxiv.org/pdf/2008.06111.pdf",
+      "open_access": true,
+      "implementation_phase": "restless-whittle",
+      "notes": "Guides the surrogate discretization and indexability constraints.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\akbarzadeh2020whittle.pdf",
+      "fetched_at": "2026-03-29T00:07:14.204181+00:00",
+      "last_error": null
+    },
+    {
+      "id": "levine2017rotting",
+      "category": "bandits",
+      "tier": "core",
+      "type": "paper",
+      "title": "Rotting Bandits",
+      "authors": [
+        "Nir Levine",
+        "Koby Crammer",
+        "Shie Mannor"
+      ],
+      "year": 2017,
+      "landing_url": "https://arxiv.org/abs/1702.07274",
+      "download_url": "https://arxiv.org/pdf/1702.07274.pdf",
+      "open_access": true,
+      "implementation_phase": "restless-whittle",
+      "notes": "Captures the decaying-arm intuition behind extractive settlement traps.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\levine2017rotting.pdf",
+      "fetched_at": "2026-03-29T00:07:17.020786+00:00",
+      "last_error": null
+    },
+    {
+      "id": "seznec2019rotting",
+      "category": "bandits",
+      "tier": "supporting",
+      "type": "paper",
+      "title": "Rotting Bandits Are Not Harder Than Stochastic Ones",
+      "authors": [
+        "Julien Seznec",
+        "Andrea Locatelli",
+        "Alexandra Carpentier",
+        "Alessandro Lazaric",
+        "Michal Valko"
+      ],
+      "year": 2019,
+      "landing_url": "https://proceedings.mlr.press/v89/seznec19a.html",
+      "download_url": "https://proceedings.mlr.press/v89/seznec19a/seznec19a.pdf",
+      "open_access": true,
+      "implementation_phase": "restless-whittle",
+      "notes": "Useful for building toy decaying benchmarks and expected policy behavior.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\seznec2019rotting.pdf",
+      "fetched_at": "2026-03-29T00:07:20.045292+00:00",
+      "last_error": null
+    },
+    {
+      "id": "henderson1974cities",
+      "category": "urban-geography",
+      "tier": "core",
+      "type": "paper",
+      "title": "The Sizes and Types of Cities",
+      "authors": [
+        "J. Vernon Henderson"
+      ],
+      "year": 1974,
+      "landing_url": "https://econpapers.repec.org/RePEc:qed:wpaper:75",
+      "download_url": "http://qed.econ.queensu.ca/working_papers/papers/qed_wp_75.pdf",
+      "open_access": true,
+      "implementation_phase": "terrain-and-sites",
+      "notes": "Provides the agglomeration versus congestion intuition for reward design; using the open working-paper version for local retrieval.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\henderson1974cities.pdf",
+      "fetched_at": "2026-03-29T00:09:39.609431+00:00",
+      "last_error": null
+    },
+    {
+      "id": "krugman1991geography",
+      "category": "urban-geography",
+      "tier": "core",
+      "type": "paper",
+      "title": "Increasing Returns and Economic Geography",
+      "authors": [
+        "Paul Krugman"
+      ],
+      "year": 1991,
+      "landing_url": "https://doi.org/10.1086/261763",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "terrain-and-sites",
+      "notes": "Use as the conceptual basis for core-periphery and accessibility effects.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "arthur1994pathdependence",
+      "category": "urban-geography",
+      "tier": "supporting",
+      "type": "book",
+      "title": "Increasing Returns and Path Dependence in the Economy",
+      "authors": [
+        "W. Brian Arthur"
+      ],
+      "year": 1994,
+      "landing_url": null,
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "simulation",
+      "notes": "Backs the lock-in and multiple-equilibria interpretation of runs.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "acemoglu2001colonial",
+      "category": "institutions",
+      "tier": "supporting",
+      "type": "paper",
+      "title": "The Colonial Origins of Comparative Development",
+      "authors": [
+        "Daron Acemoglu",
+        "Simon Johnson",
+        "James A. Robinson"
+      ],
+      "year": 2001,
+      "landing_url": "https://doi.org/10.1257/aer.91.5.1369",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "institution-layer",
+      "notes": "Useful for motivating why institutional starting points matter.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "sachs1995resourcegrowth",
+      "category": "institutions",
+      "tier": "core",
+      "type": "paper",
+      "title": "Natural Resource Abundance and Economic Growth",
+      "authors": [
+        "Jeffrey D. Sachs",
+        "Andrew M. Warner"
+      ],
+      "year": 1995,
+      "landing_url": "https://www.nber.org/papers/w5398",
+      "download_url": "https://www.nber.org/system/files/working_papers/w5398/w5398.pdf",
+      "open_access": true,
+      "implementation_phase": "institution-layer",
+      "notes": "Empirical anchor for the resource-curse hypothesis.",
+      "local_cache_path": "C:\\Users\\Mahdi Shafiei\\Documents\\insulindian-miracle-paper-cache\\sachs1995resourcegrowth.pdf",
+      "fetched_at": "2026-03-29T00:07:24.967630+00:00",
+      "last_error": null
+    },
+    {
+      "id": "sachs2001curse",
+      "category": "institutions",
+      "tier": "core",
+      "type": "paper",
+      "title": "The Curse of Natural Resources",
+      "authors": [
+        "Jeffrey D. Sachs",
+        "Andrew M. Warner"
+      ],
+      "year": 2001,
+      "landing_url": "https://doi.org/10.1016/S0014-2921(01)00125-8",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "institution-layer",
+      "notes": "Supports the long-run outcome metrics and curse channels.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "ross1999resourcecurse",
+      "category": "institutions",
+      "tier": "core",
+      "type": "paper",
+      "title": "The Political Economy of the Resource Curse",
+      "authors": [
+        "Michael L. Ross"
+      ],
+      "year": 1999,
+      "landing_url": "https://doi.org/10.1017/S0043887100008046",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "institution-layer",
+      "notes": "Frames the rentier-state and elite-capture mechanisms.",
+      "local_cache_path": null,
+      "fetched_at": null
+    },
+    {
+      "id": "corden1982dutchdisease",
+      "category": "institutions",
+      "tier": "supporting",
+      "type": "paper",
+      "title": "Booming Sector and De-Industrialisation in a Small Open Economy",
+      "authors": [
+        "W. Max Corden",
+        "J. Peter Neary"
+      ],
+      "year": 1982,
+      "landing_url": "https://doi.org/10.2307/2232670",
+      "download_url": null,
+      "open_access": false,
+      "implementation_phase": "institution-layer",
+      "notes": "Background for shocks and sectoral crowd-out intuition.",
+      "local_cache_path": null,
+      "fetched_at": null
+    }
+  ]
+}
