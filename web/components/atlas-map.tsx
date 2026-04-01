@@ -40,6 +40,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const [chapterId, setChapterId] = useState(chapters[0]?.id ?? "terrain");
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef<{ origin: Point; offset: Point } | null>(null);
   const deferredChapterId = useDeferredValue(chapterId);
@@ -57,6 +58,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
 
   const handlePointerUp = useEffectEvent(() => {
     draggingRef.current = null;
+    setIsDragging(false);
   });
 
   useEffect(() => {
@@ -79,6 +81,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
       origin: { x: event.clientX, y: event.clientY },
       offset,
     };
+    setIsDragging(true);
   };
 
   const layer = source[chapter.layer];
@@ -112,7 +115,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             style={{
               transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
               transformOrigin: "50% 50%",
-              transition: "transform 240ms ease",
+              transition: isDragging ? "none" : "transform 240ms ease",
             }}
           >
             <svg viewBox={`0 0 ${source.width} ${source.height}`} role="img" aria-label={chapter.title}>

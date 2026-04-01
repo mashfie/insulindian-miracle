@@ -10,6 +10,10 @@
   --accent-soft: rgba(52, 91, 84, 0.14);
   --danger: #8a3824;
   --danger-soft: rgba(138, 56, 36, 0.14);
+  --surface: color-mix(in srgb, var(--paper) 95%, white 5%);
+  --surface-strong: color-mix(in srgb, var(--paper) 90%, white 10%);
+  --hero-height: min(100vh, 68rem);
+  --hero-overlap: -30vh;
   --font-body: var(--font-tiempos), serif;
   --font-ui: var(--font-suisse), sans-serif;
   --font-mono: var(--font-suisse-mono), monospace;
@@ -100,17 +104,23 @@ select {
 .archive-page[data-variant="cartographic-ledger"] {
   --accent: #3f5c52;
   --accent-soft: rgba(63, 92, 82, 0.14);
+  --surface: color-mix(in srgb, var(--paper) 93%, white 7%);
+  --surface-strong: color-mix(in srgb, var(--paper) 88%, white 12%);
+  --line-strong: rgba(17, 16, 15, 0.28);
 }
 
 .archive-page[data-variant="polyhedral-report"] {
   --accent: #7d4e33;
   --accent-soft: rgba(125, 78, 51, 0.14);
+  --surface: color-mix(in srgb, var(--paper) 92%, rgba(255, 248, 240, 0.85) 8%);
+  --surface-strong: color-mix(in srgb, var(--paper) 87%, rgba(255, 246, 236, 0.92) 13%);
+  --line-strong: rgba(17, 16, 15, 0.32);
 }
 
 .site-hero {
   position: relative;
-  height: min(100vh, 68rem);
-  margin-bottom: -30vh;
+  height: var(--hero-height);
+  margin-bottom: var(--hero-overlap);
   overflow: hidden;
 }
 
@@ -136,7 +146,7 @@ select {
 }
 
 .site-shell {
-  padding-top: 8vh;
+  padding-top: 6vh;
 }
 
 .document-view {
@@ -159,6 +169,13 @@ select {
 .document-view__body aside {
   position: sticky;
   top: 1.6rem;
+}
+
+.section-row__figure,
+.document-view__body aside {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
 }
 
 .headline,
@@ -266,8 +283,9 @@ h3 {
   gap: 1rem;
   padding: 1rem 1.05rem 1.15rem;
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--paper) 94%, white 6%);
+  background: var(--surface);
   backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 rgba(17, 16, 15, 0.05), 0 20px 36px rgba(17, 16, 15, 0.05);
 }
 
 .nav-rail ol {
@@ -315,8 +333,9 @@ h3 {
   z-index: 40;
   width: min(18rem, calc(100vw - 2rem));
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--paper) 92%, white 8%);
+  background: var(--surface-strong);
   backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 rgba(17, 16, 15, 0.05), 0 18px 32px rgba(17, 16, 15, 0.06);
   opacity: 0;
   pointer-events: none;
   transition: opacity 180ms ease;
@@ -520,8 +539,8 @@ h3 {
 .atlas__viewport,
 .atlas__narrative {
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--paper) 95%, white 5%);
-  box-shadow: 0 1px 0 rgba(17, 16, 15, 0.04);
+  background: var(--surface);
+  box-shadow: 0 1px 0 rgba(17, 16, 15, 0.05), 0 16px 34px rgba(17, 16, 15, 0.04);
 }
 
 .figure-card,
@@ -538,6 +557,7 @@ h3 {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 7 / 4;
 }
 
 .figure-meta {
@@ -593,6 +613,12 @@ h3 {
   padding: 0.6rem 0.82rem;
   cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.comparison-card__header button {
+  flex-shrink: 0;
+  min-width: 10rem;
+  white-space: nowrap;
 }
 
 .comparison-card__header button:hover,
@@ -692,6 +718,12 @@ h3 {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+}
+
+.atlas__controls button {
+  white-space: nowrap;
 }
 
 .atlas__grid {
@@ -703,6 +735,7 @@ h3 {
 .atlas__viewport {
   overflow: hidden;
   cursor: grab;
+  touch-action: none;
 }
 
 .atlas__viewport:active {
@@ -726,10 +759,17 @@ h3 {
 }
 
 .motion-reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  animation: motionReveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  animation-delay: calc(var(--reveal-order, 0) * 80ms);
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    animation: motionReveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation-delay: calc(var(--reveal-order, 0) * 80ms);
+  }
 }
 
 @keyframes motionReveal {
@@ -775,12 +815,22 @@ h3 {
     transition: none;
     transform: none;
   }
+
+  .motion-reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (max-width: 64rem) {
+  :root {
+    --hero-height: min(80vh, 52rem);
+    --hero-overlap: -10vh;
+  }
+
   .site-hero {
-    margin-bottom: -10vh;
-    height: min(80vh, 52rem);
+    margin-bottom: var(--hero-overlap);
+    height: var(--hero-height);
   }
 
   .site-shell,
@@ -811,5 +861,44 @@ h3 {
     right: 0.7rem;
     left: 0.7rem;
     width: auto;
+  }
+}
+
+@media (max-width: 48rem) {
+  :root {
+    --hero-height: min(58vh, 30rem);
+    --hero-overlap: -2rem;
+  }
+
+  .site-shell,
+  .document-view {
+    padding-bottom: 6rem;
+  }
+
+  .site-shell {
+    padding-top: 1.8rem;
+  }
+
+  .document-view {
+    padding-top: 3rem;
+  }
+
+  .headline,
+  h1 {
+    font-size: clamp(2.75rem, 14vw, 4.2rem);
+  }
+
+  h2 {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  .figure-card,
+  .comparison-card,
+  .atlas__narrative,
+  .atlas__viewport,
+  .reference-card,
+  .index-card,
+  .metric-card {
+    padding: 0.85rem;
   }
 }

@@ -34,7 +34,7 @@ export function ArchiveSettingsPanel({
   }, []);
 
   return (
-    <details className={`settings-panel${visible ? " visible" : ""}`} open>
+    <details className={`settings-panel${visible ? " visible" : ""}`}>
       <summary className="settings-title">
         <span>Archive Controls</span>
         <span className="details-icon-closed" aria-hidden="true">
