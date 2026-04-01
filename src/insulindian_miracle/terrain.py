@@ -342,14 +342,45 @@ def generate_terrain(config: TerrainConfig) -> TerrainField:
 
 def select_candidate_sites(terrain: TerrainField, count: int = 15, min_spacing: float = 0.1) -> list[Site]:
     height, width = terrain.elevation.shape
-    cells = np.argwhere(terrain.land_mask)
-    ranked = sorted(cells.tolist(), key=lambda cell: terrain.suitability[cell[0], cell[1]], reverse=True)
+    max_border_distance = max(1.0, min(width, height) / 2.0 - 1.0)
+    cells: list[tuple[float, int, int, bool]] = []
+    interior_cells: list[tuple[float, int, int, bool]] = []
+
+    for y, x in np.argwhere(terrain.land_mask).tolist():
+        border_distance = min(x, width - 1 - x, y, height - 1 - y)
+        border_bonus = max(0.0, min(1.0, border_distance / max_border_distance))
+        inland_bonus = max(0.0, min(1.0, float(terrain.coastal_distance[y, x]) / 8.0))
+        priority = 0.8 * float(terrain.suitability[y, x]) + 0.12 * border_bonus + 0.08 * inland_bonus
+        candidate = (priority, int(y), int(x), border_distance == 0)
+        cells.append(candidate)
+        if border_distance > 0:
+            interior_cells.append(candidate)
+
+    ranked = sorted(interior_cells if len(interior_cells) >= count else cells, reverse=True)
     sites: list[Site] = []
-    for y, x in ranked:
+    while ranked and len(sites) < count:
+        best_index = -1
+        best_score = -1.0
+        for index, (priority, y, x, _is_border) in enumerate(ranked):
+            norm_x = float(x / max(width - 1, 1))
+            norm_y = float(y / max(height - 1, 1))
+            if sites:
+                nearest = min(math.hypot(norm_x - site.x, norm_y - site.y) for site in sites)
+                if nearest < min_spacing:
+                    continue
+            else:
+                nearest = 1.0
+            spread = min(1.0, nearest / max(min_spacing, 1e-9))
+            score = 0.72 * priority + 0.28 * spread
+            if score > best_score:
+                best_score = score
+                best_index = index
+        if best_index < 0:
+            break
+
+        _priority, y, x, _is_border = ranked.pop(best_index)
         norm_x = float(x / max(width - 1, 1))
         norm_y = float(y / max(height - 1, 1))
-        if any(math.hypot(norm_x - site.x, norm_y - site.y) < min_spacing for site in sites):
-            continue
         river_access = math.exp(-0.22 * float(terrain.river_distance[y, x]))
         site = Site(
             id=len(sites),
@@ -364,6 +395,4 @@ def select_candidate_sites(terrain: TerrainField, count: int = 15, min_spacing: 
             suitability=float(terrain.suitability[y, x]),
         )
         sites.append(site)
-        if len(sites) >= count:
-            break
     return sites

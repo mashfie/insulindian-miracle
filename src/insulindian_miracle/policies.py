@@ -137,15 +137,18 @@ class GaussianThompsonPolicy:
         self.mean_precision = np.full(self.arm_count, self.prior_mean_precision)
         self.counts = np.zeros(self.arm_count, dtype=float)
 
+    def _sample_arm(self) -> int:
+        variances = np.maximum(1.0 / self.precisions, self.minimum_exploration_variance / np.sqrt(self.counts + 1.0))
+        means = self.mean_precision / self.precisions
+        draws = self.rng.normal(means, np.sqrt(variances))
+        return int(np.argmax(draws))
+
     def select_arm(self, states: list[SiteState]) -> int:
         del states
         unseen = np.where(self.counts < 0.5)[0]
         if unseen.size:
             return int(unseen[0])
-        variances = np.maximum(1.0 / self.precisions, self.minimum_exploration_variance / np.sqrt(self.counts + 1.0))
-        means = self.mean_precision / self.precisions
-        draws = self.rng.normal(means, np.sqrt(variances))
-        return int(np.argmax(draws))
+        return self._sample_arm()
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
         del states
@@ -201,32 +204,62 @@ class SlidingWindowUCBPolicy:
     window_size: int = 40
     exploration: float = 2.0
     name: str = "sliding-window-ucb"
-    reward_windows: list[deque[float]] = field(init=False, repr=False)
+    observation_window: deque[tuple[int, float]] = field(init=False, repr=False)
+    counts: np.ndarray = field(init=False, repr=False)
+    reward_sums: np.ndarray = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         del self.seed
         self.window_size = max(1, int(self.window_size))
-        self.reward_windows = [deque(maxlen=self.window_size) for _ in range(self.arm_count)]
+        self.observation_window = deque()
+        self.counts = np.zeros(self.arm_count, dtype=float)
+        self.reward_sums = np.zeros(self.arm_count, dtype=float)
 
     def select_arm(self, states: list[SiteState]) -> int:
         del states
-        unseen = [index for index, window in enumerate(self.reward_windows) if not window]
-        if unseen:
+        unseen = np.where(self.counts <= 1e-9)[0]
+        if unseen.size:
             return int(unseen[0])
-        counts = np.asarray([len(window) for window in self.reward_windows], dtype=float)
-        means = np.asarray([float(np.mean(window)) for window in self.reward_windows], dtype=float)
-        total_mass = max(float(counts.sum()), 1.0)
-        bonus = np.sqrt((self.exploration * np.log(total_mass + 1.0)) / np.maximum(counts, 1.0))
+        means = self.reward_sums / np.maximum(self.counts, 1.0)
+        total_mass = max(float(len(self.observation_window)), 1.0)
+        bonus = np.sqrt((self.exploration * np.log(total_mass + 1.0)) / np.maximum(self.counts, 1.0))
         return int(np.argmax(means + bonus))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
         del states
-        self.reward_windows[chosen_arm].append(float(reward))
+        if len(self.observation_window) == self.window_size:
+            expired_arm, expired_reward = self.observation_window.popleft()
+            self.counts[expired_arm] = max(self.counts[expired_arm] - 1.0, 0.0)
+            self.reward_sums[expired_arm] -= expired_reward
+            if self.counts[expired_arm] <= 1e-9:
+                self.counts[expired_arm] = 0.0
+                self.reward_sums[expired_arm] = 0.0
+
+        reward_value = float(reward)
+        self.observation_window.append((chosen_arm, reward_value))
+        self.counts[chosen_arm] += 1.0
+        self.reward_sums[chosen_arm] += reward_value
 
 
 @dataclass(slots=True)
 class DiscountedGaussianThompsonPolicy(GaussianThompsonPolicy):
     name: str = "discounted-gaussian-thompson"
+    observed: np.ndarray = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self.observed = np.zeros(self.arm_count, dtype=bool)
+
+    def select_arm(self, states: list[SiteState]) -> int:
+        del states
+        unseen = np.where(~self.observed)[0]
+        if unseen.size:
+            return int(unseen[0])
+        return self._sample_arm()
+
+    def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
+        super().update(chosen_arm, reward, states)
+        self.observed[chosen_arm] = True
 
 
 @dataclass(slots=True)

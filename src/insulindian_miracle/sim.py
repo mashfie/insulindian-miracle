@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import asdict
 import json
 import math
@@ -315,21 +316,25 @@ def _aggregate_results(results: list[SimulationResult], oracle_results: list[Sim
     return summary
 
 
-def run_simulation(
-    config: SimulationConfig,
-    policy_name: str = "gaussian-thompson",
-    scenario_name: str | None = None,
-) -> SimulationResult:
-    active_config = apply_scenario(config, scenario_name)
-    terrain = generate_terrain(active_config.terrain)
-    sites = select_candidate_sites(terrain, count=active_config.num_sites, min_spacing=active_config.min_site_spacing)
-    _apply_trade_cluster_shape(sites, active_config)
-    _apply_boomtown_shape(sites, active_config)
+def _prepare_world(config: SimulationConfig) -> tuple[Any, Any, list[Any]]:
+    terrain = generate_terrain(config.terrain)
+    sites = select_candidate_sites(terrain, count=config.num_sites, min_spacing=config.min_site_spacing)
+    _apply_trade_cluster_shape(sites, config)
+    _apply_boomtown_shape(sites, config)
     if not sites:
         raise ValueError("Terrain generation produced no viable sites.")
+    return terrain, sites
 
-    rng = np.random.default_rng(active_config.seed)
-    states = initialize_site_states(sites, active_config, rng)
+
+def _run_policy_on_sites(
+    config: SimulationConfig,
+    terrain,
+    sites,
+    policy_name: str,
+) -> SimulationResult:
+    working_sites = deepcopy(sites)
+    rng = np.random.default_rng(config.seed)
+    states = initialize_site_states(working_sites, config, rng)
     initial_snapshots = {
         state.site.id: {
             "extraction": state.institution.extraction,
@@ -339,26 +344,26 @@ def run_simulation(
         }
         for state in states
     }
-    policy = build_policy(policy_name, len(states), active_config.seed, active_config)
+    policy = build_policy(policy_name, len(states), config.seed, config)
 
     selected_sites: list[int] = []
     reward_history: list[float] = []
     cumulative_reward = 0.0
-    for step in range(active_config.horizon):
+    for step in range(config.horizon):
         chosen = policy.select_arm(states)
         states[chosen].population += 1
-        evolve_report = evolve_sites(states, active_config, rng, active_site=chosen, step=step)
+        evolve_report = evolve_sites(states, config, rng, active_site=chosen, step=step)
         reward = evolve_report.rewards[chosen]
         policy.update(chosen, reward, states)
         selected_sites.append(chosen)
         reward_history.append(reward)
         cumulative_reward += reward
 
-    site_outcomes = _build_site_outcomes(states, initial_snapshots, selected_sites, active_config)
+    site_outcomes = _build_site_outcomes(states, initial_snapshots, selected_sites, config)
     metrics = _result_metrics(site_outcomes, selected_sites)
     return SimulationResult(
         policy=policy.name,
-        seed=active_config.seed,
+        seed=config.seed,
         cumulative_reward=cumulative_reward,
         selected_sites=selected_sites,
         reward_history=reward_history,
@@ -369,6 +374,42 @@ def run_simulation(
         metrics=metrics,
         terrain_summary=_terrain_summary(terrain),
     )
+
+
+def run_simulation(
+    config: SimulationConfig,
+    policy_name: str = "gaussian-thompson",
+    scenario_name: str | None = None,
+) -> SimulationResult:
+    active_config = apply_scenario(config, scenario_name)
+    terrain, sites = _prepare_world(active_config)
+    return _run_policy_on_sites(active_config, terrain, sites, policy_name)
+
+
+def run_policy_comparison(
+    config: SimulationConfig,
+    policies: list[str],
+    scenario_name: str = "baseline",
+    scenario_overrides: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not policies:
+        raise ValueError("Comparison requires at least one policy.")
+    if len(policies) > 3:
+        raise ValueError("Comparison supports at most three policies.")
+
+    scenario_key = scenario_name or "baseline"
+    scenario = get_scenario(scenario_key)
+    active_config = _config_with_overrides(apply_scenario(config, scenario_key), scenario_overrides)
+    terrain, sites = _prepare_world(active_config)
+    results = [_run_policy_on_sites(active_config, terrain, sites, policy).to_dict() for policy in policies]
+
+    return {
+        "scenario": scenario.to_dict(),
+        "config": asdict(active_config),
+        "terrain_summary": _terrain_summary(terrain),
+        "sites": [asdict(site) for site in sites],
+        "results": results,
+    }
 
 
 def run_sweep(

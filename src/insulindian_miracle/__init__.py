@@ -16,7 +16,7 @@ from .policies import (
 )
 from .research import fetch_papers, synthesize_theory
 from .scenarios import apply_scenario, list_scenarios
-from .sim import run_benchmark, run_experiment, run_simulation
+from .sim import run_benchmark, run_experiment, run_policy_comparison, run_simulation
 from .terrain import TerrainConfig, generate_terrain, select_candidate_sites
 
 __all__ = [
@@ -39,6 +39,7 @@ __all__ = [
     "run_benchmark",
     "run_experiment",
     "run_hypothesis_suite",
+    "run_policy_comparison",
     "run_simulation",
     "list_scenarios",
     "select_candidate_sites",

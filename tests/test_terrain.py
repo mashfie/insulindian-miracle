@@ -46,3 +46,24 @@ def test_select_candidate_sites_respects_spacing():
         for right in sites[left_index + 1 :]:
             assert math.hypot(left.x - right.x, left.y - right.y) >= 0.12
 
+
+def test_select_candidate_sites_avoids_literal_border_when_interior_land_exists():
+    terrain = generate_terrain(TerrainConfig(seed=7, width=64, height=64))
+    sites = select_candidate_sites(terrain, count=15, min_spacing=0.12)
+
+    assert sites
+    assert all(0.0 < site.x < 1.0 for site in sites)
+    assert all(0.0 < site.y < 1.0 for site in sites)
+
+
+def test_select_candidate_sites_reduce_default_border_bias_across_sample_seeds():
+    seeds = [7, 11, 19, 23, 31, 41]
+    edge_shares: list[float] = []
+
+    for seed in seeds:
+        terrain = generate_terrain(TerrainConfig(seed=seed, width=64, height=64))
+        sites = select_candidate_sites(terrain, count=15, min_spacing=0.12)
+        edge_count = sum(site.x in (0.0, 1.0) or site.y in (0.0, 1.0) for site in sites)
+        edge_shares.append(edge_count / max(len(sites), 1))
+
+    assert max(edge_shares) == 0.0

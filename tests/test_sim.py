@@ -1,7 +1,14 @@
 from __future__ import annotations
 
-from insulindian_miracle import GaussianThompsonPolicy, SimulationConfig, run_experiment
-from insulindian_miracle.model import SiteState, compute_reward, evolve_sites, initialize_site_states
+from insulindian_miracle import (
+    DiscountedGaussianThompsonPolicy,
+    GaussianThompsonPolicy,
+    SimulationConfig,
+    SlidingWindowUCBPolicy,
+    run_experiment,
+    run_policy_comparison,
+)
+from insulindian_miracle.model import compute_reward, evolve_sites, initialize_site_states
 from insulindian_miracle.policies import build_policy
 from insulindian_miracle.sim import run_benchmark, run_simulation
 from insulindian_miracle.terrain import Site
@@ -14,6 +21,34 @@ def test_gaussian_thompson_updates_precision():
     after = float(policy.precisions[0])
 
     assert after > before
+
+
+def test_discounted_gaussian_thompson_explores_each_arm_before_revisiting():
+    policy = DiscountedGaussianThompsonPolicy(arm_count=15, seed=7, posterior_decay=0.94)
+    selected = []
+
+    for _ in range(policy.arm_count):
+        arm = policy.select_arm([])
+        selected.append(arm)
+        policy.update(arm, reward=0.0, states=[])
+
+    assert selected == list(range(policy.arm_count))
+
+
+def test_sliding_window_ucb_expires_rewards_by_global_round():
+    policy = SlidingWindowUCBPolicy(arm_count=2, seed=7, window_size=2)
+
+    policy.update(0, reward=10.0, states=[])
+    policy.update(0, reward=9.0, states=[])
+    policy.update(1, reward=1.0, states=[])
+
+    assert policy.counts.tolist() == [1.0, 1.0]
+
+    policy.update(1, reward=2.0, states=[])
+
+    assert policy.counts.tolist() == [0.0, 2.0]
+    assert policy.reward_sums.tolist() == [0.0, 3.0]
+    assert policy.select_arm([]) == 0
 
 
 def test_reward_reflects_resource_short_run_lure():
@@ -117,6 +152,26 @@ def test_run_simulation_is_reproducible():
 
     assert first.cumulative_reward == second.cumulative_reward
     assert first.selected_sites == second.selected_sites
+
+
+def test_run_policy_comparison_returns_shared_world_payload():
+    config = SimulationConfig(horizon=12, num_sites=6, seed=13)
+    payload = run_policy_comparison(
+        config,
+        policies=["gaussian-thompson", "ucb1"],
+        scenario_name="baseline",
+    )
+
+    assert payload["scenario"]["name"] == "baseline"
+    assert len(payload["sites"]) == config.num_sites
+    assert [result["policy"] for result in payload["results"]] == [
+        "gaussian-thompson",
+        "ucb1",
+    ]
+    assert all(len(result["selected_sites"]) == config.horizon for result in payload["results"])
+    shared_site_ids = [site["id"] for site in payload["sites"]]
+    for result in payload["results"]:
+        assert [outcome["site_id"] for outcome in result["site_outcomes"]] == shared_site_ids
 
 
 def test_new_policies_run_end_to_end():
