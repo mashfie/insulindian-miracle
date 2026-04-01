@@ -19,10 +19,10 @@ import {
 } from "@/lib/content/types";
 import { renderMarkdown, splitMarkdownSections } from "@/lib/content/markdown";
 
-const ROOT = path.resolve(process.cwd(), "..");
-const DOCS_ROOT = path.join(ROOT, "docs");
-const RESULTS_ROOT = path.join(ROOT, "results");
-const RESEARCH_ROOT = path.join(ROOT, "research");
+const SOURCE_ROOT = path.join(process.cwd(), "content", "source");
+const DOCS_ROOT = path.join(SOURCE_ROOT, "docs");
+const RESULTS_ROOT = path.join(SOURCE_ROOT, "results");
+const RESEARCH_ROOT = path.join(SOURCE_ROOT, "research");
 const EXEMPLARS_PATH = path.join(process.cwd(), "content", "generated", "exemplars.json");
 const ATLAS_SOURCE_PATH = path.join(process.cwd(), "content", "generated", "atlas-source.json");
 

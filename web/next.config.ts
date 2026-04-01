@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     viewTransition: true,
   },
   turbopack: {
-    root: path.join(__dirname, ".."),
+    root: path.join(__dirname),
   },
 };
 
