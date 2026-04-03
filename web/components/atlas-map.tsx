@@ -18,6 +18,8 @@ type AtlasMapProps = {
 
 type Point = { x: number; y: number };
 
+import { VoxelMap } from "@/components/voxel-map";
+
 const COLORS = {
   resourceRent: [138, 56, 36], // --danger
   accessibility: [46, 77, 93], // --accent
@@ -25,6 +27,18 @@ const COLORS = {
   suitability: [63, 92, 82],   // sea green
   default: [13, 13, 13],       // --ink
 };
+
+function downsample(data: number[][], factor: number): number[][] {
+  const result: number[][] = [];
+  for (let y = 0; y < data.length; y += factor) {
+    const row: number[] = [];
+    for (let x = 0; x < data[0].length; x += factor) {
+      row.push(data[y][x]);
+    }
+    result.push(row);
+  }
+  return result;
+}
 
 export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const [chapterId, setChapterId] = useState(chapters[0]?.id ?? "terrain");
@@ -38,9 +52,11 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const chapter = chapters.find((entry) => entry.id === deferredChapterId) ?? chapters[0];
 
   const layer = source[chapter.layer];
+  const isVoxelView = chapter.layer === "elevation";
 
-  // Draw Heatmap on Canvas
+  // Draw Heatmap on Canvas (only if not voxel view)
   useEffect(() => {
+    if (isVoxelView) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -57,7 +73,6 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
         const isLand = source.landMask[y][x];
 
         if (!isLand) {
-          // Water color (very faint blue/white)
           imageData.data[i] = 255;
           imageData.data[i + 1] = 255;
           imageData.data[i + 2] = 255;
@@ -71,7 +86,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
       }
     }
     ctx.putImageData(imageData, 0, 0);
-  }, [chapter, layer, source]);
+  }, [chapter, layer, source, isVoxelView]);
 
   const handleChapterChange = (id: string) => {
     startTransition(() => {
@@ -163,34 +178,42 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             }}
           >
             <div style={{ position: "relative", width: source.width * 10, height: source.height * 10 }}>
-              {/* Heatmap Layer */}
-              <canvas
-                ref={canvasRef}
-                width={source.width}
-                height={source.height}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  imageRendering: "pixelated",
-                  position: "absolute",
-                  inset: 0,
-                }}
-              />
+              {isVoxelView ? (
+                <VoxelMap 
+                  data={downsample(source.elevation, 2)} 
+                  width={32} 
+                  height={32} 
+                  color={[100, 110, 120]} 
+                />
+              ) : (
+                <canvas
+                  ref={canvasRef}
+                  width={source.width}
+                  height={source.height}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    imageRendering: "pixelated",
+                    position: "absolute",
+                    inset: 0,
+                  }}
+                />
+              )}
 
               {/* Blueprint SVG Overlays */}
               <svg 
                 viewBox={`0 0 ${source.width} ${source.height}`} 
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
               >
                 {/* Coastline */}
-                {chapter.overlays.includes("coast") && source.coastMask.map((row, y) =>
+                {!isVoxelView && chapter.overlays.includes("coast") && source.coastMask.map((row, y) =>
                   row.map((val, x) => val ? (
                     <rect key={`c-${x}-${y}`} x={x} y={y} width="1" height="1" fill="none" stroke="var(--ink)" strokeWidth="0.1" opacity="0.3" />
                   ) : null)
                 )}
 
                 {/* Rivers */}
-                {chapter.overlays.includes("river") && source.riverMask.map((row, y) =>
+                {!isVoxelView && chapter.overlays.includes("river") && source.riverMask.map((row, y) =>
                   row.map((val, x) => val ? (
                     <rect key={`r-${x}-${y}`} x={x} y={y} width="1" height="1" fill="var(--accent)" opacity="0.6" />
                   ) : null)
@@ -198,7 +221,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
 
                 {/* Sites / Cities */}
                 {chapter.overlays.includes("sites") && source.sites.map((site) => (
-                  <g key={site.id}>
+                  <g key={site.id} style={{ opacity: isVoxelView ? 0.4 : 1 }}>
                     {/* Architectural Crosshair */}
                     <line x1={site.x * 63 - 1} y1={site.y * 63} x2={site.x * 63 + 1} y2={site.y * 63} stroke="var(--ink)" strokeWidth="0.2" />
                     <line x1={site.x * 63} y1={site.y * 63 - 1} x2={site.x * 63} y2={site.y * 63 + 1} stroke="var(--ink)" strokeWidth="0.2" />
