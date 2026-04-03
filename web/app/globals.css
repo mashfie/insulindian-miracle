@@ -1,17 +1,17 @@
 :root {
-  --paper: #fbf4ea;
-  --paper-rim: #efe2cf;
-  --ink: #11100f;
-  --ink-soft: rgba(17, 16, 15, 0.72);
-  --ink-faint: rgba(17, 16, 15, 0.46);
-  --line: rgba(17, 16, 15, 0.12);
-  --line-strong: rgba(17, 16, 15, 0.24);
-  --accent: #345b54;
-  --accent-soft: rgba(52, 91, 84, 0.14);
+  --paper: #ffffff;
+  --paper-rim: #f0f0f0;
+  --ink: #0d0d0d;
+  --ink-soft: rgba(13, 13, 13, 0.72);
+  --ink-faint: rgba(13, 13, 13, 0.46);
+  --line: rgba(13, 13, 13, 0.15);
+  --line-strong: rgba(13, 13, 13, 0.8);
+  --accent: #000000;
+  --accent-soft: rgba(0, 0, 0, 0.14);
   --danger: #8a3824;
   --danger-soft: rgba(138, 56, 36, 0.14);
-  --surface: color-mix(in srgb, var(--paper) 95%, white 5%);
-  --surface-strong: color-mix(in srgb, var(--paper) 90%, white 10%);
+  --surface: #f7f7f7;
+  --surface-strong: #eeeeee;
   --hero-height: min(100vh, 68rem);
   --hero-overlap: -30vh;
   --font-body: var(--font-tiempos), serif;
@@ -36,18 +36,7 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: var(--font-body);
-  background:
-    radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.72), transparent 22%),
-    radial-gradient(circle at 82% 18%, var(--accent-soft), transparent 18%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.34), transparent 16%),
-    repeating-linear-gradient(
-      0deg,
-      rgba(17, 16, 15, 0.014) 0,
-      rgba(17, 16, 15, 0.014) 1px,
-      transparent 1px,
-      transparent 17px
-    ),
-    var(--paper);
+  background: var(--paper);
 }
 
 a {
@@ -116,18 +105,11 @@ select {
 }
 
 .archive-page::before {
-  opacity: 0.1;
-  background:
-    linear-gradient(135deg, transparent 0 48%, var(--line) 48%, transparent 49% 100%),
-    linear-gradient(-135deg, transparent 0 48%, var(--line) 48%, transparent 49% 100%);
-  background-size: 7rem 7rem;
+  display: none;
 }
 
 .archive-page::after {
-  opacity: 0.2;
-  background:
-    radial-gradient(circle at 78% 14%, rgba(255, 255, 255, 0.6), transparent 18%),
-    radial-gradient(circle at 22% 76%, rgba(17, 16, 15, 0.05), transparent 22%);
+  display: none;
 }
 
 .archive-page[data-variant="cartographic-ledger"] {
@@ -210,24 +192,28 @@ select {
 .headline,
 h1,
 h2,
-h3 {
+h3,
+h4 {
   margin: 0;
-  font-family: var(--font-body);
-  font-weight: 500;
-  letter-spacing: -0.055em;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: -0.04em;
   text-wrap: balance;
 }
 
 .headline,
 h1 {
-  font-size: clamp(3.2rem, 7.2vw, 6rem);
-  line-height: 0.94;
+  font-size: clamp(4rem, 10vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
 }
 
 h2 {
-  margin-bottom: 1rem;
-  font-size: clamp(2rem, 4.8vw, 4.1rem);
-  line-height: 0.98;
+  margin-bottom: 2rem;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 0.95;
+  border-bottom: 4px solid var(--ink);
+  padding-bottom: 0.5rem;
 }
 
 h3 {
@@ -581,9 +567,10 @@ h3 {
 .metric-card,
 .atlas__viewport,
 .atlas__narrative {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  box-shadow: 0 1px 0 rgba(17, 16, 15, 0.05), 0 16px 34px rgba(17, 16, 15, 0.04);
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: none;
 }
 
 .figure-card,
@@ -749,9 +736,13 @@ h3 {
 }
 
 .reference-card:hover,
-.index-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--line-strong);
+.index-card:hover,
+.figure-card:hover,
+.comparison-card:hover,
+.metric-card:hover {
+  transform: translate(-4px, -4px);
+  border-color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
 }
 
 .reference-card__meta,
@@ -966,38 +957,9 @@ h3 {
   }
 }
 
-.article-body {
-  text-align: justify;
-  hyphens: auto;
-}
-
-@media (min-width: 48rem) {
-  .article-columns-2 {
-    column-count: 2;
-    column-gap: 2.5rem;
-    column-rule: 1px solid var(--line);
-  }
-}
-
-.drop-cap > p:first-of-type::first-letter {
-  float: left;
-  font-size: 4.5em;
-  line-height: 0.8;
-  margin-top: 0.05em;
-  margin-right: 0.15em;
-  font-family: var(--font-heading); /* Suisse Neue or Tiempos Black */
-  font-weight: 700;
-  color: var(--ink);
-}
-
-.kicker {
-  font-family: var(--font-ui); /* Suisse Int'l */
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.85rem;
-  border-top: 2px solid var(--ink);
-  display: inline-block;
-  padding-top: 0.25rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+p, .article-body {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
 }
