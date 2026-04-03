@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="archive-page" data-variant="archive">
+    <main id="main-content" className="archive-page" data-variant="archive">
       <article className="site-shell" style={{ paddingTop: "18rem", paddingBottom: "8rem" }}>
         <section className="section-full">
           <h1>Archive Register Missing</h1>

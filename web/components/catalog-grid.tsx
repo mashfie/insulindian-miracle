@@ -22,7 +22,7 @@ export function CatalogGrid({
   items: CatalogItem[];
 }) {
   return (
-    <main className="archive-page" data-variant="archive">
+    <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
         links={[
           { href: "/", label: "Home" },

@@ -29,7 +29,7 @@ export function HomeView({
   ];
 
   return (
-    <main className="archive-page" data-variant={variant}>
+    <main id="main-content" className="archive-page" data-variant={variant}>
       <ArchiveSettingsPanel
         links={routeLinks}
         accentLabel={variant === "polyhedral-report" ? "Brass / umber" : "Sea-green / ink"}
@@ -93,9 +93,9 @@ export function HomeView({
                 {quote ? (
                   <aside className="pull-quote">
                     <span>
-                      {'"'}
+                      {'\u201C'}
                       {quote.text}
-                      {'"'}
+                      {'\u201D'}
                     </span>
                     {quote.attribution ? (
                       <div className="pull-quote__attribution">{quote.attribution}</div>
@@ -111,10 +111,10 @@ export function HomeView({
           <div className="site-footer__figure">
             <div className="pull-quote">
               <span>
-                {'"'}
+                {'\u201C'}
                 The archive is trying to keep two incompatible things visible at once: the lure of
                 extractive acceleration and the slow institutional cost it conceals.
-                {'"'}
+                {'\u201D'}
               </span>
               <div className="pull-quote__attribution">Landing plate</div>
             </div>

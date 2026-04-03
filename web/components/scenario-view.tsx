@@ -26,7 +26,7 @@ export function ScenarioView({
   }));
 
   return (
-    <main className="archive-page" data-variant={variant}>
+    <main id="main-content" className="archive-page" data-variant={variant}>
       <ArchiveSettingsPanel
         links={[
           { href: "/", label: "Home" },
@@ -70,12 +70,14 @@ export function ScenarioView({
         {archive.sections.map((section, index) => (
           <section key={section.id} id={section.id} className="section-row section-block motion-reveal" style={{ ["--reveal-order" as string]: index + 1 }}>
             <div className="section-row__text">
-              <div className="section-kicker">Scenario reading {String(index + 1).padStart(2, "0")}</div>
+              <div className="kicker">Scenario reading {String(index + 1).padStart(2, "0")}</div>
               <h2>{section.title}</h2>
-              <ProseHtml html={section.html} />
+              <div className={index === 0 ? "article-columns-2 article-body drop-cap" : "article-columns-2 article-body"}>
+                <ProseHtml html={section.html} />
+              </div>
               {index === archive.sections.length - 1 && page.document ? (
                 <div style={{ marginTop: "2rem" }}>
-                  <div className="section-kicker">Repository note</div>
+                  <div className="kicker">Repository note</div>
                   <ProseHtml html={page.document.summaryHtml} />
                 </div>
               ) : null}
@@ -85,9 +87,9 @@ export function ScenarioView({
               {archive.pullQuotes[index] ? (
                 <aside className="pull-quote">
                   <span>
-                    {'"'}
+                    {'\u201C'}
                     {archive.pullQuotes[index]?.text}
-                    {'"'}
+                    {'\u201D'}
                   </span>
                   {archive.pullQuotes[index]?.attribution ? (
                     <div className="pull-quote__attribution">
@@ -101,7 +103,7 @@ export function ScenarioView({
         ))}
 
         <section className="section-full section-block">
-          <div className="section-kicker">Runtime Hook</div>
+          <div className="kicker">Runtime Hook</div>
           <ComparisonModule
             scenario={page.result?.scenario.name ?? "baseline"}
             policies={["ucb1", "gaussian-thompson", "whittle-index"]}
