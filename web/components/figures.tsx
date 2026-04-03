@@ -1,4 +1,7 @@
+"use client";
+
 import katex from "katex";
+import { useEffect, useState } from "react";
 
 import type { FigureRef, ScenarioSummaryStat } from "@/lib/content/types";
 
@@ -38,12 +41,12 @@ export function formatMetric(
   return value.toFixed(1);
 }
 
-export function FigureMeta({ figure }: { figure: FigureRef }) {
+export function FigureMeta({ figure, iteration }: { figure: FigureRef, iteration?: number }) {
   return (
     <>
       <div className="figure-meta">
         <span>{figure.title}</span>
-        <span>{figure.kind}</span>
+        <span>{iteration !== undefined ? `T=${iteration}` : figure.kind}</span>
       </div>
       <p className="figure-caption">{figure.caption}</p>
     </>
@@ -59,38 +62,51 @@ export function TrendFigure({
   figure: FigureRef;
   accent?: string;
 }) {
-  const { min, max } = extent(values);
-  const points = values
-    .map((value, index) => toSvgPoint(index, value, values.length, min, max))
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    setStep(0);
+    const timer = setInterval(() => {
+      setStep((s) => {
+        if (s >= values.length) {
+          clearInterval(timer);
+          return values.length;
+        }
+        return s + 1;
+      });
+    }, 40);
+    return () => clearInterval(timer);
+  }, [values]);
+
+  const currentValues = values.slice(0, step);
+  const { min, max } = extent(values.length > 0 ? values : [0, 1]); 
+  const points = currentValues
+    .map((v, i) => toSvgPoint(i, v, values.length, min, max))
     .join(" ");
-  const area = `M28,212 L${points} L392,212 Z`;
+  const area = points.length > 0 ? `M28,212 L${points} L${28 + ((step - 1) / Math.max(values.length - 1, 1)) * 364},212 Z` : "";
 
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
         <path d="M28 36V212H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
-        {[0, 1, 2, 3].map((step) => {
-          const y = 52 + step * 40;
+        {[0, 1, 2, 3].map((s) => {
+          const y = 52 + s * 40;
           return (
-            <path
-              key={step}
-              d={`M28 ${y}H392`}
-              stroke="rgba(19,19,19,0.08)"
-              strokeDasharray="6 8"
-              strokeWidth="1"
-            />
+            <path key={s} d={`M28 ${y}H392`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
           );
         })}
-        <path d={area} fill="rgba(46,77,93,0.08)" />
-        <polyline
-          fill="none"
-          stroke={accent}
-          strokeWidth="2.2"
-          points={points}
-          vectorEffect="non-scaling-stroke"
-        />
+        {area && <path d={area} fill="rgba(0,0,0,0.04)" />}
+        {points && (
+          <polyline
+            fill="none"
+            stroke={accent}
+            strokeWidth="2.2"
+            points={points}
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
       </svg>
-      <FigureMeta figure={figure} />
+      <FigureMeta figure={figure} iteration={step} />
     </figure>
   );
 }
@@ -102,6 +118,22 @@ export function ComparisonBars({
   figure: FigureRef;
   items: Array<{ label: string; value: number }>;
 }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    setProgress(0);
+    const timer = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 1) {
+          clearInterval(timer);
+          return 1;
+        }
+        return p + 0.05;
+      });
+    }, 50);
+    return () => clearInterval(timer);
+  }, [items]);
+
   const max = Math.max(...items.map((item) => item.value), 1);
   return (
     <figure className="figure-card">
@@ -109,7 +141,7 @@ export function ComparisonBars({
         <path d="M84 24V210H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
         {items.map((item, index) => {
           const y = 42 + index * 40;
-          const width = (item.value / max) * 280;
+          const width = (item.value / max) * 280 * progress;
           return (
             <g key={item.label}>
               <text
@@ -117,22 +149,21 @@ export function ComparisonBars({
                 y={y + 14}
                 textAnchor="end"
                 fill="rgba(19,19,19,0.72)"
-                fontFamily="var(--font-suisse)"
+                fontFamily="var(--font-ui)"
                 fontSize="11"
                 letterSpacing="1.4"
               >
                 {item.label.toUpperCase()}
               </text>
-              <rect x="94" y={y} width={width} height="22" fill="var(--accent-soft)" />
-              <rect x="94" y={y} width={width} height="22" fill="none" stroke="var(--accent)" />
+              <rect x="94" y={y} width={width} height="22" fill="var(--paper)" stroke="var(--ink)" strokeWidth="1.5" />
               <text
                 x={100 + width}
                 y={y + 15}
                 fill="rgba(19,19,19,0.78)"
-                fontFamily="var(--font-suisse)"
+                fontFamily="var(--font-ui)"
                 fontSize="12"
               >
-                {item.value.toFixed(1)}
+                {(item.value * progress).toFixed(1)}
               </text>
             </g>
           );
@@ -155,6 +186,22 @@ export function OutcomeScatter({
     boomtown?: boolean;
   }>;
 }) {
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    setVisibleCount(0);
+    const timer = setInterval(() => {
+      setVisibleCount((c) => {
+        if (c >= points.length) {
+          clearInterval(timer);
+          return points.length;
+        }
+        return c + 1;
+      });
+    }, 150);
+    return () => clearInterval(timer);
+  }, [points]);
+
   const xExtent = extent(points.map((point) => point.x));
   const yExtent = extent(points.map((point) => point.y));
 
@@ -162,25 +209,27 @@ export function OutcomeScatter({
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
         <path d="M42 24V212H388" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
-        {points.map((point) => {
+        {points.slice(0, visibleCount).map((point, i) => {
           const cx = 42 + ((point.x - xExtent.min) / (xExtent.max - xExtent.min)) * 346;
           const cy = 212 - ((point.y - yExtent.min) / (yExtent.max - yExtent.min)) * 188;
 
           return (
-            <g key={point.label}>
+            <g key={point.label} style={{ opacity: Math.min(1, (visibleCount - i) / 2) }}>
               <circle
                 cx={cx}
                 cy={cy}
                 r={point.boomtown ? 6.2 : 4.6}
-                fill={point.boomtown ? "rgba(131,71,50,0.28)" : "rgba(46,77,93,0.18)"}
-                stroke={point.boomtown ? "var(--danger)" : "var(--accent)"}
+                fill={point.boomtown ? "var(--ink)" : "var(--paper)"}
+                stroke="var(--ink)"
+                strokeWidth="1.5"
               />
               <text
                 x={cx + 8}
                 y={cy - 8}
-                fill="rgba(19,19,19,0.76)"
-                fontFamily="var(--font-suisse)"
-                fontSize="10.5"
+                fill="var(--ink)"
+                fontFamily="var(--font-ui)"
+                fontSize="10"
+                fontWeight="bold"
               >
                 {point.label}
               </text>
@@ -188,7 +237,7 @@ export function OutcomeScatter({
           );
         })}
       </svg>
-      <FigureMeta figure={figure} />
+      <FigureMeta figure={figure} iteration={visibleCount} />
     </figure>
   );
 }
@@ -204,6 +253,7 @@ export function EquationFigure({
     <figure className="figure-card">
       <div
         className="katex-display"
+        style={{ color: "var(--ink)" }}
         dangerouslySetInnerHTML={{
           __html: katex.renderToString(latex, {
             displayMode: true,
@@ -233,8 +283,8 @@ export function StatsTable({
         <tbody>
           {rows.map((row) => (
             <tr key={row.label}>
-              <th>{row.label}</th>
-              <td>{formatMetric(row.value, row.format)}</td>
+              <th style={{ fontFamily: "var(--font-ui)", letterSpacing: "0.05em" }}>{row.label.toUpperCase()}</th>
+              <td style={{ fontWeight: "bold" }}>{formatMetric(row.value, row.format)}</td>
             </tr>
           ))}
         </tbody>
@@ -242,3 +292,4 @@ export function StatsTable({
     </div>
   );
 }
+
