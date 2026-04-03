@@ -1,110 +1,97 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+
 type HeroSceneProps = {
   title: string;
   variant: "archive" | "cartographic-ledger" | "polyhedral-report";
 };
 
-const VARIANT_ACCENT: Record<HeroSceneProps["variant"], string> = {
-  archive: "#2e4d5d",
-  "cartographic-ledger": "#3f5c52",
-  "polyhedral-report": "#714b33",
+const VARIANT_COLORS: Record<HeroSceneProps["variant"], { top: string; left: string; right: string }> = {
+  archive: { top: "#f0f0f0", left: "#a0a0a0", right: "#404040" },
+  "cartographic-ledger": { top: "#ffffff", left: "#c2d1cd", right: "#1a2c26" },
+  "polyhedral-report": { top: "#ffffff", left: "#dccbbf", right: "#3a2517" },
 };
 
+const VOXELS = [
+  [0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1],
+  [0, 1, 0], [0, 2, 0], [0, 3, 0], [0, 4, 0],
+  [0, 4, 1], [0, 4, 2], [0, 3, 2],
+  [1, 3, 0], [2, 3, 0], [2, 4, 0], [2, 5, 0],
+  [-1, 2, 0], [-2, 2, 0], [-2, 2, -1], [-2, 3, -1], [-1, 3, -1], [0, 3, -1],
+  [3, 1, 2], [3, 2, 2], [1, -1, 3],
+];
+
 export function HeroScene({ title, variant }: HeroSceneProps) {
-  const accent = VARIANT_ACCENT[variant];
+  const [visibleCount, setVisibleCount] = useState(0);
+  const colors = VARIANT_COLORS[variant] || VARIANT_COLORS.archive;
+  const SIZE = 40;
+
+  const sortedVoxels = [...VOXELS].sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
+
+  useEffect(() => {
+    setVisibleCount(0);
+    const timer = setInterval(() => {
+      setVisibleCount((c) => {
+        if (c >= sortedVoxels.length) {
+          clearInterval(timer);
+          return sortedVoxels.length;
+        }
+        return c + 1;
+      });
+    }, 60);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <section className="site-hero" aria-hidden="true">
+    <section className="site-hero" aria-hidden="true" style={{ background: "var(--paper)" }}>
       <svg
         className="site-hero__stage"
-        viewBox="0 0 1440 980"
+        viewBox="-400 -300 800 600"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <defs>
-          <pattern id={`ledger-grid-${variant}`} width="48" height="48" patternUnits="userSpaceOnUse">
-            <path d="M48 0H0V48" stroke="rgba(19,19,19,0.12)" strokeWidth="1" />
-          </pattern>
-          <pattern id={`contours-${variant}`} width="180" height="180" patternUnits="userSpaceOnUse">
-            <path
-              d="M0 120C52 40 118 40 180 102"
-              stroke="rgba(19,19,19,0.12)"
-              strokeWidth="1.1"
-            />
-            <path
-              d="M-18 154C42 86 114 76 194 130"
-              stroke="rgba(19,19,19,0.08)"
-              strokeWidth="1"
-            />
-          </pattern>
-        </defs>
-        <rect width="1440" height="980" fill={`url(#ledger-grid-${variant})`} />
-        <rect width="1440" height="980" fill={`url(#contours-${variant})`} opacity="0.9" />
-        <g className="slice-in" style={{ transformOrigin: "50% 50%" }}>
-          <path
-            d="M210 222L502 118L810 248L686 548L380 584L210 222Z"
-            fill="rgba(255,255,255,0.36)"
-            stroke="rgba(19,19,19,0.18)"
-            strokeWidth="2"
-          />
-          <path
-            d="M810 248L1042 164L1218 352L990 562L686 548L810 248Z"
-            fill="rgba(255,255,255,0.18)"
-            stroke={accent}
-            strokeWidth="2.6"
-          />
-          <path
-            d="M380 584L686 548L990 562L1160 770L748 844L402 786L380 584Z"
-            fill="rgba(255,255,255,0.22)"
-            stroke="rgba(19,19,19,0.18)"
-            strokeWidth="2"
-          />
-          <path
-            d="M498 118L678 12L1054 72L1042 164L810 248L498 118Z"
-            fill="rgba(255,255,255,0.16)"
-            stroke="rgba(19,19,19,0.12)"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M468 602L612 472L804 494L870 676L674 750L468 602Z"
-            fill="rgba(255,255,255,0.08)"
-            stroke={accent}
-            strokeDasharray="9 8"
-            strokeWidth="2"
-          />
-          <path
-            d="M746 240L838 312L770 420L640 386L658 280L746 240Z"
-            fill="rgba(19,19,19,0.06)"
-            stroke="rgba(19,19,19,0.22)"
-            strokeWidth="2"
-          />
-          <path
-            d="M286 262L448 212L544 332L382 386L286 262Z"
-            fill="rgba(255,255,255,0.12)"
-            stroke={accent}
-            strokeWidth="1.6"
-          />
-          <path
-            d="M1074 260L1194 354L1108 458L966 404L1074 260Z"
-            fill="rgba(19,19,19,0.04)"
-            stroke="rgba(19,19,19,0.16)"
-            strokeWidth="1.6"
-          />
+        <g transform="translate(0, 50)">
+          {sortedVoxels.slice(0, visibleCount).map(([x, y, z], i) => {
+            const px = (x - z) * SIZE * 0.866;
+            const py = (x + z) * SIZE * 0.5 - y * SIZE;
+
+            const pTop = `0,${-SIZE} ${SIZE * 0.866},${-SIZE * 0.5} 0,0 ${-SIZE * 0.866},${-SIZE * 0.5}`;
+            const pLeft = `0,0 ${-SIZE * 0.866},${-SIZE * 0.5} ${-SIZE * 0.866},${SIZE * 0.5} 0,${SIZE}`;
+            const pRight = `0,0 ${SIZE * 0.866},${-SIZE * 0.5} ${SIZE * 0.866},${SIZE * 0.5} 0,${SIZE}`;
+
+            return (
+              <g key={i} transform={`translate(${px}, ${py})`} style={{ transition: "all 0.3s ease" }}>
+                <polygon points={pLeft} fill={colors.left} stroke="var(--ink)" strokeWidth="1" strokeLinejoin="round" />
+                <polygon points={pRight} fill={colors.right} stroke="var(--ink)" strokeWidth="1" strokeLinejoin="round" />
+                <polygon points={pTop} fill={colors.top} stroke="var(--ink)" strokeWidth="1" strokeLinejoin="round" />
+              </g>
+            );
+          })}
         </g>
-        <g opacity="0.75">
-          <path d="M112 716L316 716" stroke={accent} strokeWidth="1.5" />
-          <path d="M112 748L380 748" stroke="rgba(19,19,19,0.18)" strokeWidth="1.2" />
-          <path d="M112 780L284 780" stroke="rgba(19,19,19,0.18)" strokeWidth="1.2" />
-        </g>
+
         <text
-          x="112"
-          y="852"
-          fill="rgba(19,19,19,0.82)"
-          fontFamily="var(--font-suisse)"
-          fontSize="16"
-          letterSpacing="5.6"
+          x="-350"
+          y="250"
+          fill="var(--ink)"
+          fontFamily="var(--font-ui)"
+          fontSize="24"
+          fontWeight="bold"
+          letterSpacing="0.2em"
+          style={{ opacity: visibleCount > 5 ? 1 : 0, transition: "opacity 1s ease" }}
         >
           {title.toUpperCase()}
         </text>
+        <line 
+          x1="-350" y1="270" x2="-200" y2="270" 
+          stroke="var(--ink)" 
+          strokeWidth="4" 
+          style={{ 
+            strokeDasharray: 150, 
+            strokeDashoffset: visibleCount > 5 ? 0 : 150, 
+            transition: "stroke-dashoffset 1s ease" 
+          }} 
+        />
       </svg>
     </section>
   );

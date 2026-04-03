@@ -1,32 +1,13 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Aboreto } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
-const tiempos = localFont({
-  src: [
-    {
-      path: "../public/fonts/tiempos/tiempos-fine-light.otf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/tiempos/tiempos-fine-regular.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/tiempos/tiempos-fine-italic.otf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../public/fonts/tiempos/tiempos-fine-bold.otf",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-tiempos",
+const aboreto = Aboreto({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -78,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${tiempos.variable} ${suisse.variable} ${suisseMono.variable}`}
+      className={`${aboreto.variable} ${suisse.variable} ${suisseMono.variable}`}
     >
       <body>
         <a href="#main-content" className="skip-link">Skip to content</a>

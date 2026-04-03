@@ -14,7 +14,6 @@
   --surface-strong: #eeeeee;
   --hero-height: min(100vh, 68rem);
   --hero-overlap: -30vh;
-  --font-body: var(--font-tiempos), serif;
   --font-ui: var(--font-suisse), sans-serif;
   --font-mono: var(--font-suisse-mono), monospace;
   --page-width: 78rem;
@@ -36,7 +35,10 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: var(--font-body);
-  background: var(--paper);
+  background: 
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 20px 20px,
+    var(--paper);
 }
 
 a {
