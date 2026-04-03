@@ -65,22 +65,24 @@ export function ComparisonModule({
           {isPending ? "Loading..." : "Load Fresh Run"}
         </button>
       </div>
-      {error ? <div className="compare-error">{error}</div> : null}
-      {rows.length ? (
-        <div className="comparison-card__metrics">
-          {rows.map((row) => (
-            <div key={row.policy} className="metric-card">
-              <div className="metric-card__label">{row.policy}</div>
-              <div className="metric-card__value">{row.cumulative.toFixed(1)}</div>
-              <div className="metric-card__meta">regret {row.regret.toFixed(1)}</div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="comparison-note">
-          No live payload loaded yet. Configure <code>NEXT_PUBLIC_COMPARE_API_URL</code> to activate this module.
-        </div>
-      )}
+      <div role="status" aria-live="polite">
+        {error ? <div className="compare-error">{error}</div> : null}
+        {rows.length ? (
+          <div className="comparison-card__metrics">
+            {rows.map((row) => (
+              <div key={row.policy} className="metric-card">
+                <div className="metric-card__label">{row.policy}</div>
+                <div className="metric-card__value">{row.cumulative.toFixed(1)}</div>
+                <div className="metric-card__meta">regret {row.regret.toFixed(1)}</div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="comparison-note">
+            No live payload loaded yet. Configure <code>NEXT_PUBLIC_COMPARE_API_URL</code> to activate this module.
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -60,6 +60,15 @@ a:hover {
   text-decoration-color: currentColor;
 }
 
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+.index-card:focus-visible,
+.reference-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 button,
 input,
 textarea,
@@ -70,6 +79,26 @@ select {
 ::selection {
   background: var(--ink);
   color: var(--paper);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  z-index: 100;
+  padding: 0.6rem 1.2rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
 }
 
 .archive-page {
@@ -104,16 +133,16 @@ select {
 .archive-page[data-variant="cartographic-ledger"] {
   --accent: #3f5c52;
   --accent-soft: rgba(63, 92, 82, 0.14);
-  --surface: color-mix(in srgb, var(--paper) 93%, white 7%);
-  --surface-strong: color-mix(in srgb, var(--paper) 88%, white 12%);
+  --surface: color-mix(in srgb, var(--paper) 90%, white 10%);
+  --surface-strong: color-mix(in srgb, var(--paper) 84%, white 16%);
   --line-strong: rgba(17, 16, 15, 0.28);
 }
 
 .archive-page[data-variant="polyhedral-report"] {
   --accent: #7d4e33;
   --accent-soft: rgba(125, 78, 51, 0.14);
-  --surface: color-mix(in srgb, var(--paper) 92%, rgba(255, 248, 240, 0.85) 8%);
-  --surface-strong: color-mix(in srgb, var(--paper) 87%, rgba(255, 246, 236, 0.92) 13%);
+  --surface: color-mix(in srgb, var(--paper) 88%, rgba(255, 248, 240, 0.85) 12%);
+  --surface-strong: color-mix(in srgb, var(--paper) 83%, rgba(255, 246, 236, 0.92) 17%);
   --line-strong: rgba(17, 16, 15, 0.32);
 }
 
@@ -421,6 +450,20 @@ h3 {
   margin-top: 6rem;
 }
 
+.section-block + .section-block {
+  border-top: 3px solid var(--ink);
+  position: relative;
+  padding-top: 4rem;
+}
+.section-block + .section-block::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--ink);
+}
+
 .section-row__text,
 .section-row__figure,
 .section-full,
@@ -558,6 +601,20 @@ h3 {
   width: 100%;
   height: auto;
   aspect-ratio: 7 / 4;
+  margin-bottom: 0.4rem;
+}
+
+.figure-card {
+  padding: 1.15rem 1.15rem 1rem;
+}
+
+.figure-caption {
+  font-family: var(--font-mono); /* Suisse Int'l Mono */
+  font-size: 0.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  text-align: left;
 }
 
 .figure-meta {
@@ -810,7 +867,9 @@ h3 {
   .reference-card,
   .index-card,
   .comparison-card__header button,
-  .atlas__controls button {
+  .atlas__controls button,
+  .settings-panel,
+  .details-icon-closed {
     animation: none;
     transition: none;
     transform: none;
@@ -819,6 +878,10 @@ h3 {
   .motion-reveal {
     opacity: 1;
     transform: none;
+  }
+
+  .settings-panel.visible {
+    opacity: 1;
   }
 }
 
@@ -866,7 +929,7 @@ h3 {
 
 @media (max-width: 48rem) {
   :root {
-    --hero-height: min(58vh, 30rem);
+    --hero-height: min(44vh, 24rem);
     --hero-overlap: -2rem;
   }
 
@@ -901,4 +964,40 @@ h3 {
   .metric-card {
     padding: 0.85rem;
   }
+}
+
+.article-body {
+  text-align: justify;
+  hyphens: auto;
+}
+
+@media (min-width: 48rem) {
+  .article-columns-2 {
+    column-count: 2;
+    column-gap: 2.5rem;
+    column-rule: 1px solid var(--line);
+  }
+}
+
+.drop-cap > p:first-of-type::first-letter {
+  float: left;
+  font-size: 4.5em;
+  line-height: 0.8;
+  margin-top: 0.05em;
+  margin-right: 0.15em;
+  font-family: var(--font-heading); /* Suisse Neue or Tiempos Black */
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.kicker {
+  font-family: var(--font-ui); /* Suisse Int'l */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  border-top: 2px solid var(--ink);
+  display: inline-block;
+  padding-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
 }

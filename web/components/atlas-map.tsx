@@ -41,10 +41,44 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef<{ origin: Point; offset: Point } | null>(null);
   const deferredChapterId = useDeferredValue(chapterId);
   const chapter = chapters.find((entry) => entry.id === deferredChapterId) ?? chapters[0];
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPrefersReducedMotion(mediaQuery.matches);
+    const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", listener);
+    return () => mediaQuery.removeEventListener("change", listener);
+  }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash && chapters.some(c => c.id === hash)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setChapterId(hash);
+    }
+    
+    const handleHashChange = () => {
+      const newHash = window.location.hash.slice(1);
+      if (newHash && chapters.some(c => c.id === newHash)) {
+        setChapterId(newHash);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [chapters]);
+
+  const handleChapterChange = (id: string) => {
+    startTransition(() => {
+      setChapterId(id);
+      window.history.replaceState(null, "", `#${id}`);
+    });
+  };
 
   const handlePointerMove = useEffectEvent((event: PointerEvent) => {
     const drag = draggingRef.current;
@@ -84,6 +118,41 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
     setIsDragging(true);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const PAN_STEP = 20;
+    const ZOOM_STEP = 0.08;
+    
+    switch (event.key) {
+      case "ArrowUp":
+        event.preventDefault();
+        setOffset(prev => ({ ...prev, y: prev.y + PAN_STEP }));
+        break;
+      case "ArrowDown":
+        event.preventDefault();
+        setOffset(prev => ({ ...prev, y: prev.y - PAN_STEP }));
+        break;
+      case "ArrowLeft":
+        event.preventDefault();
+        setOffset(prev => ({ ...prev, x: prev.x + PAN_STEP }));
+        break;
+      case "ArrowRight":
+        event.preventDefault();
+        setOffset(prev => ({ ...prev, x: prev.x - PAN_STEP }));
+        break;
+      case "+":
+      case "=":
+        setZoom(current => Math.min(2.4, current + ZOOM_STEP));
+        break;
+      case "-":
+        setZoom(current => Math.max(0.85, current - ZOOM_STEP));
+        break;
+      case "Home":
+        setZoom(1);
+        setOffset({ x: 0, y: 0 });
+        break;
+    }
+  };
+
   const layer = source[chapter.layer];
 
   return (
@@ -94,11 +163,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             key={entry.id}
             type="button"
             data-active={entry.id === chapter.id}
-            onClick={() => {
-              startTransition(() => {
-                setChapterId(entry.id);
-              });
-            }}
+            onClick={() => handleChapterChange(entry.id)}
           >
             {entry.title}
           </button>
@@ -110,12 +175,17 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
           className="atlas__viewport"
           onWheel={handleWheel}
           onPointerDown={handlePointerDown}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="application"
+          aria-label={`Interactive map for ${chapter.title}`}
+          aria-roledescription="interactive map"
         >
           <div
             style={{
               transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
               transformOrigin: "50% 50%",
-              transition: isDragging ? "none" : "transform 240ms ease",
+              transition: isDragging || prefersReducedMotion ? "none" : "transform 240ms ease",
             }}
           >
             <svg viewBox={`0 0 ${source.width} ${source.height}`} role="img" aria-label={chapter.title}>
@@ -233,7 +303,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
           </div>
         </div>
         <aside className="atlas__narrative">
-          <div className="section-kicker">Atlas Chapter</div>
+          <div className="kicker">Atlas Chapter</div>
           <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>{chapter.title}</h2>
           <p>{chapter.narrative}</p>
           <ul className="atlas__site-list">
@@ -252,7 +322,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             })}
           </ul>
           <p className="comparison-note">
-            Drag to pan. Scroll to zoom. The map remains static-first; only the focused layer and overlay system change client-side.
+            Drag to pan. Scroll to zoom. Use arrow keys to pan, +/- to zoom, and Home to reset. The map remains static-first; only the focused layer and overlay system change client-side.
           </p>
         </aside>
       </div>

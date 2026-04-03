@@ -36,7 +36,7 @@ export default async function ReferencesPage() {
         </header>
         {Object.entries(grouped).map(([category, items]) => (
           <section key={category} className="section-full section-block">
-            <div className="section-kicker">{category}</div>
+            <div className="kicker">Reference group</div>
             <h2 style={{ fontSize: "2.5rem" }}>{category}</h2>
             <div className="reference-grid">
               {items.map((reference) => (

@@ -22,7 +22,7 @@ export function DocumentView({
   aside,
 }: DocumentViewProps) {
   return (
-    <main className="archive-page" data-variant="archive">
+    <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
         links={[
           { href: "/", label: "Home" },
@@ -43,8 +43,10 @@ export function DocumentView({
           <p className="dek">{deck}</p>
         </header>
         <div className="document-view__body">
-          <div>
-            <ProseHtml html={document.summaryHtml} />
+          <div className="article-columns-2 article-body">
+            <div className="drop-cap">
+              <ProseHtml html={document.summaryHtml} />
+            </div>
             {document.sections.map((section) => (
               <section key={section.id} id={section.id} className="section-block">
                 <h2>{section.title}</h2>

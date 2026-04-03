@@ -11,13 +11,14 @@ export default async function AtlasPage() {
   const chapters = getAtlasChapters();
 
   return (
-    <main className="archive-page" data-variant="archive">
+    <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
         links={[
           { href: "/", label: "Home" },
           { href: "/atlas/", label: "Atlas" },
           { href: "/scenarios/", label: "Scenarios" },
           { href: "/policies/", label: "Policies" },
+          { href: "/theory/", label: "Theory" },
           { href: "/references/", label: "References" },
         ]}
         accentLabel="Layered field"
