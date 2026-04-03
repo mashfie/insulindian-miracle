@@ -167,10 +167,11 @@ function deriveRoute(group: string, slug: string) {
   if (group === "scenarios") {
     return `/scenarios/${slug}`;
   }
-  return `/theory/${slug}`;
+  return `/`;
 }
 
 function listMarkdownFiles(dir: string): string[] {
+  if (!existsSync(dir)) return [];
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const entryPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
@@ -188,12 +189,9 @@ function docRouteMap() {
   for (const file of listMarkdownFiles(DOCS_ROOT)) {
     const relative = path.relative(DOCS_ROOT, file);
     const segments = relative.split(path.sep);
-    const group = segments[0] ?? "theory";
+    const group = segments[0] ?? "archive";
     const slug = path.basename(file, ".md");
-    const route = deriveRoute(
-      group === "modules" || group === "system" ? "theory" : group,
-      slug,
-    );
+    const route = deriveRoute(group, slug);
 
     map[slug.toLowerCase()] = route;
   }
@@ -208,13 +206,13 @@ function docRouteMap() {
 async function readDoc(filePath: string, routeMap: Record<string, string>): Promise<NormalizedDoc> {
   const relative = path.relative(DOCS_ROOT, filePath);
   const [rawGroup] = relative.split(path.sep);
-  const sourceGroup = rawGroup ?? "theory";
+  const sourceGroup = rawGroup ?? "archive";
   const collection =
     sourceGroup === "policies"
       ? "policies"
       : sourceGroup === "scenarios"
         ? "scenarios"
-        : "theory";
+        : "archive";
   const slug = path.basename(filePath, ".md");
   const route = deriveRoute(collection, slug);
   const raw = readFileSync(filePath, "utf8");
@@ -268,6 +266,7 @@ export const getDocumentByRoute = cache(async (collection: NormalizedDoc["collec
 });
 
 export const getResultsIndex = cache(() => {
+  if (!existsSync(RESULTS_ROOT)) return {};
   const resultFiles = readdirSync(RESULTS_ROOT)
     .filter((file) => file.endsWith(".json"))
     .sort();
@@ -490,15 +489,6 @@ export async function getPolicyPages() {
       .map((doc) => getPolicyPage(doc.slug)),
   );
   return entries.filter((entry): entry is PolicyPage => Boolean(entry));
-}
-
-export async function getTheoryPage(slug: string) {
-  return getDocumentByRoute("theory", slug);
-}
-
-export async function getTheoryPages() {
-  const docs = await getDocuments();
-  return docs.filter((doc) => doc.collection === "theory");
 }
 
 export const getAtlasSource = cache((): AtlasSource | null => {

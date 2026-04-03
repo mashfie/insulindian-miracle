@@ -4,7 +4,6 @@ import {
   type PointerEvent as ReactPointerEvent,
   useDeferredValue,
   useEffect,
-  useEffectEvent,
   useRef,
   useState,
   startTransition,
@@ -19,95 +18,66 @@ type AtlasMapProps = {
 
 type Point = { x: number; y: number };
 
-function colorFor(value: number, chapter: AtlasChapter["layer"]) {
-  const alpha = Math.max(0.16, value * 0.92);
-  if (chapter === "resourceRent") {
-    return `rgba(131, 71, 50, ${alpha})`;
-  }
-  if (chapter === "accessibility") {
-    return `rgba(46, 77, 93, ${alpha})`;
-  }
-  if (chapter === "defensibility") {
-    return `rgba(32, 44, 58, ${alpha})`;
-  }
-  if (chapter === "suitability") {
-    return `rgba(63, 92, 82, ${alpha})`;
-  }
-  return `rgba(19, 19, 19, ${Math.max(0.1, value * 0.8)})`;
-}
+const COLORS = {
+  resourceRent: [138, 56, 36], // --danger
+  accessibility: [46, 77, 93], // --accent
+  defensibility: [32, 44, 58], // deep blue
+  suitability: [63, 92, 82],   // sea green
+  default: [13, 13, 13],       // --ink
+};
 
 export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const [chapterId, setChapterId] = useState(chapters[0]?.id ?? "terrain");
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef<{ origin: Point; offset: Point } | null>(null);
   const deferredChapterId = useDeferredValue(chapterId);
   const chapter = chapters.find((entry) => entry.id === deferredChapterId) ?? chapters[0];
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPrefersReducedMotion(mediaQuery.matches);
-    const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener("change", listener);
-    return () => mediaQuery.removeEventListener("change", listener);
-  }, []);
+  const layer = source[chapter.layer];
 
+  // Draw Heatmap on Canvas
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash && chapters.some(c => c.id === hash)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setChapterId(hash);
-    }
-    
-    const handleHashChange = () => {
-      const newHash = window.location.hash.slice(1);
-      if (newHash && chapters.some(c => c.id === newHash)) {
-        setChapterId(newHash);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const { width, height } = source;
+    const imageData = ctx.createImageData(width, height);
+    const rgb = COLORS[chapter.layer as keyof typeof COLORS] || COLORS.default;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        const val = layer[y][x];
+        const isLand = source.landMask[y][x];
+
+        if (!isLand) {
+          // Water color (very faint blue/white)
+          imageData.data[i] = 255;
+          imageData.data[i + 1] = 255;
+          imageData.data[i + 2] = 255;
+          imageData.data[i + 3] = 40; 
+        } else {
+          imageData.data[i] = rgb[0];
+          imageData.data[i + 1] = rgb[1];
+          imageData.data[i + 2] = rgb[2];
+          imageData.data[i + 3] = Math.floor(Math.max(0.1, val) * 255);
+        }
       }
-    };
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [chapters]);
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }, [chapter, layer, source]);
 
   const handleChapterChange = (id: string) => {
     startTransition(() => {
       setChapterId(id);
       window.history.replaceState(null, "", `#${id}`);
     });
-  };
-
-  const handlePointerMove = useEffectEvent((event: PointerEvent) => {
-    const drag = draggingRef.current;
-    if (!drag) {
-      return;
-    }
-    const x = drag.offset.x + (event.clientX - drag.origin.x);
-    const y = drag.offset.y + (event.clientY - drag.origin.y);
-    setOffset({ x, y });
-  });
-
-  const handlePointerUp = useEffectEvent(() => {
-    draggingRef.current = null;
-    setIsDragging(false);
-  });
-
-  useEffect(() => {
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-    };
-  }, []);
-
-  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const direction = event.deltaY > 0 ? -0.08 : 0.08;
-    setZoom((current) => Math.min(2.4, Math.max(0.85, current + direction)));
   };
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -118,42 +88,29 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
     setIsDragging(true);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const PAN_STEP = 20;
-    const ZOOM_STEP = 0.08;
-    
-    switch (event.key) {
-      case "ArrowUp":
-        event.preventDefault();
-        setOffset(prev => ({ ...prev, y: prev.y + PAN_STEP }));
-        break;
-      case "ArrowDown":
-        event.preventDefault();
-        setOffset(prev => ({ ...prev, y: prev.y - PAN_STEP }));
-        break;
-      case "ArrowLeft":
-        event.preventDefault();
-        setOffset(prev => ({ ...prev, x: prev.x + PAN_STEP }));
-        break;
-      case "ArrowRight":
-        event.preventDefault();
-        setOffset(prev => ({ ...prev, x: prev.x - PAN_STEP }));
-        break;
-      case "+":
-      case "=":
-        setZoom(current => Math.min(2.4, current + ZOOM_STEP));
-        break;
-      case "-":
-        setZoom(current => Math.max(0.85, current - ZOOM_STEP));
-        break;
-      case "Home":
-        setZoom(1);
-        setOffset({ x: 0, y: 0 });
-        break;
-    }
-  };
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      if (!draggingRef.current) return;
+      const x = draggingRef.current.offset.x + (e.clientX - draggingRef.current.origin.x);
+      const y = draggingRef.current.offset.y + (e.clientY - draggingRef.current.origin.y);
+      setOffset({ x, y });
+    };
+    const up = () => {
+      draggingRef.current = null;
+      setIsDragging(false);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+  }, []);
 
-  const layer = source[chapter.layer];
+  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const direction = event.deltaY > 0 ? -0.1 : 0.1;
+    setZoom((current) => Math.min(4, Math.max(0.5, current + direction)));
+  };
 
   return (
     <section className="atlas">
@@ -164,8 +121,9 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             type="button"
             data-active={entry.id === chapter.id}
             onClick={() => handleChapterChange(entry.id)}
+            style={{ fontFamily: "var(--font-heading)", letterSpacing: "0.05em" }}
           >
-            {entry.title}
+            {entry.title.toUpperCase()}
           </button>
         ))}
       </div>
@@ -173,156 +131,135 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
         <div
           ref={viewportRef}
           className="atlas__viewport"
+          style={{ 
+            background: "var(--paper)", 
+            position: "relative",
+            overflow: "hidden",
+            border: "2px solid var(--ink)",
+            cursor: isDragging ? "grabbing" : "grab",
+            boxShadow: "inset 0 0 100px rgba(0,0,0,0.05)"
+          }}
           onWheel={handleWheel}
           onPointerDown={handlePointerDown}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          role="application"
-          aria-label={`Interactive map for ${chapter.title}`}
-          aria-roledescription="interactive map"
         >
+          {/* Paper Grain Overlay */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.04,
+            pointerEvents: "none",
+            background: "url('https://www.transparenttextures.com/patterns/felt.png')"
+          }} />
+
           <div
             style={{
               transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
               transformOrigin: "50% 50%",
-              transition: isDragging || prefersReducedMotion ? "none" : "transform 240ms ease",
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
             }}
           >
-            <svg viewBox={`0 0 ${source.width} ${source.height}`} role="img" aria-label={chapter.title}>
-              {layer.flatMap((row, y) =>
-                row.map((value, x) => {
-                  if (!source.landMask[y]?.[x]) {
-                    return (
-                      <rect
-                        key={`water-${x}-${y}`}
-                        x={x}
-                        y={y}
-                        width="1"
-                        height="1"
-                        fill="rgba(255,255,255,0.42)"
-                      />
-                    );
-                  }
-                  return (
-                    <rect
-                      key={`${x}-${y}`}
-                      x={x}
-                      y={y}
-                      width="1"
-                      height="1"
-                      fill={colorFor(value, chapter.layer)}
-                    />
-                  );
-                }),
-              )}
-              {chapter.overlays.includes("coast") &&
-                source.coastMask.flatMap((row, y) =>
-                  row.map((value, x) =>
-                    value ? (
-                      <rect
-                        key={`coast-${x}-${y}`}
-                        x={x}
-                        y={y}
-                        width="1"
-                        height="1"
-                        fill="none"
-                        stroke="rgba(19,19,19,0.22)"
-                        strokeWidth="0.16"
-                      />
-                    ) : null,
-                  ),
+            <div style={{ position: "relative", width: source.width * 10, height: source.height * 10 }}>
+              {/* Heatmap Layer */}
+              <canvas
+                ref={canvasRef}
+                width={source.width}
+                height={source.height}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  imageRendering: "pixelated",
+                  position: "absolute",
+                  inset: 0,
+                }}
+              />
+
+              {/* Blueprint SVG Overlays */}
+              <svg 
+                viewBox={`0 0 ${source.width} ${source.height}`} 
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+              >
+                {/* Coastline */}
+                {chapter.overlays.includes("coast") && source.coastMask.map((row, y) =>
+                  row.map((val, x) => val ? (
+                    <rect key={`c-${x}-${y}`} x={x} y={y} width="1" height="1" fill="none" stroke="var(--ink)" strokeWidth="0.1" opacity="0.3" />
+                  ) : null)
                 )}
-              {chapter.overlays.includes("river") &&
-                source.riverMask.flatMap((row, y) =>
-                  row.map((value, x) =>
-                    value ? (
-                      <rect
-                        key={`river-${x}-${y}`}
-                        x={x}
-                        y={y}
-                        width="1"
-                        height="1"
-                        fill="rgba(46,77,93,0.86)"
-                      />
-                    ) : null,
-                  ),
+
+                {/* Rivers */}
+                {chapter.overlays.includes("river") && source.riverMask.map((row, y) =>
+                  row.map((val, x) => val ? (
+                    <rect key={`r-${x}-${y}`} x={x} y={y} width="1" height="1" fill="var(--accent)" opacity="0.6" />
+                  ) : null)
                 )}
-              {chapter.overlays.includes("sites") &&
-                source.sites.map((site) => (
+
+                {/* Sites / Cities */}
+                {chapter.overlays.includes("sites") && source.sites.map((site) => (
                   <g key={site.id}>
+                    {/* Architectural Crosshair */}
+                    <line x1={site.x * 63 - 1} y1={site.y * 63} x2={site.x * 63 + 1} y2={site.y * 63} stroke="var(--ink)" strokeWidth="0.2" />
+                    <line x1={site.x * 63} y1={site.y * 63 - 1} x2={site.x * 63} y2={site.y * 63 + 1} stroke="var(--ink)" strokeWidth="0.2" />
                     <circle
-                      cx={site.x * (source.width - 1)}
-                      cy={site.y * (source.height - 1)}
-                      r="1.15"
-                      fill="rgba(255,255,255,0.22)"
-                      stroke="rgba(19,19,19,0.8)"
-                      strokeWidth="0.25"
+                      cx={site.x * 63}
+                      cy={site.y * 63}
+                      r="0.8"
+                      fill="none"
+                      stroke="var(--ink)"
+                      strokeWidth="0.2"
                     />
                     <text
-                      x={site.x * (source.width - 1) + 1.5}
-                      y={site.y * (source.height - 1) - 1.2}
-                      fontFamily="var(--font-suisse)"
-                      fontSize="2.2"
-                      fill="rgba(19,19,19,0.82)"
+                      x={site.x * 63 + 1.2}
+                      y={site.y * 63 - 1.2}
+                      fontFamily="var(--font-heading)"
+                      fontSize="2"
+                      fill="var(--ink)"
+                      fontWeight="bold"
                     >
                       S{site.id}
                     </text>
                   </g>
                 ))}
-              {chapter.overlays.includes("boomtowns") &&
-                source.sites
-                  .filter((site) => site.boomtown)
-                  .map((site) => (
-                    <circle
-                      key={`boomtown-${site.id}`}
-                      cx={site.x * (source.width - 1)}
-                      cy={site.y * (source.height - 1)}
-                      r="2.1"
-                      fill="none"
-                      stroke="rgba(131,71,50,0.82)"
-                      strokeWidth="0.34"
-                      strokeDasharray="0.75 0.6"
-                    />
-                  ))}
-              {chapter.overlays.includes("trade-clusters") &&
-                source.sites
-                  .filter((site) => site.trade_cluster)
-                  .map((site) => (
-                    <rect
-                      key={`cluster-${site.id}`}
-                      x={site.x * (source.width - 1) - 1.1}
-                      y={site.y * (source.height - 1) - 1.1}
-                      width="2.2"
-                      height="2.2"
-                      fill="none"
-                      stroke="rgba(63,92,82,0.86)"
-                      strokeWidth="0.3"
-                    />
-                  ))}
-            </svg>
+
+                {/* Boomtown Highlight */}
+                {chapter.overlays.includes("boomtowns") && source.sites.filter(s => s.boomtown).map(site => (
+                   <circle
+                    key={`b-${site.id}`}
+                    cx={site.x * 63}
+                    cy={site.y * 63}
+                    r="2.5"
+                    fill="none"
+                    stroke="var(--danger)"
+                    strokeWidth="0.3"
+                    strokeDasharray="0.5 0.5"
+                  />
+                ))}
+              </svg>
+            </div>
           </div>
         </div>
-        <aside className="atlas__narrative">
-          <div className="kicker">Atlas Chapter</div>
-          <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>{chapter.title}</h2>
-          <p>{chapter.narrative}</p>
-          <ul className="atlas__site-list">
+        <aside className="atlas__narrative" style={{ padding: "2rem", border: "2px solid var(--ink)", background: "var(--paper)" }}>
+          <div className="kicker" style={{ fontFamily: "var(--font-heading)" }}>ATLAS CHAPTER</div>
+          <h2 style={{ fontSize: "3rem", marginBottom: "1.5rem", lineHeight: "0.9" }}>{chapter.title.toUpperCase()}</h2>
+          <p style={{ fontSize: "1.2rem", lineHeight: "1.6" }}>{chapter.narrative}</p>
+          <ul className="atlas__site-list" style={{ marginTop: "2rem", listStyle: "none", padding: 0 }}>
             {chapter.linkedSites.map((siteId) => {
               const site = source.sites.find((entry) => entry.id === siteId);
-              if (!site) {
-                return null;
-              }
+              if (!site) return null;
               return (
-                <li key={site.id}>
-                  <strong>S{site.id}</strong>{" "}
-                  {site.boomtown ? "boomtown" : site.trade_cluster ? "trade cluster" : "candidate"}{" "}
-                  with suitability {site.suitability.toFixed(2)} and resource rent {site.resource_rent.toFixed(2)}.
+                <li key={site.id} style={{ marginBottom: "1rem", borderBottom: "1px solid var(--line)", paddingBottom: "0.5rem" }}>
+                  <strong style={{ fontFamily: "var(--font-heading)" }}>SITE {site.id}</strong> — 
+                  <span style={{ fontSize: "0.9rem", marginLeft: "0.5rem", color: "var(--ink-soft)" }}>
+                    {site.boomtown ? "EXTRACTIVE BOOMTOWN" : site.trade_cluster ? "TRADE CLUSTER" : "STABLE CANDIDATE"}
+                  </span>
                 </li>
               );
             })}
           </ul>
-          <p className="comparison-note">
-            Drag to pan. Scroll to zoom. Use arrow keys to pan, +/- to zoom, and Home to reset. The map remains static-first; only the focused layer and overlay system change client-side.
+          <p className="comparison-note" style={{ marginTop: "3rem", opacity: 0.6, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Drafting Grid v4.0 // Scale 1:15000 // Multi-Layered Inference
           </p>
         </aside>
       </div>

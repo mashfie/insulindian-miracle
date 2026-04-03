@@ -1,6 +1,6 @@
 :root {
-  --paper: #ffffff;
-  --paper-rim: #f0f0f0;
+  --paper: #fef5f0;
+  --paper-rim: #fde2d5;
   --ink: #0d0d0d;
   --ink-soft: rgba(13, 13, 13, 0.72);
   --ink-faint: rgba(13, 13, 13, 0.46);
@@ -10,11 +10,11 @@
   --accent-soft: rgba(0, 0, 0, 0.14);
   --danger: #8a3824;
   --danger-soft: rgba(138, 56, 36, 0.14);
-  --surface: #f7f7f7;
-  --surface-strong: #eeeeee;
+  --surface: #f9ece5;
+  --surface-strong: #f3e2d9;
   --hero-height: min(100vh, 68rem);
   --hero-overlap: -30vh;
-  --font-ui: var(--font-suisse), sans-serif;
+  --font-ui: var(--font-heading), sans-serif;
   --font-mono: var(--font-suisse-mono), monospace;
   --page-width: 78rem;
   color-scheme: light;

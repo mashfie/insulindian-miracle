@@ -21,11 +21,7 @@ export type CompareResponse = {
 };
 
 export async function fetchComparison(payload: CompareRequest): Promise<CompareResponse> {
-  const endpoint = process.env.NEXT_PUBLIC_COMPARE_API_URL;
-
-  if (!endpoint) {
-    throw new Error("NEXT_PUBLIC_COMPARE_API_URL is not configured.");
-  }
+  const endpoint = process.env.NEXT_PUBLIC_COMPARE_API_URL || "/api/compare";
 
   const response = await fetch(endpoint, {
     method: "POST",

@@ -7,7 +7,7 @@ import "./globals.css";
 const aboreto = Aboreto({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-heading",
   display: "swap",
 });
 
@@ -29,7 +29,7 @@ const suisse = localFont({
       style: "normal",
     },
   ],
-  variable: "--font-suisse",
+  variable: "--font-body",
   display: "swap",
 });
 
