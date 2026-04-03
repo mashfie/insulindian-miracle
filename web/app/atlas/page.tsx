@@ -18,7 +18,6 @@ export default async function AtlasPage() {
           { href: "/atlas/", label: "Atlas" },
           { href: "/scenarios/", label: "Scenarios" },
           { href: "/policies/", label: "Policies" },
-          { href: "/theory/", label: "Theory" },
           { href: "/references/", label: "References" },
         ]}
         accentLabel="Layered field"

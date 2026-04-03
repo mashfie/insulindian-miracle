@@ -8,26 +8,75 @@ type HeroSceneProps = {
 };
 
 const VARIANT_COLORS: Record<HeroSceneProps["variant"], { top: string; left: string; right: string }> = {
-  archive: { top: "#f0f0f0", left: "#a0a0a0", right: "#404040" },
+  archive: { top: "#fef5f0", left: "#dccbbf", right: "#a08d81" },
   "cartographic-ledger": { top: "#ffffff", left: "#c2d1cd", right: "#1a2c26" },
   "polyhedral-report": { top: "#ffffff", left: "#dccbbf", right: "#3a2517" },
 };
 
-const VOXELS = [
-  [0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1],
-  [0, 1, 0], [0, 2, 0], [0, 3, 0], [0, 4, 0],
-  [0, 4, 1], [0, 4, 2], [0, 3, 2],
-  [1, 3, 0], [2, 3, 0], [2, 4, 0], [2, 5, 0],
-  [-1, 2, 0], [-2, 2, 0], [-2, 2, -1], [-2, 3, -1], [-1, 3, -1], [0, 3, -1],
-  [3, 1, 2], [3, 2, 2], [1, -1, 3],
-];
+// Unique voxel sets for different sections
+const VOXEL_SETS: Record<string, number[][]> = {
+  home: [
+    [0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1],
+    [0, 1, 0], [0, 2, 0], [0, 3, 0], [0, 4, 0],
+    [0, 4, 1], [0, 4, 2], [0, 3, 2],
+    [1, 3, 0], [2, 3, 0], [2, 4, 0], [2, 5, 0],
+    [-1, 2, 0], [-2, 2, 0], [-2, 2, -1], [-2, 3, -1], [-1, 3, -1], [0, 3, -1],
+    [3, 1, 2], [3, 2, 2], [1, -1, 3],
+  ],
+  atlas: [
+    // Topographic pyramid
+    [-2, 0, -2], [-1, 0, -2], [0, 0, -2], [1, 0, -2], [2, 0, -2],
+    [-2, 0, -1], [-1, 0, -1], [0, 0, -1], [1, 0, -1], [2, 0, -1],
+    [-2, 0, 0], [-1, 0, 0], [0, 0, 0], [1, 0, 0], [2, 0, 0],
+    [-2, 0, 1], [-1, 0, 1], [0, 0, 1], [1, 0, 1], [2, 0, 1],
+    [-2, 0, 2], [-1, 0, 2], [0, 0, 2], [1, 0, 2], [2, 0, 2],
+    [-1, 1, -1], [0, 1, -1], [1, 1, -1],
+    [-1, 1, 0], [0, 1, 0], [1, 1, 0],
+    [-1, 1, 1], [0, 1, 1], [1, 1, 1],
+    [0, 2, 0],
+  ],
+  scenarios: [
+    // Interlocking knot
+    [0,0,0], [1,0,0], [2,0,0], [2,1,0], [2,2,0], [1,2,0], [0,2,0], [0,1,0],
+    [0,0,1], [0,0,2], [1,0,2], [2,0,2], [2,1,2], [2,2,2], [1,2,2], [0,2,2], [0,1,2],
+    [0,2,1], [2,2,1], [2,0,1],
+  ],
+  policies: [
+    // Monolithic pillar
+    [-1,0,-1], [0,0,-1], [1,0,-1],
+    [-1,0,0], [0,0,0], [1,0,0],
+    [-1,0,1], [0,0,1], [1,0,1],
+    [0,1,0], [0,2,0], [0,3,0], [0,4,0], [0,5,0],
+    [-1,5,-1], [0,5,-1], [1,5,-1],
+    [-1,5,0], [0,5,0], [1,5,0],
+    [-1,5,1], [0,5,1], [1,5,1],
+  ],
+  references: [
+    // Archival grid
+    [-2,0,-1], [0,0,-1], [2,0,-1],
+    [-2,0,1], [0,0,1], [2,0,1],
+    [-2,1,-1], [0,1,-1], [2,1,-1],
+    [-2,1,1], [0,1,1], [2,1,1],
+    [-2,2,-1], [0,2,-1], [2,2,-1],
+  ]
+};
+
+function getVoxelSet(title: string): number[][] {
+  const t = title.toLowerCase();
+  if (t === "atlas") return VOXEL_SETS.atlas;
+  if (t === "scenarios" || t.includes("scenario")) return VOXEL_SETS.scenarios;
+  if (t === "policies" || t.includes("policy")) return VOXEL_SETS.policies;
+  if (t === "references") return VOXEL_SETS.references;
+  return VOXEL_SETS.home;
+}
 
 export function HeroScene({ title, variant }: HeroSceneProps) {
   const [visibleCount, setVisibleCount] = useState(0);
   const colors = VARIANT_COLORS[variant] || VARIANT_COLORS.archive;
   const SIZE = 40;
 
-  const sortedVoxels = [...VOXELS].sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
+  const voxels = getVoxelSet(title);
+  const sortedVoxels = [...voxels].sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
 
   useEffect(() => {
     setVisibleCount(0);
@@ -39,9 +88,9 @@ export function HeroScene({ title, variant }: HeroSceneProps) {
         }
         return c + 1;
       });
-    }, 60);
+    }, 40);
     return () => clearInterval(timer);
-  }, []);
+  }, [title]);
 
   return (
     <section className="site-hero" aria-hidden="true" style={{ background: "var(--paper)" }}>

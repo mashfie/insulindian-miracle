@@ -29,7 +29,6 @@ export function DocumentView({
           { href: "/atlas/", label: "Atlas" },
           { href: "/scenarios/", label: "Scenarios" },
           { href: "/policies/", label: "Policies" },
-          { href: "/theory/", label: "Theory" },
           { href: "/references/", label: "References" },
         ]}
         accentLabel="Report / archive"

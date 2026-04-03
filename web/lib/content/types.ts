@@ -47,7 +47,7 @@ export type NormalizedDoc = {
   slug: string;
   route: string;
   title: string;
-  collection: "scenarios" | "policies" | "theory";
+  collection: "scenarios" | "policies" | "archive";
   sourceGroup: string;
   html: string;
   summaryHtml: string;
