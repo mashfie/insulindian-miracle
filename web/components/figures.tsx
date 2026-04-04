@@ -95,7 +95,7 @@ export function TrendFigure({
             <path key={s} d={`M28 ${y}H392`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
           );
         })}
-        {area && <path d={area} fill="rgba(0,0,0,0.04)" />}
+        {area && <path d={area} fill={accent} opacity="0.10" />}
         {points && (
           <polyline
             fill="none"
@@ -116,7 +116,7 @@ export function ComparisonBars({
   items,
 }: {
   figure: FigureRef;
-  items: Array<{ label: string; value: number }>;
+  items: Array<{ label: string; value: number; color?: string }>;
 }) {
   const [progress, setProgress] = useState(0);
 
@@ -155,7 +155,7 @@ export function ComparisonBars({
               >
                 {item.label.toUpperCase()}
               </text>
-              <rect x="94" y={y} width={width} height="22" fill="var(--paper)" stroke="var(--ink)" strokeWidth="1.5" />
+              <rect x="94" y={y} width={width} height="22" fill={item.color ?? "var(--paper)"} stroke="var(--ink)" strokeWidth="1.5" opacity="0.85" />
               <text
                 x={100 + width}
                 y={y + 15}
@@ -219,9 +219,10 @@ export function OutcomeScatter({
                 cx={cx}
                 cy={cy}
                 r={point.boomtown ? 6.2 : 4.6}
-                fill={point.boomtown ? "var(--ink)" : "var(--paper)"}
-                stroke="var(--ink)"
+                fill={point.boomtown ? "#8a3824" : "#4a6a7a"}
+                stroke={point.boomtown ? "#4a1810" : "#2a3a48"}
                 strokeWidth="1.5"
+                opacity="0.88"
               />
               <text
                 x={cx + 8}
