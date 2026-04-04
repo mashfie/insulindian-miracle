@@ -48,6 +48,7 @@ export function buildLandingVisuals({
       key="trend"
       values={rewardHistory.slice(0, 80)}
       figure={figureAt(archive, 0, "Reward history across a single Whittle-index run.", "trend")}
+      accent={POLICY_COLORS["whittle-index"]}
     />,
     <ComparisonBars
       key="comparison"
@@ -58,10 +59,10 @@ export function buildLandingVisuals({
         "comparison",
       )}
       items={[
-        { label: "Oracle", value: oracleSummary.mean_cumulative_reward ?? 0 },
-        { label: "Gauss TS", value: summary["gaussian-thompson"]?.mean_cumulative_reward ?? 0 },
-        { label: "UCB1", value: summary.ucb1?.mean_cumulative_reward ?? 0 },
-        { label: "Whittle", value: summary["whittle-index"]?.mean_cumulative_reward ?? 0 },
+        { label: "Oracle", value: oracleSummary.mean_cumulative_reward ?? 0, color: "#a08d81" },
+        { label: "Gauss TS", value: summary["gaussian-thompson"]?.mean_cumulative_reward ?? 0, color: POLICY_COLORS["gaussian-thompson"] },
+        { label: "UCB1", value: summary.ucb1?.mean_cumulative_reward ?? 0, color: POLICY_COLORS["ucb1"] },
+        { label: "Whittle", value: summary["whittle-index"]?.mean_cumulative_reward ?? 0, color: POLICY_COLORS["whittle-index"] },
       ]}
     />,
     <EquationFigure
@@ -118,16 +119,18 @@ export function buildLandingVisuals({
   ];
 }
 
+// Hiroshige-inspired desaturated palette — earthy woodblock tones
+// anchored to the hero voxel's warm taupe/brown/teal palette
 const POLICY_COLORS: Record<string, string> = {
-  "sliding-window-ucb": "#1a5276",
-  "whittle-index": "#7d3c98",
-  "discounted-ucb": "#117a65",
-  "gaussian-thompson": "#b9770e",
-  "ucb1": "#922b21",
-  "epsilon-greedy": "#7f8c8d",
-  "discounted-gaussian-thompson": "#2e86c1",
-  "linucb": "#28b463",
-  "linear-thompson": "#d4ac0d",
+  "sliding-window-ucb":            "#4a6a7a", // indigo-slate
+  "whittle-index":                 "#7a5c6e", // dusty plum
+  "discounted-ucb":                "#3f5c52", // dark sage (matches trade-cluster voxel)
+  "gaussian-thompson":             "#b08060", // warm ochre / raw sienna
+  "ucb1":                          "#8a3824", // brick rust (matches --danger / boomtown voxel)
+  "epsilon-greedy":                "#8a8070", // warm ash
+  "discounted-gaussian-thompson":  "#5a7890", // faded denim
+  "linucb":                        "#6a7850", // olive drab
+  "linear-thompson":               "#a07848", // tawny amber
 };
 
 function computeAggregateSeries(

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { Aboreto } from "next/font/google";
+import { Aboreto, Space_Grotesk, Space_Mono } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
@@ -12,36 +11,16 @@ const aboreto = Aboreto({
   display: "swap",
 });
 
-const suisse = localFont({
-  src: [
-    {
-      path: "../public/fonts/suisse/suisse-book.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/suisse/suisse-book-italic.otf",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../public/fonts/suisse/suisse-medium.otf",
-      weight: "500",
-      style: "normal",
-    },
-  ],
+const spaceGrotesk = Space_Grotesk({
+  weight: ["400", "500"],
+  subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
 });
 
-const suisseMono = localFont({
-  src: [
-    {
-      path: "../public/fonts/suisse-mono/suisse-mono.otf",
-      weight: "400",
-      style: "normal",
-    },
-  ],
+const spaceMono = Space_Mono({
+  weight: "400",
+  subsets: ["latin"],
   variable: "--font-suisse-mono",
   display: "swap",
 });
@@ -60,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${aboreto.variable} ${suisse.variable} ${suisseMono.variable}`}
+      className={`${aboreto.variable} ${spaceGrotesk.variable} ${spaceMono.variable}`}
     >
       <body>
         <a href="#main-content" className="skip-link">Skip to content</a>

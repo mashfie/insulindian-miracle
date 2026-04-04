@@ -762,7 +762,7 @@ h3 {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 7 / 4;
+  aspect-ratio: 5 / 4;
   margin-bottom: 0.4rem;
 }
 
@@ -771,7 +771,7 @@ h3 {
 }
 
 .figure-caption {
-  font-family: var(--font-mono); /* Suisse Int'l Mono */
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   border-top: 1px solid var(--line);
   padding-top: 0.5rem;

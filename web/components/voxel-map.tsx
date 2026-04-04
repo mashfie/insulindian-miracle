@@ -9,20 +9,23 @@ type VoxelMapProps = {
   width: number;
   height: number;
   color?: [number, number, number];
+  overlayData?: number[][];
   sites?: AtlasSite[];
   landMask?: boolean[][];
 };
 
 /**
  * Heerich-powered isometric terrain renderer.
- * Renders elevation data as sculpted terrain with per-face shading
- * and embedded city markers using the heerich SVG voxel engine.
+ * Terrain shape comes from `data` (elevation). When `overlayData` is provided,
+ * face color is driven by that layer instead — enabling thematic map coloring
+ * over a consistent 3D terrain form.
  */
 export function VoxelMap({
   data,
   width,
   height,
   color = [100, 110, 120],
+  overlayData,
   sites = [],
   landMask,
 }: VoxelMapProps) {
@@ -36,38 +39,31 @@ export function VoxelMap({
 
     const maxStack = 6;
 
-    // Build terrain using fill with a test function
-    // This renders the full heightmap as stacked voxels
     h.applyGeometry({
       type: "fill",
       bounds: [[0, 0, 0], [width - 1, maxStack, height - 1]],
       test: (x: number, y: number, z: number) => {
         if (x < 0 || x >= width || z < 0 || z >= height) return false;
-        // Skip water cells if landMask provided
         if (landMask) {
-          // Map from downsampled coords back — approximate
-          const srcY = Math.min(Math.floor(z * (landMask.length / height)), landMask.length - 1);
-          const srcX = Math.min(Math.floor(x * (landMask[0].length / width)), landMask[0].length - 1);
-          if (!landMask[srcY][srcX]) return false;
+          if (!landMask[z]?.[x]) return false;
         }
         const elev = data[z]?.[x] ?? 0;
-        const h = Math.floor(elev * maxStack);
-        return y <= h;
+        const stackH = Math.floor(elev * maxStack);
+        return y <= stackH;
       },
       style: {
         default: (x: number, y: number, z: number) => {
           const elev = data[z]?.[x] ?? 0;
           const maxH = Math.floor(elev * maxStack);
           const isTop = y === maxH;
-          const t = elev;
+          // Color driven by overlayData when present, elevation otherwise
+          const t = overlayData?.[z]?.[x] ?? elev;
 
-          // Warm-to-cool gradient based on elevation
           const r = Math.round(color[0] + t * 80);
           const g = Math.round(color[1] + t * 60);
           const b = Math.round(color[2] - t * 30);
 
           if (isTop) {
-            // Top faces: lighter, warmer
             return {
               fill: `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 45)}, ${Math.min(255, b + 20)})`,
               stroke: `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.15)`,
@@ -82,7 +78,7 @@ export function VoxelMap({
         },
         top: (x: number, _y: number, z: number) => {
           const elev = data[z]?.[x] ?? 0;
-          const t = elev;
+          const t = overlayData?.[z]?.[x] ?? elev;
           return {
             fill: `rgb(${Math.min(255, Math.round(color[0] + t * 130))}, ${Math.min(255, Math.round(color[1] + t * 105))}, ${Math.min(255, Math.round(color[2] + t * 50))})`,
             stroke: `rgba(13, 13, 13, 0.12)`,
@@ -92,18 +88,15 @@ export function VoxelMap({
       },
     });
 
-    // Carve river valleys — subtract voxels where water flows
-    // This creates a sculpted feel rather than flat-topped blocks
-
-    // Add city markers as raised pillars with distinct styling
     for (const site of sites) {
       const sx = Math.round(site.x * (width - 1));
-      const sz = Math.round(site.y * (height - 1));
+      // site.y is normalized top-to-bottom in source coords; data rows are
+      // flipped so z=0 is the last source row — mirror the y coordinate
+      const sz = (height - 1) - Math.round(site.y * (height - 1));
       const baseElev = data[sz]?.[sx] ?? 0;
       const baseH = Math.floor(baseElev * maxStack);
 
       if (site.boomtown) {
-        // Boomtowns: tall narrow spire — extractive tower
         h.applyGeometry({
           type: "box",
           position: [sx, baseH + 1, sz],
@@ -114,7 +107,6 @@ export function VoxelMap({
           },
         });
       } else if (site.trade_cluster) {
-        // Trade clusters: wider squat block — market
         h.applyGeometry({
           type: "box",
           position: [sx - 1, baseH + 1, sz - 1],
@@ -125,7 +117,6 @@ export function VoxelMap({
           },
         });
       } else {
-        // Regular sites: single raised block
         h.applyGeometry({
           type: "box",
           position: [sx, baseH + 1, sz],
@@ -137,10 +128,9 @@ export function VoxelMap({
         });
       }
 
-      // Label
       h.applyGeometry({
         type: "box",
-        position: [sx, baseH + (site.boomtown ? 5 : site.trade_cluster ? 3 : 3), sz],
+        position: [sx, baseH + (site.boomtown ? 5 : 3), sz],
         size: 1,
         content: `<text font-family="var(--font-ui)" font-size="8" fill="#0d0d0d" font-weight="bold" text-anchor="middle" dominant-baseline="central">S${site.id}</text>`,
         opaque: false,
@@ -148,12 +138,11 @@ export function VoxelMap({
     }
 
     return h.toSVG({ padding: 20 });
-  }, [data, width, height, color, sites, landMask]);
+  }, [data, width, height, color, overlayData, sites, landMask]);
 
   useEffect(() => {
     if (!containerRef.current) return;
     containerRef.current.innerHTML = svgString;
-    // Make the SVG responsive
     const svg = containerRef.current.querySelector("svg");
     if (svg) {
       svg.removeAttribute("width");
