@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     // Generate some interesting mock data that changes slightly with the scenario
     const isBaseline = scenario === "baseline";
     
-    const results = policies.map((policy) => {
+    const results = policies.map((policy: string) => {
       const basePerformance = isBaseline ? 0.8 : 0.6;
       const randomness = Math.random() * 0.1;
       const performance = basePerformance + (policy.includes("thompson") ? 0.05 : 0) + randomness;
