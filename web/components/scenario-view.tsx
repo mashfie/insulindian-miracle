@@ -64,6 +64,10 @@ export function ScenarioView({
           />
         </section>
 
+        <section className="section-block scenario-trajectory">
+          {visuals[1]}
+        </section>
+
         <section className="stats-grid section-block">
           <StatsTable title="Scenario summary" rows={page.stats} />
           {visuals[0]}

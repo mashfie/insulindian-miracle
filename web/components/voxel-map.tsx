@@ -34,7 +34,7 @@ export function VoxelMap({
   const svgString = useMemo(() => {
     const h = new Heerich({
       tile: 12,
-      camera: { type: "oblique", angle: 315, distance: 18 },
+      camera: { type: "oblique", angle: 45, distance: 18 },
     });
 
     const maxStack = 6;

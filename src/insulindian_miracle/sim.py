@@ -401,13 +401,23 @@ def run_policy_comparison(
     scenario = get_scenario(scenario_key)
     active_config = _config_with_overrides(apply_scenario(config, scenario_key), scenario_overrides)
     terrain, sites = _prepare_world(active_config)
-    results = [_run_policy_on_sites(active_config, terrain, sites, policy).to_dict() for policy in policies]
+
+    oracle = _run_policy_on_sites(active_config, terrain, sites, ORACLE_POLICY)
+    oracle_reward = oracle.cumulative_reward
+
+    results = []
+    for policy in policies:
+        result = _run_policy_on_sites(active_config, terrain, sites, policy)
+        d = result.to_dict()
+        d["oracle_regret"] = float(oracle_reward - result.cumulative_reward)
+        results.append(d)
 
     return {
         "scenario": scenario.to_dict(),
         "config": asdict(active_config),
         "terrain_summary": _terrain_summary(terrain),
         "sites": [asdict(site) for site in sites],
+        "oracle_reward": oracle_reward,
         "results": results,
     }
 
