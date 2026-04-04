@@ -68,11 +68,13 @@ def _build_config(payload: CompareRequest) -> SimulationConfig:
 
 
 @app.get("/")
+@app.get("/api/compare")
 def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
 @app.post("/")
+@app.post("/api/compare")
 def compare(payload: CompareRequest) -> dict[str, Any]:
     try:
         config = _build_config(payload)
