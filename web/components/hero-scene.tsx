@@ -13,22 +13,22 @@ const VARIANT_PALETTES: Record<
   { base: string; accent: string; shadow: string; top: string }
 > = {
   archive: {
-    base: "#c8bbb0",
-    accent: "#2e6b62",
-    shadow: "#5a504a",
-    top: "#ede4dc",
+    base: "#d4c4b8",
+    accent: "#a08d81",
+    shadow: "#6b5d54",
+    top: "#f0e6dd",
   },
   "cartographic-ledger": {
-    base: "#b0c0be",
-    accent: "#4a5f78",
-    shadow: "#1a2c36",
-    top: "#dce6e4",
+    base: "#b8ccc6",
+    accent: "#3f5c52",
+    shadow: "#1a2c26",
+    top: "#e0ece8",
   },
   "polyhedral-report": {
-    base: "#c8b098",
-    accent: "#a07840",
-    shadow: "#3a2a18",
-    top: "#e8dcd0",
+    base: "#d4b8a0",
+    accent: "#7d4e33",
+    shadow: "#3a2517",
+    top: "#f0e2d4",
   },
 };
 
