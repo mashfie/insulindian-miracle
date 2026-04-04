@@ -119,18 +119,18 @@ export function buildLandingVisuals({
   ];
 }
 
-// Hiroshige-inspired desaturated palette — earthy woodblock tones
-// anchored to the hero voxel's warm taupe/brown/teal palette
+// OKLCH-derived data palette — perceptually uniform, cartographic register
+// Keyed to --data-1…6 in globals.css (hex approximations for SVG fill)
 const POLICY_COLORS: Record<string, string> = {
-  "sliding-window-ucb":            "#4a6a7a", // indigo-slate
-  "whittle-index":                 "#7a5c6e", // dusty plum
-  "discounted-ucb":                "#3f5c52", // dark sage (matches trade-cluster voxel)
-  "gaussian-thompson":             "#b08060", // warm ochre / raw sienna
-  "ucb1":                          "#8a3824", // brick rust (matches --danger / boomtown voxel)
-  "epsilon-greedy":                "#8a8070", // warm ash
-  "discounted-gaussian-thompson":  "#5a7890", // faded denim
-  "linucb":                        "#6a7850", // olive drab
-  "linear-thompson":               "#a07848", // tawny amber
+  "whittle-index":                 "#3d7a72", // data-1 (teal)
+  "sliding-window-ucb":            "#4a5f78", // data-4 (slate)
+  "gaussian-thompson":             "#a07840", // data-3 (ochre)
+  "ucb1":                          "#9e3a22", // data-2 (brick)
+  "discounted-ucb":                "#3f5c52", // data-1 variant (dark teal)
+  "epsilon-greedy":                "#8a8070", // neutral warm ash
+  "discounted-gaussian-thompson":  "#5a7890", // data-4 variant (denim)
+  "linucb":                        "#6a7850", // data-6 (olive)
+  "linear-thompson":               "#a07848", // data-3 variant (amber)
 };
 
 function computeAggregateSeries(
