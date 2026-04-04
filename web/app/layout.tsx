@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Aboreto } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
+import { SiteHeader } from "@/components/site-header";
 
 const aboreto = Aboreto({
   weight: "400",
@@ -63,6 +64,7 @@ export default function RootLayout({
     >
       <body>
         <a href="#main-content" className="skip-link">Skip to content</a>
+        <SiteHeader />
         {children}
       </body>
     </html>

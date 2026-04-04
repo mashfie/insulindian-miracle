@@ -310,11 +310,15 @@ export const getRawResultFile = cache((fileSlug: string) => {
 
 export const getPrimaryScenarioResult = cache((slug: string) => {
   const results = getResultsIndex();
-  if (slug === "ucb-bait") {
-    return results["ucb-bait-boomtown-v4"] ?? results["ucb-bait-boomtown-v3"] ?? null;
-  }
-  const direct = Object.values(results).find((result) => result.scenario.name === slug);
-  return direct ?? null;
+  const candidates = Object.values(results).filter(
+    (result) => result.scenario.name === slug,
+  );
+  if (candidates.length === 0) return null;
+  // Prefer the file with the most policies and runs
+  candidates.sort(
+    (a, b) => b.policyKeys.length * b.runs - a.policyKeys.length * a.runs,
+  );
+  return candidates[0] ?? null;
 });
 
 export const getReferenceEntries = cache(() => {
@@ -507,7 +511,7 @@ export function getAtlasChapters(): AtlasChapter[] {
       layer: "elevation",
       overlays: ["coast", "river", "sites"],
       narrative:
-        "The peninsula is not backdrop but prior: a long taper with a river spine, coastal friction, and an interior that never fully escapes the sea.",
+        "The peninsula is the prior distribution. A long taper with a river spine, coastal friction, and an interior that never fully escapes the sea. Every algorithm inherits this geography before it makes a single choice.",
       linkedSites: [0, 3, 6],
     },
     {
@@ -516,7 +520,7 @@ export function getAtlasChapters(): AtlasChapter[] {
       layer: "resourceRent",
       overlays: ["sites", "boomtowns"],
       narrative:
-        "Resource rent condenses into local pockets rather than spreading evenly across the landmass; the boomtown lure is spatially narrow and institutionally expensive.",
+        "Resource rent condenses into pockets rather than spreading evenly. The extractive strata are the curse's geography — spatially narrow, institutionally expensive, and precisely where optimistic algorithms concentrate their attention.",
       linkedSites: [3, 6, 14],
     },
     {
@@ -525,7 +529,7 @@ export function getAtlasChapters(): AtlasChapter[] {
       layer: "accessibility",
       overlays: ["river", "sites", "trade-clusters"],
       narrative:
-        "Accessibility is a directional field, highest near the mainland bridge and river corridor, then attenuated as the peninsula thins into exposed edge conditions.",
+        "Accessibility is a directional field — highest near the mainland bridge and river corridor, attenuated as the peninsula thins. The Hanseatic and Dutch Republic scenarios live or die by this layer: trade networks reward position, not endowment.",
       linkedSites: [1, 5, 10],
     },
     {
@@ -534,7 +538,7 @@ export function getAtlasChapters(): AtlasChapter[] {
       layer: "defensibility",
       overlays: ["coast", "sites"],
       narrative:
-        "Defensibility rewards slope and inland distance. It acts as a brake on pure littoral logic and helps explain why the highest-suitability sites do not all collapse onto the shore.",
+        "Defensibility rewards slope and inland distance — the brake on pure littoral logic. It explains why the highest-suitability sites do not all collapse onto the shore, and why the interior retains strategic value even when trade favours the coast.",
       linkedSites: [4, 8, 12],
     },
     {
@@ -543,7 +547,7 @@ export function getAtlasChapters(): AtlasChapter[] {
       layer: "suitability",
       overlays: ["river", "coast", "sites", "boomtowns", "trade-clusters"],
       narrative:
-        "Suitability is a composite plate: ports, river adjacency, access, arability, defense, and resource rent are combined before any institutional dynamics begin to distort the field.",
+        "Suitability composites every layer — ports, river adjacency, access, arability, defence, resource rent — into a single prior score. This is the landscape before institutional dynamics begin to distort it. The gap between suitability and outcome is the gap the archive measures.",
       linkedSites: [0, 3, 7, 14],
     },
   ];

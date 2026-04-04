@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 
 import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
+import { Breadcrumb } from "@/components/breadcrumb";
 import { ComparisonModule } from "@/components/comparison-module";
 import { HeroScene } from "@/components/hero-scene";
 import { ProseHtml } from "@/components/prose-html";
 import { SectionNav } from "@/components/section-nav";
 import { StatsTable } from "@/components/figures";
 import type { ScenarioPage } from "@/lib/content/types";
+import { SITE_ROUTES } from "@/lib/navigation";
 
 type ScenarioViewProps = {
   page: ScenarioPage;
@@ -28,18 +30,19 @@ export function ScenarioView({
   return (
     <main id="main-content" className="archive-page" data-variant={variant}>
       <ArchiveSettingsPanel
-        links={[
-          { href: "/", label: "Home" },
-          { href: "/atlas/", label: "Atlas" },
-          { href: "/scenarios/", label: "Scenarios" },
-          { href: "/policies/", label: "Policies" },
-          { href: "/references/", label: "References" },
-        ]}
+        links={SITE_ROUTES}
         accentLabel={page.slug === "ucb-bait" ? "Boomtown / collapse" : "Comparative scenario"}
         motionLabel="Atlas kinetics"
       />
       <HeroScene title={archive.title} variant={variant} />
       <article className="site-shell">
+        <Breadcrumb
+          items={[
+            { href: "/", label: "Home" },
+            { href: "/scenarios/", label: "Scenarios" },
+          ]}
+          current={archive.title}
+        />
         <section className="intro-grid motion-reveal">
           <div>
             <div className="eyebrow">Scenario Plate</div>
@@ -69,14 +72,14 @@ export function ScenarioView({
         {archive.sections.map((section, index) => (
           <section key={section.id} id={section.id} className="section-row section-block motion-reveal" style={{ ["--reveal-order" as string]: index + 1 }}>
             <div className="section-row__text">
-              <div className="kicker">Scenario reading {String(index + 1).padStart(2, "0")}</div>
+              <div className="section-kicker">Scenario reading {String(index + 1).padStart(2, "0")}</div>
               <h2>{section.title}</h2>
               <div className={index === 0 ? "article-columns-2 article-body drop-cap" : "article-columns-2 article-body"}>
                 <ProseHtml html={section.html} />
               </div>
               {index === archive.sections.length - 1 && page.document ? (
                 <div style={{ marginTop: "2rem" }}>
-                  <div className="kicker">Repository note</div>
+                  <div className="section-kicker">Repository note</div>
                   <ProseHtml html={page.document.summaryHtml} />
                 </div>
               ) : null}
@@ -102,7 +105,7 @@ export function ScenarioView({
         ))}
 
         <section className="section-full section-block">
-          <div className="kicker">Runtime Hook</div>
+          <div className="section-kicker">Runtime Hook</div>
           <ComparisonModule
             scenario={page.result?.scenario.name ?? "baseline"}
             policies={["ucb1", "gaussian-thompson", "whittle-index"]}

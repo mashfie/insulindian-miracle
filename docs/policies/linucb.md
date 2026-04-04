@@ -13,30 +13,41 @@ Contextual bandit with regularised linear regression. Observes an 11-dimensional
 
 ## Formulation
 
-```
-θ̂ = A⁻¹ · b                           # Ridge regression estimate
-score(k) = x(k)ᵀ · θ̂ + α · √(x(k)ᵀ · A⁻¹ · x(k))
-A(t) = argmax score(k)
-```
+Ridge regression estimate:
 
-where A = Σ x(k)x(k)ᵀ + λI (covariance), b = Σ r·x(k) (reward-weighted features), α controls exploration.
+$$
+\hat{\theta} = V^{-1} b
+$$
+
+where $V = \sum \varphi(k)\varphi(k)^\top + \lambda I$ and $b = \sum r \cdot \varphi(k)$.
+
+Upper confidence bound in feature space:
+
+$$
+\text{score}(k) = \varphi(k)^\top \hat{\theta} + \alpha \sqrt{\varphi(k)^\top V^{-1} \varphi(k)}
+$$
+
+$$
+A(t) = \arg\max_k \; \text{score}(k)
+$$
+
+The term $\sqrt{\varphi(k)^\top V^{-1} \varphi(k)}$ is the predictive standard deviation under the linear model — arms in under-explored regions of feature space receive a larger bonus.
 
 ## Implementation
 
 `LinUCBPolicy` in `policies.py:233–264`.
 
 - **Feature dim**: 11 (see [[policies#Contextual Feature Vector]])
-- **α**: `config.linucb_alpha` (default 1.15)
-- **Ridge**: `config.linear_bandit_ridge` (default 1.0)
+- **$\alpha$**: `config.linucb_alpha` (default 1.15)
+- **Ridge**: $\lambda$ = `config.linear_bandit_ridge` (default 1.0)
 - **Shared model**: single covariance matrix and reward vector across all arms
-- **Update**: rank-1 update: `A += x·xᵀ`, `b += r·x`
+- **Update**: rank-1 update: $V \leftarrow V + \varphi \varphi^\top$, $b \leftarrow b + r \varphi$
 
 ## Feature Vector
 
-```
-[bias, geography, resource_rent, extraction, openness, adaptability,
- capital, log_pop, network_bonus, is_boomtown, is_trade_cluster]
-```
+$$
+\varphi(k) = [\text{bias},\; \text{geo},\; \text{rent},\; \text{extract},\; \text{open},\; \text{adapt},\; \text{capital},\; \ln(\text{pop}),\; \text{network},\; \mathbb{1}_{\text{boom}},\; \mathbb{1}_{\text{trade}}]
+$$
 
 Because features include *current* institutional state (extraction, openness, capital), the model implicitly adapts to non-stationarity — the same arm yields different feature vectors as its institutions evolve.
 
@@ -57,3 +68,28 @@ Because features include *current* institutional state (extraction, openness, ca
 - **Open cluster / Merchant republic**: Strong — features capture trade cluster membership and openness
 - **Resource curse**: Good — changing extraction feature signals institutional decay
 - **Baseline**: Competitive — contextual information helps even in stable environments
+
+## Empirical Performance
+
+12-run experiments across 9 scenarios. Regret is relative to the myopic oracle; negative regret indicates the policy outperformed the oracle.
+
+| Scenario | Reward | Regret | Rank |
+|----------|--------|--------|------|
+| baseline | 2088 | 804 | 7/9 |
+| resource-curse | 1412 | -283 | 6/9 |
+| botswana | 4986 | 371 | 5/9 |
+| ucb-bait | 1699 | -33 | 5/9 |
+| merchant-republic | 4566 | 1062 | 6/9 |
+| open-cluster | 4731 | 230 | 4/9 |
+| megacity-trap | 2273 | 528 | 6/9 |
+| shock-reform | 2969 | 153 | 5/9 |
+| balanced-urban | 4626 | 378 | 5/9 |
+
+Ranked 4th–7th across scenarios. The contextual features provide the same implicit adaptation as Linear Thompson but the deterministic confidence bound is less aggressive in exploration, resulting in slightly lower performance in most scenarios. Strongest in open-cluster (4th) where feature-space structure matters most.
+
+## References
+
+- Li, L., Chu, W., Langford, J. & Schapire, R. E. (2010). A contextual-bandit approach to personalized news article recommendation. *WWW 2010*, 661–670.
+- Abbasi-Yadkori, Y., Pál, D. & Szepesvári, C. (2011). Improved algorithms for linear stochastic bandits. *NIPS 2011*.
+
+[[linear-thompson]] · [[multi-armed-bandits]]

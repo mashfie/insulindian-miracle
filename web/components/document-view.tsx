@@ -1,10 +1,14 @@
 import type { ReactNode } from "react";
 
 import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
+import { Breadcrumb } from "@/components/breadcrumb";
 import { HeroScene } from "@/components/hero-scene";
 import { ProseHtml } from "@/components/prose-html";
 import { SectionNav } from "@/components/section-nav";
 import type { NormalizedDoc, ReferenceEntry } from "@/lib/content/types";
+import { SITE_ROUTES } from "@/lib/navigation";
+
+type BreadcrumbItem = { href: string; label: string };
 
 type DocumentViewProps = {
   document: NormalizedDoc;
@@ -12,6 +16,7 @@ type DocumentViewProps = {
   deck: string;
   references?: ReferenceEntry[];
   aside?: ReactNode;
+  breadcrumbItems?: BreadcrumbItem[];
 };
 
 export function DocumentView({
@@ -20,22 +25,20 @@ export function DocumentView({
   deck,
   references = [],
   aside,
+  breadcrumbItems,
 }: DocumentViewProps) {
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
-        links={[
-          { href: "/", label: "Home" },
-          { href: "/atlas/", label: "Atlas" },
-          { href: "/scenarios/", label: "Scenarios" },
-          { href: "/policies/", label: "Policies" },
-          { href: "/references/", label: "References" },
-        ]}
+        links={SITE_ROUTES}
         accentLabel="Report / archive"
         motionLabel="Atlas kinetics"
       />
       <HeroScene title={document.title} variant="archive" />
       <article className="document-view site-shell">
+        {breadcrumbItems ? (
+          <Breadcrumb items={breadcrumbItems} current={document.title} />
+        ) : null}
         <header className="document-view__header">
           <div className="eyebrow">{eyebrow}</div>
           <h1 className="headline">{document.title}</h1>

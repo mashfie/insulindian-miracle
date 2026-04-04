@@ -13,11 +13,11 @@ A benchmark policy that selects the arm with the highest *immediate* reward by s
 
 ## Formulation
 
-```
-A(t) = argmax [ compute_reward(k, states_after_adding_pop_to_k) ]
-```
+$$
+A(t) = \arg\max_k \; r\!\left(k,\; s_k^{+}\right)
+$$
 
-For each arm, temporarily increment its population by 1, compute the full reward, then revert. Select the arm yielding the highest reward.
+where $s_k^{+}$ denotes the state of arm $k$ after incrementing its population by 1, and $r(k, s)$ is the true reward function `compute_reward()`. For each candidate arm, the population is temporarily incremented, the full reward is computed, then the state is reverted. The arm yielding the highest immediate reward is selected.
 
 ## Implementation
 
@@ -29,17 +29,33 @@ For each arm, temporarily increment its population by 1, compute the full reward
 
 ## Purpose
 
-Provides an upper bound on single-step-optimal play. Used to compute **oracle regret** in experiments:
+Provides the regret benchmark for all experiments. Oracle regret for policy $\pi$ at step $t$:
 
-```
-regret(t) = oracle_reward(t) − policy_reward(t)
-```
+$$
+\text{regret}_\pi(t) = r_{\text{oracle}}(t) - r_\pi(t)
+$$
 
-> [!note] Not globally optimal
-> The myopic oracle maximises immediate reward, not cumulative reward. A policy that sacrifices short-term reward for better institutions (e.g., avoiding resource-rich extractive sites) could outperform the oracle over the full horizon. This is the core insight of the simulation.
+Cumulative regret:
+
+$$
+R_\pi(T) = \sum_{t=1}^{T} \left[ r_{\text{oracle}}(t) - r_\pi(t) \right]
+$$
+
+> **Not globally optimal.** The myopic oracle maximises immediate reward, not cumulative reward. A policy that sacrifices short-term reward for better institutions (e.g., avoiding resource-rich extractive sites) can outperform the oracle over the full horizon. This is the core insight of the simulation — and empirically, the top policies beat the oracle in every scenario.
+
+## Empirical Performance
+
+The myopic oracle serves as the regret baseline ($R = 0$ by definition). It does not appear in policy rankings. Negative regret for other policies indicates they outperformed this oracle — which occurs frequently, as the oracle's greedy strategy falls into extraction traps and boomtown lures that adaptive policies learn to avoid.
 
 ## Expected Performance
 
 - **Baseline**: Best or near-best (low non-stationarity makes greedy effective)
-- **Resource curse**: Can be outperformed — myopic greed falls into the extraction trap
-- **UCB bait**: Can be outperformed — selects the boomtown during its bonus period
+- **Resource curse**: Vulnerable — myopic greed falls into the extraction trap
+- **UCB bait**: Vulnerable — selects the boomtown during its bonus period
+
+## References
+
+- Auer, P., Cesa-Bianchi, N. & Fischer, P. (2002). Finite-time analysis of the multiarmed bandit problem. *Machine Learning*, 47(2–3), 235–256.
+- Bubeck, S. & Cesa-Bianchi, N. (2012). Regret analysis of stochastic and nonstochastic multi-armed bandit problems. *Foundations and Trends in Machine Learning*, 5(1), 1–122.
+
+[[multi-armed-bandits]] · [[simulation-loop]]

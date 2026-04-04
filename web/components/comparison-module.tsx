@@ -37,13 +37,14 @@ export function ComparisonModule({
     <section className="comparison-card">
       <div className="comparison-card__header">
         <div>
-          <div className="section-kicker">Live Comparison Module</div>
-          <h2 style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>Runtime Compare</h2>
+          <div className="section-kicker">Live Experiment</div>
+          <h2 style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>Policy Comparison</h2>
           <p className="comparison-note">{note}</p>
         </div>
         <button
           type="button"
           aria-live="polite"
+          disabled={isPending}
           onClick={() => {
             startTransition(async () => {
               try {
@@ -62,12 +63,16 @@ export function ComparisonModule({
             });
           }}
         >
-          {isPending ? "Loading..." : "Load Fresh Run"}
+          {isPending ? "Running\u2026" : "Run Comparison"}
         </button>
       </div>
       <div role="status" aria-live="polite">
         {error ? <div className="compare-error">{error}</div> : null}
-        {rows.length ? (
+        {isPending ? (
+          <div className="comparison-card__skeleton">
+            <div /><div /><div />
+          </div>
+        ) : rows.length ? (
           <div className="comparison-card__metrics">
             {rows.map((row) => (
               <div key={row.policy} className="metric-card">
@@ -79,7 +84,7 @@ export function ComparisonModule({
           </div>
         ) : (
           <div className="comparison-note">
-            No live payload loaded yet. Configure <code>NEXT_PUBLIC_COMPARE_API_URL</code> to activate this module.
+            Run a live simulation against the Python backend. Each policy plays the same peninsula, same seed, same institutional dynamics &mdash; only the allocation strategy differs.
           </div>
         )}
       </div>

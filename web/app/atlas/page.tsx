@@ -5,6 +5,7 @@ import {
   getAtlasChapters,
   getAtlasSource,
 } from "@/lib/content/repository";
+import { SITE_ROUTES } from "@/lib/navigation";
 
 export default async function AtlasPage() {
   const source = getAtlasSource();
@@ -13,26 +14,20 @@ export default async function AtlasPage() {
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
-        links={[
-          { href: "/", label: "Home" },
-          { href: "/atlas/", label: "Atlas" },
-          { href: "/scenarios/", label: "Scenarios" },
-          { href: "/policies/", label: "Policies" },
-          { href: "/references/", label: "References" },
-        ]}
+        links={SITE_ROUTES}
         accentLabel="Layered field"
         motionLabel="Atlas kinetics"
       />
       <HeroScene title="Atlas" variant="archive" />
       <article className="site-shell">
         <header className="atlas__header">
-          <div className="eyebrow">Chaptered Map</div>
+          <div className="eyebrow">Field Report</div>
           <h1 className="headline">Atlas</h1>
           <p className="dek">
-            A non-sticky explorable plate derived from the backend terrain model. Each chapter pivots the same peninsula through a different inferential layer.
+            The peninsula as experimental apparatus. Each chapter pivots the same Perlin-noise terrain through a different inferential layer — elevation, hydrology, resource endowment, institutional allocation, settlement outcome.
           </p>
           <p className="lede">
-            Terrain is not a neutral surface. It is already sorted into access, slope, river adjacency, defensive depth, and pockets of extractive promise before policy begins to choose.
+            Terrain is not neutral. It is already sorted into coastal access, river adjacency, defensive depth, and pockets of extractive promise before any algorithm begins to choose. Geography is the prior; institutions are the posterior.
           </p>
         </header>
         {source ? (
