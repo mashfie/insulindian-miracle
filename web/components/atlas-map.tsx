@@ -42,6 +42,18 @@ function downsample(data: number[][], factor: number): number[][] {
   return result;
 }
 
+function downsampleMask(data: boolean[][], factor: number): boolean[][] {
+  const result: boolean[][] = [];
+  for (let y = 0; y < data.length; y += factor) {
+    const row: boolean[] = [];
+    for (let x = 0; x < data[0].length; x += factor) {
+      row.push(data[y][x]);
+    }
+    result.push(row);
+  }
+  return result;
+}
+
 export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const [chapterId, setChapterId] = useState(chapters[0]?.id ?? "terrain");
   const [zoom, setZoom] = useState(1);
@@ -52,9 +64,11 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
   const deferredChapterId = useDeferredValue(chapterId);
   const chapter = chapters.find((entry) => entry.id === deferredChapterId) ?? chapters[0];
 
-  // Elevation is the terrain shape — flip rows so the voxel Z-axis matches
-  // the 2D map orientation (row 0 = top of peninsula = back of isometric view)
+  // Elevation drives terrain shape. Flip rows so the voxel Z-axis matches
+  // the 2D map orientation (row 0 = top of peninsula = back of isometric scene).
+  // landMask is downsampled and flipped in sync so z-index lookups stay aligned.
   const elevationDs = downsample(source.elevation, DOWNSAMPLE_FACTOR).reverse();
+  const landMaskDs = downsampleMask(source.landMask, DOWNSAMPLE_FACTOR).reverse();
   const voxelW = elevationDs[0]?.length ?? 16;
   const voxelH = elevationDs.length;
 
@@ -142,7 +156,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
                 color={COLORS[chapter.layer] ?? COLORS.elevation}
                 overlayData={overlayDs}
                 sites={voxelSites}
-                landMask={source.landMask}
+                landMask={landMaskDs}
               />
             </div>
           </div>

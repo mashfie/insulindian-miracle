@@ -45,9 +45,7 @@ export function VoxelMap({
       test: (x: number, y: number, z: number) => {
         if (x < 0 || x >= width || z < 0 || z >= height) return false;
         if (landMask) {
-          const srcY = Math.min(Math.floor(z * (landMask.length / height)), landMask.length - 1);
-          const srcX = Math.min(Math.floor(x * (landMask[0].length / width)), landMask[0].length - 1);
-          if (!landMask[srcY][srcX]) return false;
+          if (!landMask[z]?.[x]) return false;
         }
         const elev = data[z]?.[x] ?? 0;
         const stackH = Math.floor(elev * maxStack);
@@ -92,7 +90,9 @@ export function VoxelMap({
 
     for (const site of sites) {
       const sx = Math.round(site.x * (width - 1));
-      const sz = Math.round(site.y * (height - 1));
+      // site.y is normalized top-to-bottom in source coords; data rows are
+      // flipped so z=0 is the last source row — mirror the y coordinate
+      const sz = (height - 1) - Math.round(site.y * (height - 1));
       const baseElev = data[sz]?.[sx] ?? 0;
       const baseH = Math.floor(baseElev * maxStack);
 
