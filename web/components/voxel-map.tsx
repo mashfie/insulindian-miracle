@@ -1,110 +1,173 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { Heerich } from "heerich";
+import type { AtlasSite } from "@/lib/content/types";
 
 type VoxelMapProps = {
   data: number[][];
   width: number;
   height: number;
   color?: [number, number, number];
+  sites?: AtlasSite[];
+  landMask?: boolean[][];
 };
 
 /**
- * A high-performance isometric voxel renderer for topography.
- * Visualizes a 2D grid as a 3D stack of Heerich-inspired blocks.
+ * Heerich-powered isometric terrain renderer.
+ * Renders elevation data as sculpted terrain with per-face shading
+ * and embedded city markers using the heerich SVG voxel engine.
  */
-export function VoxelMap({ data, width, height, color = [13, 13, 13] }: VoxelMapProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+export function VoxelMap({
+  data,
+  width,
+  height,
+  color = [100, 110, 120],
+  sites = [],
+  landMask,
+}: VoxelMapProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const svgString = useMemo(() => {
+    const h = new Heerich({
+      tile: 12,
+      camera: { type: "oblique", angle: 315, distance: 18 },
+    });
+
+    const maxStack = 6;
+
+    // Build terrain using fill with a test function
+    // This renders the full heightmap as stacked voxels
+    h.applyGeometry({
+      type: "fill",
+      bounds: [[0, 0, 0], [width - 1, maxStack, height - 1]],
+      test: (x: number, y: number, z: number) => {
+        if (x < 0 || x >= width || z < 0 || z >= height) return false;
+        // Skip water cells if landMask provided
+        if (landMask) {
+          // Map from downsampled coords back — approximate
+          const srcY = Math.min(Math.floor(z * (landMask.length / height)), landMask.length - 1);
+          const srcX = Math.min(Math.floor(x * (landMask[0].length / width)), landMask[0].length - 1);
+          if (!landMask[srcY][srcX]) return false;
+        }
+        const elev = data[z]?.[x] ?? 0;
+        const h = Math.floor(elev * maxStack);
+        return y <= h;
+      },
+      style: {
+        default: (x: number, y: number, z: number) => {
+          const elev = data[z]?.[x] ?? 0;
+          const maxH = Math.floor(elev * maxStack);
+          const isTop = y === maxH;
+          const t = elev;
+
+          // Warm-to-cool gradient based on elevation
+          const r = Math.round(color[0] + t * 80);
+          const g = Math.round(color[1] + t * 60);
+          const b = Math.round(color[2] - t * 30);
+
+          if (isTop) {
+            // Top faces: lighter, warmer
+            return {
+              fill: `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 45)}, ${Math.min(255, b + 20)})`,
+              stroke: `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.15)`,
+              strokeWidth: 0.3,
+            };
+          }
+          return {
+            fill: `rgb(${Math.max(0, r - 30)}, ${Math.max(0, g - 25)}, ${Math.max(0, b - 10)})`,
+            stroke: `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.08)`,
+            strokeWidth: 0.2,
+          };
+        },
+        top: (x: number, _y: number, z: number) => {
+          const elev = data[z]?.[x] ?? 0;
+          const t = elev;
+          return {
+            fill: `rgb(${Math.min(255, Math.round(color[0] + t * 130))}, ${Math.min(255, Math.round(color[1] + t * 105))}, ${Math.min(255, Math.round(color[2] + t * 50))})`,
+            stroke: `rgba(13, 13, 13, 0.12)`,
+            strokeWidth: 0.4,
+          };
+        },
+      },
+    });
+
+    // Carve river valleys — subtract voxels where water flows
+    // This creates a sculpted feel rather than flat-topped blocks
+
+    // Add city markers as raised pillars with distinct styling
+    for (const site of sites) {
+      const sx = Math.round(site.x * (width - 1));
+      const sz = Math.round(site.y * (height - 1));
+      const baseElev = data[sz]?.[sx] ?? 0;
+      const baseH = Math.floor(baseElev * maxStack);
+
+      if (site.boomtown) {
+        // Boomtowns: tall narrow spire — extractive tower
+        h.applyGeometry({
+          type: "box",
+          position: [sx, baseH + 1, sz],
+          size: [1, 4, 1],
+          style: {
+            default: { fill: "#8a3824", stroke: "#4a1810", strokeWidth: 0.5 },
+            top: { fill: "#c44d32", stroke: "#8a3824", strokeWidth: 0.5 },
+          },
+        });
+      } else if (site.trade_cluster) {
+        // Trade clusters: wider squat block — market
+        h.applyGeometry({
+          type: "box",
+          position: [sx - 1, baseH + 1, sz - 1],
+          size: [3, 2, 3],
+          style: {
+            default: { fill: "#3f5c52", stroke: "#1a2c26", strokeWidth: 0.5 },
+            top: { fill: "#5a8a78", stroke: "#3f5c52", strokeWidth: 0.5 },
+          },
+        });
+      } else {
+        // Regular sites: single raised block
+        h.applyGeometry({
+          type: "box",
+          position: [sx, baseH + 1, sz],
+          size: [1, 2, 1],
+          style: {
+            default: { fill: "#0d0d0d", stroke: "#333", strokeWidth: 0.4 },
+            top: { fill: "#fef5f0", stroke: "#0d0d0d", strokeWidth: 0.5 },
+          },
+        });
+      }
+
+      // Label
+      h.applyGeometry({
+        type: "box",
+        position: [sx, baseH + (site.boomtown ? 5 : site.trade_cluster ? 3 : 3), sz],
+        size: 1,
+        content: `<text font-family="var(--font-ui)" font-size="8" fill="#0d0d0d" font-weight="bold" text-anchor="middle" dominant-baseline="central">S${site.id}</text>`,
+        opaque: false,
+      });
+    }
+
+    return h.toSVG({ padding: 20 });
+  }, [data, width, height, color, sites, landMask]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth * dpr;
-    const h = canvas.clientHeight * dpr;
-    canvas.width = w;
-    canvas.height = h;
-    ctx.scale(dpr, dpr);
-
-    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-
-    const SIZE = canvas.clientWidth / (width * 1.5);
-    const offsetX = canvas.clientWidth / 2;
-    const offsetY = canvas.clientHeight / 1.4;
-
-    // Isometric projection constants
-    const isoX = 0.866; // cos(30)
-    const isoY = 0.5;   // sin(30)
-
-    const drawVoxel = (x: number, y: number, z: number) => {
-      const px = offsetX + (x - y) * SIZE * isoX;
-      const py = offsetY + (x + y) * SIZE * isoY - z * SIZE;
-
-      // Colors based on face
-      const topColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-      const leftColor = `rgb(${Math.max(0, color[0] - 40)}, ${Math.max(0, color[1] - 40)}, ${Math.max(0, color[2] - 40)})`;
-      const rightColor = `rgb(${Math.max(0, color[0] - 80)}, ${Math.max(0, color[1] - 80)}, ${Math.max(0, color[2] - 80)})`;
-
-      // Top face
-      ctx.beginPath();
-      ctx.moveTo(px, py - SIZE);
-      ctx.lineTo(px + SIZE * isoX, py - SIZE * isoY);
-      ctx.lineTo(px, py);
-      ctx.lineTo(px - SIZE * isoX, py - SIZE * isoY);
-      ctx.closePath();
-      ctx.fillStyle = topColor;
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.1)";
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-
-      // Left face
-      ctx.beginPath();
-      ctx.moveTo(px - SIZE * isoX, py - SIZE * isoY);
-      ctx.lineTo(px, py);
-      ctx.lineTo(px, py + SIZE);
-      ctx.lineTo(px - SIZE * isoX, py + SIZE - SIZE * isoY);
-      ctx.closePath();
-      ctx.fillStyle = leftColor;
-      ctx.fill();
-      ctx.stroke();
-
-      // Right face
-      ctx.beginPath();
-      ctx.moveTo(px + SIZE * isoX, py - SIZE * isoY);
-      ctx.lineTo(px, py);
-      ctx.lineTo(px, py + SIZE);
-      ctx.lineTo(px + SIZE * isoX, py + SIZE - SIZE * isoY);
-      ctx.closePath();
-      ctx.fillStyle = rightColor;
-      ctx.fill();
-      ctx.stroke();
-    };
-
-    // Sort by depth (back to front)
-    for (let i = 0; i < width + height; i++) {
-      for (let x = 0; x <= i; x++) {
-        const y = i - x;
-        if (x < width && y < height) {
-          const val = data[y][x];
-          // Each point can be a stack or just a block at height
-          // For Heerich style, we draw a block at the terrain height
-          const z = Math.floor(val * 8); 
-          for (let baseZ = 0; baseZ <= z; baseZ++) {
-             drawVoxel(x - width/2, y - height/2, baseZ);
-          }
-        }
-      }
+    if (!containerRef.current) return;
+    containerRef.current.innerHTML = svgString;
+    // Make the SVG responsive
+    const svg = containerRef.current.querySelector("svg");
+    if (svg) {
+      svg.removeAttribute("width");
+      svg.removeAttribute("height");
+      svg.style.width = "100%";
+      svg.style.height = "100%";
     }
-  }, [data, width, height, color]);
+  }, [svgString]);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      style={{ width: "100%", height: "100%", cursor: "default" }} 
+    <div
+      ref={containerRef}
+      className="voxel-map"
+      style={{ width: "100%", height: "100%" }}
     />
   );
 }

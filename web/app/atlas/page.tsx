@@ -5,6 +5,7 @@ import {
   getAtlasChapters,
   getAtlasSource,
 } from "@/lib/content/repository";
+import { SITE_ROUTES } from "@/lib/navigation";
 
 export default async function AtlasPage() {
   const source = getAtlasSource();
@@ -13,13 +14,7 @@ export default async function AtlasPage() {
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
-        links={[
-          { href: "/", label: "Home" },
-          { href: "/atlas/", label: "Atlas" },
-          { href: "/scenarios/", label: "Scenarios" },
-          { href: "/policies/", label: "Policies" },
-          { href: "/references/", label: "References" },
-        ]}
+        links={SITE_ROUTES}
         accentLabel="Layered field"
         motionLabel="Atlas kinetics"
       />

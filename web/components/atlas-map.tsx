@@ -136,7 +136,6 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             type="button"
             data-active={entry.id === chapter.id}
             onClick={() => handleChapterChange(entry.id)}
-            style={{ fontFamily: "var(--font-heading)", letterSpacing: "0.05em" }}
           >
             {entry.title.toUpperCase()}
           </button>
@@ -145,65 +144,40 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
       <div className="atlas__grid">
         <div
           ref={viewportRef}
-          className="atlas__viewport"
-          style={{ 
-            background: "var(--paper)", 
-            position: "relative",
-            overflow: "hidden",
-            border: "2px solid var(--ink)",
-            cursor: isDragging ? "grabbing" : "grab",
-            boxShadow: "inset 0 0 100px rgba(0,0,0,0.05)"
-          }}
+          className={`atlas__viewport${isDragging ? " is-dragging" : ""}`}
           onWheel={handleWheel}
           onPointerDown={handlePointerDown}
         >
           {/* Paper Grain Overlay */}
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0.04,
-            pointerEvents: "none",
-            background: "url('https://www.transparenttextures.com/patterns/felt.png')"
-          }} />
+          <div className="atlas__grain" />
 
           <div
-            style={{
-              transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-              transformOrigin: "50% 50%",
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }}
+            className="atlas__zoom-layer"
+            style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }}
           >
-            <div style={{ position: "relative", width: source.width * 10, height: source.height * 10 }}>
+            <div className="atlas__canvas-wrap" style={{ width: source.width * 10, height: source.height * 10 }}>
               {isVoxelView ? (
-                <VoxelMap 
-                  data={downsample(source.elevation, 2)} 
-                  width={32} 
-                  height={32} 
-                  color={[100, 110, 120]} 
+                <VoxelMap
+                  data={downsample(source.elevation, 4)}
+                  width={16}
+                  height={16}
+                  color={[140, 130, 115]}
+                  sites={source.sites}
+                  landMask={source.landMask}
                 />
               ) : (
                 <canvas
                   ref={canvasRef}
+                  className="atlas__canvas"
                   width={source.width}
                   height={source.height}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    imageRendering: "pixelated",
-                    position: "absolute",
-                    inset: 0,
-                  }}
                 />
               )}
 
               {/* Blueprint SVG Overlays */}
-              <svg 
-                viewBox={`0 0 ${source.width} ${source.height}`} 
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+              <svg
+                className="atlas__overlay-svg"
+                viewBox={`0 0 ${source.width} ${source.height}`}
               >
                 {/* Coastline */}
                 {!isVoxelView && chapter.overlays.includes("coast") && source.coastMask.map((row, y) =>
@@ -263,25 +237,25 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             </div>
           </div>
         </div>
-        <aside className="atlas__narrative" style={{ padding: "2rem", border: "2px solid var(--ink)", background: "var(--paper)" }}>
-          <div className="kicker" style={{ fontFamily: "var(--font-heading)" }}>ATLAS CHAPTER</div>
-          <h2 style={{ fontSize: "3rem", marginBottom: "1.5rem", lineHeight: "0.9" }}>{chapter.title.toUpperCase()}</h2>
-          <p style={{ fontSize: "1.2rem", lineHeight: "1.6" }}>{chapter.narrative}</p>
-          <ul className="atlas__site-list" style={{ marginTop: "2rem", listStyle: "none", padding: 0 }}>
+        <aside className="atlas__narrative">
+          <div className="section-kicker">ATLAS CHAPTER</div>
+          <h2 className="atlas__chapter-title">{chapter.title.toUpperCase()}</h2>
+          <p className="atlas__chapter-narrative">{chapter.narrative}</p>
+          <ul className="atlas__site-list">
             {chapter.linkedSites.map((siteId) => {
               const site = source.sites.find((entry) => entry.id === siteId);
               if (!site) return null;
               return (
-                <li key={site.id} style={{ marginBottom: "1rem", borderBottom: "1px solid var(--line)", paddingBottom: "0.5rem" }}>
-                  <strong style={{ fontFamily: "var(--font-heading)" }}>SITE {site.id}</strong> — 
-                  <span style={{ fontSize: "0.9rem", marginLeft: "0.5rem", color: "var(--ink-soft)" }}>
+                <li key={site.id} className="atlas__site-item">
+                  <strong className="atlas__site-label">SITE {site.id}</strong> —
+                  <span className="atlas__site-type">
                     {site.boomtown ? "EXTRACTIVE BOOMTOWN" : site.trade_cluster ? "TRADE CLUSTER" : "STABLE CANDIDATE"}
                   </span>
                 </li>
               );
             })}
           </ul>
-          <p className="comparison-note" style={{ marginTop: "3rem", opacity: 0.6, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          <p className="atlas__draft-note">
             Drafting Grid v4.0 // Scale 1:15000 // Multi-Layered Inference
           </p>
         </aside>

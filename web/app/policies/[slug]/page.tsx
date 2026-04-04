@@ -35,6 +35,10 @@ export default async function PolicyDetailPage({
       eyebrow="Policy Dossier"
       deck={page.archive.dek}
       references={references}
+      breadcrumbItems={[
+        { href: "/", label: "Home" },
+        { href: "/policies/", label: "Policies" },
+      ]}
       aside={
         page.evidenceScenario ? (
           <ComparisonModule

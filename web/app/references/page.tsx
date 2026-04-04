@@ -1,6 +1,7 @@
 import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
 import { HeroScene } from "@/components/hero-scene";
 import { getReferenceEntries } from "@/lib/content/repository";
+import { SITE_ROUTES } from "@/lib/navigation";
 
 export default async function ReferencesPage() {
   const references = await getReferenceEntries();
@@ -12,15 +13,9 @@ export default async function ReferencesPage() {
   }, {});
 
   return (
-    <main className="archive-page" data-variant="archive">
+    <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
-        links={[
-          { href: "/", label: "Home" },
-          { href: "/atlas/", label: "Atlas" },
-          { href: "/scenarios/", label: "Scenarios" },
-          { href: "/policies/", label: "Policies" },
-          { href: "/references/", label: "References" },
-        ]}
+        links={SITE_ROUTES}
         accentLabel="Annotation / citation"
         motionLabel="Atlas kinetics"
       />
@@ -35,7 +30,7 @@ export default async function ReferencesPage() {
         </header>
         {Object.entries(grouped).map(([category, items]) => (
           <section key={category} className="section-full section-block">
-            <div className="kicker">Reference group</div>
+            <div className="section-kicker">Reference group</div>
             <h2 style={{ fontSize: "2.5rem" }}>{category}</h2>
             <div className="reference-grid">
               {items.map((reference) => (

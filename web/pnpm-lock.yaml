@@ -14,6 +14,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      heerich:
+        specifier: ^0.9.0
+        version: 0.9.0
       katex:
         specifier: ^0.16.25
         version: 0.16.44
@@ -1246,6 +1249,9 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
+
+  heerich@0.9.0:
+    resolution: {integrity: sha512-b51x0f7TI7pxHu2vioc+5XcbUXe9HmGklWSBZ+7zb7Obpfg2lOV5JSEXpmwy+wIW2KNk38gB0xasVaJrkAHLVQ==}
 
   hermes-estree@0.25.1:
     resolution: {integrity: sha512-0wUoCcLp+5Ev5pDW2OriHC2MJCbwLwuRx+gAqMTOkGKJJiBCLjtrvy4PWUGn6MIVefecRpzoOZ/UV6iGdOr+Cw==}
@@ -3508,6 +3514,8 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
+
+  heerich@0.9.0: {}
 
   hermes-estree@0.25.1: {}
 

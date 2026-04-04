@@ -5,6 +5,7 @@ import { HeroScene } from "@/components/hero-scene";
 import { ProseHtml } from "@/components/prose-html";
 import { SectionNav } from "@/components/section-nav";
 import type { ArchivePage, ReferenceEntry } from "@/lib/content/types";
+import { SITE_ROUTES } from "@/lib/navigation";
 
 type HomeViewProps = {
   archive: ArchivePage;
@@ -19,13 +20,7 @@ export function HomeView({
   visuals,
   variant = "archive",
 }: HomeViewProps) {
-  const routeLinks = [
-    { href: "/", label: "Home" },
-    { href: "/atlas/", label: "Atlas" },
-    { href: "/scenarios/", label: "Scenarios" },
-    { href: "/policies/", label: "Policies" },
-    { href: "/references/", label: "References" },
-  ];
+  const routeLinks = SITE_ROUTES;
 
   return (
     <main id="main-content" className="archive-page" data-variant={variant}>
@@ -132,12 +127,18 @@ export function HomeView({
                 </article>
               ))}
             </div>
-            <div className="footer-links" style={{ marginTop: "1.2rem" }}>
+          </div>
+          <div className="site-footer__colophon">
+            <div className="site-footer__identity">Insulindian Miracle Archive</div>
+            <div className="footer-links">
               {routeLinks.map((link) => (
                 <a key={link.href} className="route-link" href={link.href}>
                   {link.label}
                 </a>
               ))}
+            </div>
+            <div className="site-footer__tagline">
+              An editorial exhibition on city formation and multi-armed bandits.
             </div>
           </div>
         </footer>

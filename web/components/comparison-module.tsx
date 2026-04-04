@@ -44,6 +44,7 @@ export function ComparisonModule({
         <button
           type="button"
           aria-live="polite"
+          disabled={isPending}
           onClick={() => {
             startTransition(async () => {
               try {
@@ -62,12 +63,16 @@ export function ComparisonModule({
             });
           }}
         >
-          {isPending ? "Loading..." : "Load Fresh Run"}
+          {isPending ? "Running\u2026" : "Run Comparison"}
         </button>
       </div>
       <div role="status" aria-live="polite">
         {error ? <div className="compare-error">{error}</div> : null}
-        {rows.length ? (
+        {isPending ? (
+          <div className="comparison-card__skeleton">
+            <div /><div /><div />
+          </div>
+        ) : rows.length ? (
           <div className="comparison-card__metrics">
             {rows.map((row) => (
               <div key={row.policy} className="metric-card">
@@ -79,7 +84,7 @@ export function ComparisonModule({
           </div>
         ) : (
           <div className="comparison-note">
-            No live payload loaded yet. Configure <code>NEXT_PUBLIC_COMPARE_API_URL</code> to activate this module.
+            No comparison data loaded. Press &ldquo;Run Comparison&rdquo; to fetch a fresh experimental run against the Python backend.
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
 import { HeroScene } from "@/components/hero-scene";
+import { SITE_ROUTES } from "@/lib/navigation";
 
 type CatalogItem = {
   href: string;
@@ -24,13 +25,7 @@ export function CatalogGrid({
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
       <ArchiveSettingsPanel
-        links={[
-          { href: "/", label: "Home" },
-          { href: "/atlas/", label: "Atlas" },
-          { href: "/scenarios/", label: "Scenarios" },
-          { href: "/policies/", label: "Policies" },
-          { href: "/references/", label: "References" },
-        ]}
+        links={SITE_ROUTES}
         accentLabel="Paper / ink"
         motionLabel="Atlas kinetics"
       />
