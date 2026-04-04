@@ -88,7 +88,13 @@ export function TrendFigure({
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
-        <path d="M28 36V212H392" stroke="var(--line)" strokeWidth="1" />
+        <path d="M28 36V212H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        {[0, 1, 2, 3].map((s) => {
+          const y = 52 + s * 40;
+          return (
+            <path key={s} d={`M28 ${y}H392`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
+          );
+        })}
         {area && <path d={area} fill={accent} opacity="0.10" />}
         {points && (
           <polyline
@@ -99,9 +105,6 @@ export function TrendFigure({
             vectorEffect="non-scaling-stroke"
           />
         )}
-        <text x="24" y="216" textAnchor="end" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">{min.toFixed(1)}</text>
-        <text x="24" y="40" textAnchor="end" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">{max.toFixed(1)}</text>
-        <text x="392" y="228" textAnchor="end" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">T={values.length}</text>
       </svg>
       <FigureMeta figure={figure} iteration={step} />
     </figure>
@@ -135,7 +138,7 @@ export function ComparisonBars({
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
-        <path d="M84 24V210H392" stroke="var(--line)" strokeWidth="1" />
+        <path d="M84 24V210H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
         {items.map((item, index) => {
           const y = 42 + index * 40;
           const width = (item.value / max) * 280 * progress;
@@ -157,7 +160,7 @@ export function ComparisonBars({
                 x={100 + width}
                 y={y + 15}
                 fill="rgba(19,19,19,0.78)"
-                fontFamily="var(--font-data)"
+                fontFamily="var(--font-ui)"
                 fontSize="12"
               >
                 {(item.value * progress).toFixed(1)}
@@ -205,9 +208,7 @@ export function OutcomeScatter({
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
-        <path d="M42 24V212H388" stroke="var(--line)" strokeWidth="1" />
-        <text x="215" y="232" textAnchor="middle" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">Resource Rent</text>
-        <text x="12" y="118" textAnchor="middle" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9" transform="rotate(-90 12 118)">Population</text>
+        <path d="M42 24V212H388" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
         {points.slice(0, visibleCount).map((point, i) => {
           const cx = 42 + ((point.x - xExtent.min) / (xExtent.max - xExtent.min)) * 346;
           const cy = 212 - ((point.y - yExtent.min) / (yExtent.max - yExtent.min)) * 188;
@@ -218,8 +219,8 @@ export function OutcomeScatter({
                 cx={cx}
                 cy={cy}
                 r={point.boomtown ? 6.2 : 4.6}
-                fill={point.boomtown ? "#9e3a22" : "#4a5f78"}
-                stroke={point.boomtown ? "#5a2010" : "#2a3a48"}
+                fill={point.boomtown ? "#8a3824" : "#4a6a7a"}
+                stroke={point.boomtown ? "#4a1810" : "#2a3a48"}
                 strokeWidth="1.5"
                 opacity="0.88"
               />
@@ -227,7 +228,7 @@ export function OutcomeScatter({
                 x={cx + 8}
                 y={cy - 8}
                 fill="var(--ink)"
-                fontFamily="var(--font-data)"
+                fontFamily="var(--font-ui)"
                 fontSize="10"
                 fontWeight="bold"
               >
@@ -317,7 +318,13 @@ export function RewardTrajectory({
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
-        <path d="M42 24V210H388" stroke="var(--line)" strokeWidth="1" />
+        <path d="M42 24V210H388" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        {[0, 1, 2, 3].map((s) => {
+          const y = 40 + s * 42;
+          return (
+            <path key={s} d={`M42 ${y}H388`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
+          );
+        })}
         {series.map((s) => {
           const cumMean: number[] = [];
           const cumUpper: number[] = [];
@@ -345,28 +352,27 @@ export function RewardTrajectory({
             .map((v, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(v)}`)
             .join(" ");
 
-          const lastY = cumMean.length > 0 ? toY(cumMean[cumMean.length - 1]) : 0;
-          const lastX = cumMean.length > 0 ? toX(cumMean.length - 1) : 0;
-
           return (
             <g key={s.label}>
               <path d={bandPath} fill={s.color} opacity="0.12" />
               <path d={linePath} fill="none" stroke={s.color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
-              {cumMean.length > 0 && step >= maxLen && (
-                <text x={lastX + 4} y={lastY} fill={s.color} fontFamily="var(--font-ui)" fontSize="9" dominantBaseline="middle">{s.label}</text>
-              )}
             </g>
           );
         })}
-        <text x="38" y="214" textAnchor="end" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">{min.toFixed(0)}</text>
-        <text x="38" y="28" textAnchor="end" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">{max.toFixed(0)}</text>
-        <text x="388" y="224" textAnchor="end" fill="var(--ink-faint)" fontFamily="var(--font-data)" fontSize="9">T={maxLen}</text>
       </svg>
       <div className="figure-meta">
         <span>{figure.title}</span>
         <span>T={step}</span>
       </div>
       <p className="figure-caption">{figure.caption}</p>
+      <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", marginTop: "0.5rem", fontSize: "0.75rem", fontFamily: "var(--font-ui)", letterSpacing: "0.05em" }}>
+        {series.map((s) => (
+          <span key={s.label} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ width: 12, height: 3, background: s.color, display: "inline-block" }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
     </figure>
   );
 }
@@ -404,7 +410,7 @@ export function PolicyRankingBars({
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
-        <path d="M100 16V224H392" stroke="var(--line)" strokeWidth="1" />
+        <path d="M100 16V224H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
         {oracle !== undefined ? (
           <>
             <line
@@ -458,7 +464,7 @@ export function PolicyRankingBars({
                 x={106 + width}
                 y={y + barHeight / 2 + 4}
                 fill="rgba(19,19,19,0.78)"
-                fontFamily="var(--font-data)"
+                fontFamily="var(--font-ui)"
                 fontSize="11"
               >
                 {(item.value * progress).toFixed(0)}
@@ -490,7 +496,7 @@ export function StatsTable({
           {rows.map((row) => (
             <tr key={row.label}>
               <th style={{ fontFamily: "var(--font-ui)", letterSpacing: "0.05em" }}>{row.label.toUpperCase()}</th>
-              <td style={{ fontFamily: "var(--font-data)", fontWeight: "bold", fontVariantNumeric: "tabular-nums" }}>{formatMetric(row.value, row.format)}</td>
+              <td style={{ fontWeight: "bold" }}>{formatMetric(row.value, row.format)}</td>
             </tr>
           ))}
         </tbody>
