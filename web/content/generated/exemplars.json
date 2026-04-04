@@ -1,268 +1,100 @@
 {
   "meta": {
-    "generated_at": "2026-04-01",
-    "voice": "ML scientist / computational social scientist with k-punk pressure, sparse first-person, and liberal institutional optimism.",
+    "generated_at": "2026-04-04",
+    "voice": "Computational social scientist with k-punk editorial sensibility. Precise, institutional, analytically cold, but willing to let structural critique carry emotional weight. Not Verso house style. A field report written by someone who reads Fisher.",
     "source_files": [
       "docs/index.md",
-      "docs/scenarios/ucb-bait.md",
-      "docs/theory/institutional-economics.md",
-      "docs/theory/resource-curse.md",
-      "docs/theory/multi-armed-bandits.md",
-      "docs/theory/restless-bandits.md",
-      "docs/theory/urban-economics.md",
-      "docs/theory/hypotheses.md",
-      "docs/policies/ucb1.md",
-      "docs/policies/thompson-sampling.md",
-      "docs/policies/whittle-index.md",
+      "docs/scenarios/*.md",
+      "docs/theory/*.md",
+      "docs/policies/*.md",
       "docs/system/reward-function.md",
       "docs/system/institutional-dynamics.md",
-      "results/ucb-bait-boomtown-v4.json",
-      "results/whittle-run.json",
-      "research/index.json",
-      "research/reading-order.md"
-    ],
-    "personal_context_used": [
-      "JCPOA collapse witnessed from Weimar",
-      "Iranian future narrowed by poverty, sanctions, and rial collapse",
-      "Tehran as beloved big-city liberal enclave",
-      "Hauntology / Burial register",
-      "Gallery-hopping, techno, Schubert, Sadr highway, brutalism, coffee, German high culture",
-      "Acemoglu-style institutional seriousness and first-person presence where earned"
-    ],
-    "result_tensions": [
-      "Hypothesis H7 predicts UCB1 should be most trapped in UCB Bait, but v4 aggregate results instead show gaussian-thompson highest cumulative reward, whittle-index lowest boomtown share, and epsilon-greedy lowest cumulative reward.",
-      "The boomtown is not a simple arm to avoid: the oracle still allocates 0.116 of selections there, close to UCB1 at 0.111 and gaussian-thompson at 0.120."
+      "web/content/source/results/*.json",
+      "research/index.json"
     ]
   },
   "landing_page": {
     "slug": "landing",
     "title": "Insulindian Miracle",
-    "dek": "A technical exhibition about settlement, institutions, and the problem of learning which cities still deserve belief.",
-    "lede": "I came to this model through a lost urban future: Weimar when the JCPOA failed, Tehran in memory as a dense liberal enclave, and Iran afterward as a country where the rial kept teaching the same lesson about rents, closure, and stolen time. Insulindian Miracle turns that pressure into a formal question. On a procedurally generated peninsula with fifteen candidate sites, can a planner learn the difference between a place that pays quickly and a place that can actually become a city?",
+    "dek": "A computational archive on city formation, institutional drift, and the resource curse — implemented as a multi-armed bandit over candidate settlement sites on a procedurally generated peninsula.",
+    "lede": "In Disco Elysium there is a thought called the Insulindian Miracle — a poem about a future that was supposed to arrive but didn't, and a printing machine that was supposed to produce it. The miracle is that the machine keeps running. This archive is that machine. On a procedurally generated peninsula with fifteen candidate sites, ten allocation policies, and nine scenarios drawn from real economic history, it asks a question that sounds technical but isn't: can a planner learn the difference between a place that pays quickly and a place that can actually become a city?",
     "reference_ids": [
       "henderson1974cities",
       "krugman1991geography",
       "sachs1995resourcegrowth",
       "ross1999resourcecurse",
-      "lattimore2020bandit"
+      "lattimore2020bandit",
+      "acemoglu2001colonial"
     ],
     "sections": [
       {
-        "id": "problem",
+        "id": "peninsula",
         "title": "The Peninsula As A Political Economy",
         "paragraphs": [
-          "The repo defines the project as a computational research testbed for city formation, institutional dynamics, and the resource curse, implemented as a multi-armed bandit over candidate settlement sites. Each site is both an arm and a political economy.",
-          "The key distinction is structural: geography is not the same thing as extractable resource rent. The model separates the durable conditions for city growth from the short-run temptation of cashflow."
-        ],
-        "grounding": {
-          "docs": [
-            "docs/index.md",
-            "docs/theory/resource-curse.md"
-          ],
-          "results": [],
-          "references": [
-            "lattimore2020bandit",
-            "sachs1995resourcegrowth"
-          ],
-          "personal_context": []
-        }
+          "The simulation generates a Perlin-noise peninsula — elevation, hydrology, coastal access, soil quality — and selects fifteen candidate settlement sites. Each site is both an arm in a multi-armed bandit and a small political economy: it has geography, resources, institutions, capital, and a population that grows or shrinks depending on investment. The planner selects one site per step. The selected site receives investment; all sites evolve.",
+          "The key distinction is structural. Geography — elevation, accessibility, coastal position — is durable. Resource rent is extractable but depleting. Institutional quality is endogenous: it responds to investment, reform pressure, shocks, and the resource curse. A site can look optimal today and become a trap tomorrow. The signal changes under the planner's hand."
+        ]
       },
       {
-        "id": "city",
-        "title": "Why The City Still Matters",
+        "id": "forgetting",
+        "title": "Forgetting Is The Strongest Form Of Intelligence",
         "paragraphs": [
-          "The urban theory is clear: agglomeration, accessibility, network spillovers, congestion, and metropolitan overstretch are all encoded directly in the reward function. The project is closer to Henderson and Krugman than to any startup myth about frictionless growth.",
-          "That is why the city remains the unit of desire here. Tehran mattered because density changed the available forms of life. The model does not simulate galleries, techno, Schubert, or the concrete drama of Sadr Highway, but it does model the institutional preconditions that let urban complexity survive."
-        ],
-        "grounding": {
-          "docs": [
-            "docs/theory/urban-economics.md",
-            "docs/system/reward-function.md"
-          ],
-          "results": [],
-          "references": [
-            "henderson1974cities",
-            "krugman1991geography"
-          ],
-          "personal_context": [
-            "Tehran as liberal enclave",
-            "Gallery-hopping, techno, Schubert, Sadr highway, brutalism"
-          ]
-        }
+          "Across 1,080 simulation runs (9 scenarios, 10 policies, 12 runs each), one result dominates: Sliding-Window UCB wins or ties for first in 7 of 9 scenarios. It beats the omniscient oracle in every scenario. The mechanism is forgetting. SW-UCB maintains a fixed-length window of recent observations and discards everything older. In a world where arms decay under use, this is not a limitation — it is the correct epistemology.",
+          "The oracle computes the myopic optimum at each step using perfect information. But myopic omniscience cannot see institutional trajectories. SW-UCB's sliding window lets it forget the high early returns of a decaying arm, detect the post-reform recovery of a shocked site, and reallocate investment before the oracle can. In the resource-curse scenario, SW-UCB scores 2357 against the oracle's 1129 — more than double. Forgetting what was true yesterday is how you learn what is true now."
+        ]
       },
       {
-        "id": "restless",
-        "title": "A Planner Changes The World By Touching It",
+        "id": "cities",
+        "title": "The Algorithm Builds The City It Deserves",
         "paragraphs": [
-          "This is not a stationary bandit. Every site evolves every step. Extraction drifts, capital builds or erodes, openness converges toward network participation, and shocks can land anywhere. The selected site is pressed harder by extraction and depletion precisely because it is being used.",
-          "That makes the archive a study in timing. The planner is not looking for one true city but for the moment when a reward signal is still an opening rather than the afterimage of a future already being consumed."
-        ],
-        "grounding": {
-          "docs": [
-            "docs/theory/restless-bandits.md",
-            "docs/system/institutional-dynamics.md"
-          ],
-          "results": [],
-          "references": [
-            "whittle1988restless",
-            "levine2017rotting"
-          ],
-          "personal_context": [
-            "Hauntology / Burial register"
-          ]
-        }
+          "Policy choice doesn't just affect cumulative reward — it determines urban morphology. UCB1's optimistic averaging concentrates investment in whichever site had high early returns, producing Zipf slopes of -1.6 to -2.8: extreme primate cities. Whittle's spatial intelligence distributes investment across the network, producing slopes of -0.3 to -0.8: polycentric systems. In the balanced-urban scenario, UCB1 builds a Zipf slope of -2.80 (steepest primacy in the suite) in an environment explicitly designed to reward polycentrism.",
+          "The simulation encodes Henderson's insight that there exists an optimal degree of urban concentration — and then shows that most allocation algorithms systematically miss it. Only policies with either spatial awareness (Whittle) or temporal awareness (SW-UCB) converge on the polycentric equilibria that the reward function favours."
+        ]
       },
       {
-        "id": "measured",
-        "title": "The First Plate Already Suggests A Form",
+        "id": "curse",
+        "title": "The Same Resources, Opposite Futures",
         "paragraphs": [
-          "The single `whittle-run.json` plate is useful as an image of system form. On seed 7, cumulative reward is 1041.825. Final populations lie between 17 and 25 across all fifteen sites, max final extraction is about 0.272, and max openness is about 0.393.",
-          "That is not proof that Whittle is always best. It is evidence that the archive is interested in settlement systems, not just single winners."
-        ],
-        "grounding": {
-          "docs": [
-            "docs/policies/whittle-index.md",
-            "docs/theory/urban-economics.md"
-          ],
-          "results": [
-            "results/whittle-run.json"
-          ],
-          "references": [
-            "akbarzadeh2020whittle"
-          ],
-          "personal_context": []
-        }
+          "The resource-curse and Botswana scenarios share the same underlying resource endowment. The only difference is institutional parameters: initial openness, extraction bias, curse buffers. The result is a 4x divergence in top-policy reward (SW-UCB: 5513 in Botswana vs 2357 in resource-curse) and a qualitative shift in institutional dynamics. In Botswana, extraction converges to 0.002 and openness to 1.000 across all policies. In the resource curse, extraction ranges from 0.09 to 0.21 — no algorithm fully escapes.",
+          "This is Mehlum, Moene and Torvik's conditional curse made computational. Below the institutional threshold, additional resources reduce growth. Above it, resources augment growth. The simulation's most striking confirmation: institutions dominate resource endowment so completely that identical geography produces opposite trajectories."
+        ]
       },
       {
         "id": "normative",
         "title": "Against Fatalism",
         "paragraphs": [
-          "Under the technical language sits a liberal wager: extractive institutions may produce immediate reward, but inclusive institutions are the only ones that convert geography, openness, and public investment into durable growth. The docs state the Acemoglu and Robinson distinction directly.",
-          "A haunted tone is warranted. Fatalism is not. The model works only because reform remains possible and because not every rich site has to become a rentier trap."
-        ],
-        "grounding": {
-          "docs": [
-            "docs/theory/institutional-economics.md",
-            "docs/theory/resource-curse.md"
-          ],
-          "results": [],
-          "references": [
-            "acemoglu2001colonial",
-            "ross1999resourcecurse"
-          ],
-          "personal_context": [
-            "Against anti-liberalism; wants liberal optimism beneath rigor"
-          ]
-        }
+          "Under the technical language sits a structural wager: extractive institutions produce immediate reward, but inclusive institutions are the only ones that convert geography, openness, and public investment into durable growth. The shock-reform scenario tests this directly — exogenous shocks destroy short-term wealth but open reform windows that, in institutionally ready sites, produce permanent improvement. SW-UCB scores 3470 against the oracle's 3122 because it is willing to return to shocked sites after reform, while the oracle's myopic abandonment forfeits the post-crisis dividend.",
+          "The archive is trying to keep two incompatible things visible at once: the lure of extractive acceleration and the slow institutional cost it conceals. Reform remains possible. Not every rich site has to become a rentier trap. But the model shows exactly how narrow the path is, and how few algorithms find it."
+        ]
       }
     ],
     "pull_quotes": [
       {
-        "quote": "A site is not just an arm. It is a theory of what a city could still become.",
-        "grounding": {
-          "docs": [
-            "docs/theory/multi-armed-bandits.md",
-            "docs/theory/urban-economics.md"
-          ],
-          "results": [],
-          "references": [
-            "lattimore2020bandit",
-            "henderson1974cities"
-          ],
-          "personal_context": []
-        }
+        "quote": "Forgetting what was true yesterday is how you learn what is true now."
       },
       {
-        "quote": "The planner changes the world by touching it; the signal cannot be treated as innocent.",
-        "grounding": {
-          "docs": [
-            "docs/theory/restless-bandits.md",
-            "docs/system/institutional-dynamics.md"
-          ],
-          "results": [],
-          "references": [
-            "whittle1988restless"
-          ],
-          "personal_context": []
-        }
+        "quote": "The algorithm builds the city it deserves. UCB1 builds primate cities; Whittle builds republics."
       },
       {
-        "quote": "I wanted the city back, but not as nostalgia. I wanted a model that could say why some futures stay open and others collapse into rent.",
-        "grounding": {
-          "docs": [
-            "docs/index.md",
-            "docs/theory/institutional-economics.md"
-          ],
-          "results": [],
-          "references": [
-            "ross1999resourcecurse"
-          ],
-          "personal_context": [
-            "Weimar, JCPOA collapse, Tehran as urban horizon"
-          ]
-        }
+        "quote": "The trap is not that the boomtown is fake. The trap is that it is partly real."
       }
     ],
     "figure_captions": [
       {
         "id": "reward-decomposition",
-        "caption": "Reward is an engineered conflict between geography, resource payoff, extractive cashflow, inclusive growth, reinvestment, secondary-city dividend, and network spillover, with congestion, overstretch, reform cost, and boomtown collapse pushing back.",
-        "grounding": {
-          "docs": [
-            "docs/system/reward-function.md"
-          ],
-          "results": [],
-          "references": [],
-          "personal_context": []
-        }
+        "caption": "Reward is an engineered conflict between geography, resource payoff, extractive cashflow, inclusive growth, reinvestment, secondary-city dividend, and network spillover — with congestion, overstretch, reform cost, and boomtown collapse pushing back."
       },
       {
-        "id": "whittle-plate",
-        "caption": "The recorded Whittle plate on seed 7 reaches cumulative reward 1041.825 while keeping all final site populations inside a 17-25 band: polycentric discipline rather than jackpot urbanism.",
-        "grounding": {
-          "docs": [
-            "docs/policies/whittle-index.md"
-          ],
-          "results": [
-            "results/whittle-run.json"
-          ],
-          "references": [
-            "akbarzadeh2020whittle"
-          ],
-          "personal_context": []
-        }
-      },
-      {
-        "id": "reading-order",
-        "caption": "The reading order begins with Lattimore, Russo, Henderson, Sachs, and Ross: regret, posterior learning, cities, and the resource curse in one argumentative chain.",
-        "grounding": {
-          "docs": [],
-          "results": [],
-          "references": [
-            "lattimore2020bandit",
-            "russo2018thompson",
-            "henderson1974cities",
-            "sachs1995resourcegrowth",
-            "ross1999resourcecurse"
-          ],
-          "personal_context": []
-        }
+        "id": "policy-ranking",
+        "caption": "Across 9 scenarios and 12 runs each, SW-UCB dominates: first or tied-first in 7 of 9 scenarios, beating the oracle in every one. Whittle excels in network scenarios and collapses in resource traps."
       },
       {
         "id": "institutional-loop",
-        "caption": "The core loop is path dependence made operational: high extraction lifts short-run payoff, weakens crisis pressure, delays reform, and raises extraction again on the next step.",
-        "grounding": {
-          "docs": [
-            "docs/theory/institutional-economics.md",
-            "docs/system/institutional-dynamics.md"
-          ],
-          "results": [],
-          "references": [
-            "acemoglu2001colonial",
-            "ross1999resourcecurse"
-          ],
-          "personal_context": []
-        }
+        "caption": "The core loop is path dependence made operational: high extraction lifts short-run payoff, weakens crisis pressure, delays reform, and raises extraction again on the next step."
+      },
+      {
+        "id": "curse-comparison",
+        "caption": "Identical resource endowment, opposite institutional parameters: Botswana extraction converges to 0.002, resource-curse extraction drifts to 0.09-0.21. The 4x reward divergence is entirely institutional."
       }
     ]
   },
@@ -270,13 +102,12 @@
     "ucb-bait": {
       "slug": "ucb-bait",
       "title": "UCB Bait",
-      "dek": "A boomtown scenario where the real problem is not whether to touch the spike, but whether the spike is allowed to dictate the map.",
-      "lede": "UCB Bait is the archive's cleanest political diagram. One site gets a huge resource endowment, a +6.0 early reward bonus, accelerated decay, and a collapse regime that begins at step 24. The question is not whether the boomtown is fake. It is partly real. The question is whether an algorithm can monetize the opening without mistaking a temporary windfall for a viable urban future.",
+      "dek": "A boomtown scenario designed to trap optimistic algorithms — one site offers massive early returns, then collapses as extraction locks in.",
+      "lede": "Dawson City swelled to 40,000 people in two years and collapsed to 1,000 in twenty. The gold was real — $29 million extracted in peak years — but the economy was pure extraction with zero institutional depth. UCB Bait encodes this pattern: one site gets a +6.0 early reward bonus, accelerated decay, and a collapse regime that begins at step 24. The question is not whether the boomtown is fake. It is partly real. The question is whether an algorithm can monetize the opening without mistaking a temporary windfall for a viable urban future.",
       "reference_ids": [
         "auer2002ucb1",
         "russo2018thompson",
         "akbarzadeh2020whittle",
-        "levine2017rotting",
         "sachs1995resourcegrowth"
       ],
       "sections": [
@@ -284,228 +115,283 @@
           "id": "setup",
           "title": "How The Trap Is Built",
           "paragraphs": [
-            "The scenario is explicit. Horizon falls to 280. Resource capture gain rises to 2.45, curse strength to 0.14, active extraction pressure to 0.28, active resource depletion to 0.12. One boomtown gets a 0.65 resource bonus, a +6.0 early reward spike, collapse onset at step 24, and active effects multiplied by six.",
-            "The site is therefore not simply high value. It is a deliberately overclocked arm whose use accelerates the mechanisms that will later punish it."
-          ],
-          "grounding": {
-            "docs": [
-              "docs/scenarios/ucb-bait.md",
-              "docs/system/institutional-dynamics.md"
-            ],
-            "results": [],
-            "references": [
-              "sachs1995resourcegrowth"
-            ],
-            "personal_context": []
-          }
+            "The scenario constructs a single boomtown with enormous early reward (+6.0 for 42 steps) and a collapse penalty beginning at step 24. The boomtown_decay_multiplier of 6.0 means active extraction and institutional decay effects are 6x stronger — concentrated extraction accelerates depletion simultaneously on every dimension.",
+            "The key bandit-theoretic insight is temporal: UCB1's running average accumulates high early observations with tight confidence bounds, making the boomtown appear near-optimal long after the collapse has begun. Thompson sampling's posterior decay widens the variance, allowing it to sample low values and explore alternatives before average-based policies can react."
+          ]
         },
         {
           "id": "timing",
           "title": "The Measured Result Is About Timing, Not Purity",
           "paragraphs": [
-            "Hypothesis H7 predicts a simple trap story, but v4 is more interesting. The myopic oracle still spends 0.116 of selections on the boomtown. Gaussian Thompson averages 0.120, UCB1 0.111, and Whittle Index 0.060.",
-            "That means the boomtown is not a site a competent planner must avoid at all costs. It is a profitable but deforming site. The real question is when to enter, when to leave, and how much of the wider map to sacrifice while the spike is paying."
-          ],
-          "grounding": {
-            "docs": [
-              "docs/theory/hypotheses.md",
-              "docs/scenarios/ucb-bait.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [
-              "auer2002ucb1",
-              "russo2018thompson",
-              "akbarzadeh2020whittle"
-            ],
-            "personal_context": []
-          }
+            "UCB1 makes 12 of 18 selections during the decay window (steps 24-42) — it is most committed to the boomtown precisely when the boomtown is collapsing. Thompson sampling makes only 1 during decay. Whittle makes 0 total boomtown selections — it refuses the boomtown entirely.",
+            "But Whittle's caution comes at a cost: rank 7 of 9 with reward 1218, forgoing the genuine pre-collapse returns that SW-UCB and Thompson capture. The optimal strategy is neither full commitment (UCB1) nor full avoidance (Whittle), but calibrated exploitation with an exit plan."
+          ]
         },
         {
           "id": "ranking",
-          "title": "What The Ranking Actually Says",
+          "title": "What The Ranking Says",
           "paragraphs": [
-            "Across the aggregate v4 runs, Gaussian Thompson is the strongest tested policy at mean cumulative reward 976.236, ahead of UCB1 at 879.782, Whittle Index at 782.134, and epsilon-greedy at 572.254. The oracle benchmark remains higher at 1057.761.",
-            "The measured story is therefore broader than UCB humiliation. Thompson seems to handle the non-stationary trap best in this calibration. Whittle protects option value and disperses investment, but pays a reward penalty for that caution."
-          ],
-          "grounding": {
-            "docs": [
-              "docs/policies/thompson-sampling.md",
-              "docs/policies/ucb1.md",
-              "docs/policies/whittle-index.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [
-              "russo2018thompson",
-              "auer2002ucb1",
-              "akbarzadeh2020whittle"
-            ],
-            "personal_context": []
-          }
-        },
-        {
-          "id": "urban-form",
-          "title": "Reward Is Not The Only Outcome Plate",
-          "paragraphs": [
-            "Policy choice changes urban form. Gaussian Thompson finishes with population HHI about 0.146 and Zipf slope about -1.146. UCB1 is more concentrated at HHI about 0.194 and slope about -1.386. Whittle is the real polycentric outlier, with HHI about 0.069 and slope about -0.205.",
-            "The archive cares about this because city systems matter. A policy can earn less regret on paper yet still compose a distorted hierarchy, or keep the map open while sacrificing too much reward."
-          ],
-          "grounding": {
-            "docs": [
-              "docs/theory/urban-economics.md",
-              "docs/theory/hypotheses.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [
-              "henderson1974cities",
-              "krugman1991geography"
-            ],
-            "personal_context": []
-          }
-        },
-        {
-          "id": "personal",
-          "title": "Boomtown As Historical Feeling",
-          "paragraphs": [
-            "This is where first person helps. I recognize the boomtown structure because I have lived near its political equivalent: an opening announced as destiny, then monetized so aggressively that it destroys the conditions that made the opening matter. The future appears, gets priced, and returns as scarcity.",
-            "That is why the scenario should not be written as pure irony. The harder lesson is institutional. Windfalls are real. What decides their aftermath is whether institutions can turn them into a city rather than a rent circuit."
-          ],
-          "grounding": {
-            "docs": [
-              "docs/theory/institutional-economics.md",
-              "docs/theory/resource-curse.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [
-              "ross1999resourcecurse",
-              "acemoglu2001colonial"
-            ],
-            "personal_context": [
-              "Weimar, JCPOA collapse, rial collapse, first-person presence"
-            ]
-          }
+            "SW-UCB wins at 1832, beating the oracle's 1666. Thompson takes second. UCB1 finishes 8th at 1155, and epsilon-greedy last at 965. The forgetting mechanism is again decisive: SW-UCB captures pre-collapse returns, then its sliding window discards them, allowing clean reallocation to sites whose institutions remain intact.",
+            "The Dawson City lesson holds: the optimal response to a windfall is neither avoidance nor commitment, but institutional — the ability to take profit without letting the profit take you."
+          ]
         }
       ],
       "pull_quotes": [
         {
-          "quote": "The trap is not that the boomtown is fake. The trap is that it is partly real.",
-          "grounding": {
-            "docs": [
-              "docs/scenarios/ucb-bait.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [],
-            "personal_context": []
-          }
+          "quote": "The trap is not that the boomtown is fake. The trap is that it is partly real."
         },
         {
-          "quote": "Even the oracle spends 11.6 percent of its selections there. The problem is timing, not purity.",
-          "grounding": {
-            "docs": [
-              "docs/theory/hypotheses.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [],
-            "personal_context": []
-          }
-        },
-        {
-          "quote": "A lost future becomes a control problem when the signal itself changes under pressure.",
-          "grounding": {
-            "docs": [
-              "docs/theory/restless-bandits.md",
-              "docs/system/institutional-dynamics.md"
-            ],
-            "results": [],
-            "references": [
-              "levine2017rotting"
-            ],
-            "personal_context": [
-              "Hauntology and historical foreclosure"
-            ]
-          }
+          "quote": "UCB1 makes 12 of 18 selections during collapse. Thompson makes 1. Whittle makes 0."
         }
       ],
       "figure_captions": [
         {
           "id": "parameter-plate",
-          "caption": "UCB Bait forces fast temptation: capture gain 2.45, curse strength 0.14, active extraction pressure 0.28, active depletion 0.12, early bonus +6.0, collapse onset at step 24, bonus duration 42 steps.",
-          "grounding": {
-            "docs": [
-              "docs/scenarios/ucb-bait.md"
-            ],
-            "results": [],
-            "references": [],
-            "personal_context": []
-          }
+          "caption": "UCB Bait forces fast temptation: capture gain 2.45, curse strength 0.14, active extraction pressure 0.28, early bonus +6.0, collapse onset at step 24, bonus duration 42 steps."
         },
         {
-          "id": "reward-ranking",
-          "caption": "Aggregate v4 reward ranking: gaussian-thompson 976.236, ucb1 879.782, whittle-index 782.134, epsilon-greedy 572.254, oracle 1057.761.",
-          "grounding": {
-            "docs": [],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [
-              "russo2018thompson",
-              "auer2002ucb1",
-              "akbarzadeh2020whittle"
-            ],
-            "personal_context": []
-          }
-        },
-        {
-          "id": "boomtown-share",
-          "caption": "Boomtown exposure does not map cleanly onto competence: oracle 0.116, gaussian-thompson 0.120, ucb1 0.111, whittle-index 0.060.",
-          "grounding": {
-            "docs": [],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [],
-            "personal_context": []
-          }
-        },
-        {
-          "id": "urban-distribution",
-          "caption": "The same trap yields different city systems: Thompson stays near a Zipf-like slope, UCB1 concentrates harder, and Whittle flattens the hierarchy into a much more polycentric map.",
-          "grounding": {
-            "docs": [
-              "docs/theory/urban-economics.md"
-            ],
-            "results": [
-              "results/ucb-bait-boomtown-v4.json"
-            ],
-            "references": [
-              "henderson1974cities",
-              "krugman1991geography"
-            ],
-            "personal_context": []
-          }
+          "id": "boomtown-temporal",
+          "caption": "The temporal story of the trap: UCB1 is most committed to the boomtown precisely when the boomtown is collapsing. Thompson and SW-UCB exit before the worst damage accumulates."
         }
       ]
+    },
+    "resource-curse-scenario": {
+      "slug": "resource-curse-scenario",
+      "title": "Resource Curse",
+      "dek": "Iran's petrodollar trap encoded as institutional dynamics — resources fund the apparatus that consumes institutional quality.",
+      "lede": "Mahdavy coined 'rentier state' to describe Iran: when governments derive revenue from external rents rather than taxation, they lose the institutional incentive to build productive capacity. Oil revenue exceeded 60% of government income through the Shah and persisted after 1979. The model amplifies this: resource curse strength at 0.13 (3x baseline), institutional buffers suppressed, and extraction drifts upward because high rewards suppress reform pressure.",
+      "reference_ids": [
+        "sachs1995resourcegrowth",
+        "ross1999resourcecurse",
+        "acemoglu2001colonial"
+      ],
+      "sections": [
+        {
+          "id": "mechanism",
+          "title": "How The Curse Operates",
+          "paragraphs": [
+            "Resource-rich sites generate high immediate reward via resource payoff and extractive cashflow. High reward suppresses reform pressure — the sigmoid crisis trigger fires when reward declines, and sustained high reward keeps crisis pressure low. Without reform, extraction drifts upward logistically. Rising extraction erodes long-run growth through extractive drag, capital erosion, and metropolitan overstretch.",
+            "The buffers that might protect institutions are deliberately suppressed: openness buffers drop from 0.35 to 0.12, capital buffers from 0.25 to 0.08. This encodes Mahdavy's insight — in a rentier state, neither trade openness nor capital accumulation prevents institutional erosion when rents are large enough."
+          ]
+        },
+        {
+          "id": "results",
+          "title": "Whittle's Tragedy",
+          "paragraphs": [
+            "SW-UCB beats the oracle by more than 2x (2357 vs 1129). Whittle finishes last at 273 — its worst showing in any scenario. The mechanism is diagnostic: Whittle's spatial intelligence anchors on geography, which in this scenario correlates with resource endowment, which correlates with the trap. The very feature that makes Whittle excel in trade-network scenarios becomes a liability when geography encodes a curse.",
+            "Extraction ranges from 0.09 to 0.21 across policies — no algorithm fully escapes. But SW-UCB's forgetting lets it abandon decaying arms faster than any other policy, minimising exposure to the trap's worst phase."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Whittle trusts geography. When geography is trustworthy, this is intelligence. When geography is treacherous, it is catastrophe."
+        }
+      ],
+      "figure_captions": [
+        {
+          "id": "extraction-drift",
+          "caption": "Extraction drift across the resource-curse scenario: no algorithm fully escapes, but forgetting-based policies (SW-UCB, D-UCB) escape fastest."
+        }
+      ]
+    },
+    "botswana": {
+      "slug": "botswana",
+      "title": "Botswana",
+      "dek": "Norway's sovereign wealth fund encoded as institutional parameters — same resource endowment as the curse scenario, opposite trajectory.",
+      "lede": "Norway discovered North Sea oil in 1969 with pre-existing parliamentary democracy, high social trust, and established rule of law. The Government Pension Fund Global converts a depleting resource into a permanent endowment. The scenario encodes this: high initial openness, strong institutional buffers, and a resource bias of 0.15 — resources don't corrupt the initial institutional allocation.",
+      "reference_ids": [
+        "sachs1995resourcegrowth",
+        "ross1999resourcecurse",
+        "acemoglu2001colonial"
+      ],
+      "sections": [
+        {
+          "id": "institutional-hold",
+          "title": "Institutions Hold",
+          "paragraphs": [
+            "Extraction converges to 0.002 and openness to 1.000 across all policies. Institutions hold — even naive approaches succeed when the institutional environment is sound. The policy spread (SW-UCB at 5513 vs UCB1 at 3018) is smaller in relative terms than in the resource curse, confirming Mehlum et al.'s prediction: in producer-friendly environments, the choice of allocation strategy matters less because the institutional landscape is self-correcting.",
+            "The comparison with the resource-curse scenario is the core test. Same simulation engine, different institutional parameters, 4x divergence in top-policy reward. Institutions dominate resource endowment."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Same resources, opposite institutions: extraction 0.002 vs 0.21. The 4x reward divergence is entirely institutional."
+        }
+      ],
+      "figure_captions": [
+        {
+          "id": "curse-comparison",
+          "caption": "Botswana vs Resource Curse: identical resource endowment, opposite institutional parameters. Extraction converges to 0.002 in Botswana and drifts to 0.09-0.21 in the curse scenario."
+        }
+      ]
+    },
+    "merchant-republic": {
+      "slug": "merchant-republic",
+      "title": "Merchant Republic",
+      "dek": "The Dutch Republic as a computational experiment — port-led coordination through capital networks and commercial institutions.",
+      "lede": "The Dutch Republic was the first modern economy: no natural resources, immense wealth from trade margins. The Amsterdam Exchange Bank, the VOC, and North & Weingast's credible commitments created a commercial network state where the value of each port depended on its connections to other ports. The scenario encodes this with extreme network parameters and four designated trade clusters.",
+      "reference_ids": [
+        "henderson1974cities",
+        "krugman1991geography"
+      ],
+      "sections": [
+        {
+          "id": "network-intelligence",
+          "title": "Geography As Network",
+          "paragraphs": [
+            "Whittle excels here — its spatial intelligence works when geography correlates with trade networks rather than resource traps. The contrast with the resource-curse scenario is sharp: Whittle finishes last there (273) and second here (5833). The same algorithmic property — trusting spatial structure — produces opposite outcomes depending on what the structure encodes.",
+            "The Zipf slopes reveal urban morphology: UCB1 produces -2.35 (extreme megacity), Whittle produces -0.62 (polycentric network). Whittle builds something resembling the actual Dutch Republic — multiple cities of comparable size connected by trade. UCB1 builds a primate city system the Republic explicitly was not."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Whittle builds the Dutch Republic. UCB1 builds its opposite."
+        }
+      ],
+      "figure_captions": []
+    },
+    "open-cluster": {
+      "slug": "open-cluster",
+      "title": "Open Cluster",
+      "dek": "The Hanseatic League as spatial spillovers — trade without sovereignty, network externalities as the growth engine.",
+      "lede": "The Hanse was not a state. It levied no taxes, maintained no army, exercised no territorial sovereignty. Its power was network-based: collective bargaining, mutual defence of trade rights, and the credible threat of exclusion. The scenario encodes this with five trade cluster sites, elevated spatial parameters, and minimal resource curse — wealth from position, not extraction.",
+      "reference_ids": [
+        "henderson1974cities",
+        "krugman1991geography"
+      ],
+      "sections": [
+        {
+          "id": "whittles-best",
+          "title": "Whittle's Best Scenario",
+          "paragraphs": [
+            "Whittle finishes first at 5267, beating SW-UCB's 5217. Its spatial model recognises the network structure and distributes investment accordingly, producing a polycentric settlement pattern (Zipf -0.60, HHI 0.115) that mirrors the historical Hanse. UCB1 produces Zipf -2.25: the anti-Hanse, a primate city built by averaging early high returns.",
+            "The contrast with Whittle's resource-curse performance is the sharpest diagnostic in the suite. Same algorithm, first here (5267) and last there (273). Spatial intelligence is powerful when geography encodes trade opportunity. It is catastrophic when geography encodes extraction traps."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Spatial intelligence is powerful when geography is trustworthy. It is catastrophic when it is not."
+        }
+      ],
+      "figure_captions": []
+    },
+    "megacity-trap": {
+      "slug": "megacity-trap",
+      "title": "Megacity Trap",
+      "dek": "Tehran's urban primacy as an overstretch model — one city that starves secondary cities of institutional oxygen.",
+      "lede": "Greater Tehran houses 20% of Iran's population and generates 40% of GDP — not through organic urbanisation but through Pahlavi-era state centralisation that channelled bureaucracy, licensing, and oil revenue distribution through a single capital. Henderson estimated that excessive primacy costs 1-2 GDP points annually. The scenario encodes this with harsh overstretch penalties and suppressed secondary city bonuses.",
+      "reference_ids": [
+        "henderson1974cities",
+        "krugman1991geography"
+      ],
+      "sections": [
+        {
+          "id": "convergence",
+          "title": "Sticks Produce Convergence",
+          "paragraphs": [
+            "The top three policies (SW-UCB 2951, Whittle 2948, D-UCB 2922) all achieve low top-site shares below 0.11. The overstretch penalty is harsh enough that even greedy algorithms are punished for concentration, forcing distribution. The difference between winning and losing policies is not whether they diversify — all do — but how efficiently they identify which secondary sites to develop.",
+            "Zipf slopes are uniformly flat across all policies (range -0.30 to -0.03). Contrast with balanced-urban where carrots (secondary city bonus) produce differentiated responses: Whittle at -0.43 vs UCB1 at -2.80. Carrots produce differentiation; sticks produce convergence."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Carrots produce differentiated responses. Sticks produce convergence."
+        }
+      ],
+      "figure_captions": []
+    },
+    "shock-reform": {
+      "slug": "shock-reform",
+      "title": "Shock Reform",
+      "dek": "Korea 1997 as institutional rupture — exogenous crisis as the catalyst for reforms that prosperity could never produce.",
+      "lede": "The IMF's $57 billion bailout of South Korea was the largest in history. The won lost half its value, GDP contracted 5.5%, unemployment tripled. What followed was dramatic institutional reform: chaebol restructuring, banking regulation, independent audit requirements. By 2005, Korea exceeded pre-crisis GDP. Rodrik formalised the paradox: reform occurs not during prosperity but during crisis, when status quo bias is overwhelmed.",
+      "reference_ids": [
+        "acemoglu2001colonial",
+        "sachs1995resourcegrowth"
+      ],
+      "sections": [
+        {
+          "id": "forgetting-reform",
+          "title": "The Ability To Return",
+          "paragraphs": [
+            "SW-UCB beats the oracle by 348 — the second-largest margin in the suite. When a shock hits, the oracle abandons the site permanently. SW-UCB's window also detects the drop, but because it forgets pre-shock data, it is equally ready to return after reform improves institutional quality. The oracle never reconsiders a site it has abandoned; SW-UCB does.",
+            "Whittle finishes rank 7 — its spatial model anchors on geographic features correlated with resource endowment, which correlates with shock vulnerability. It avoids the sites most likely to undergo beneficial reform. It sees risk correctly but cannot see the opportunity on the other side."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "The oracle never reconsiders a site it has abandoned. SW-UCB does. That is the Rodrik paradox made computational."
+        }
+      ],
+      "figure_captions": []
+    },
+    "balanced-urban": {
+      "slug": "balanced-urban",
+      "title": "Balanced Urban",
+      "dek": "Germany's polycentric Mittelstand as urban economics — no primate city, distributed prosperity, built-in resilience.",
+      "lede": "No single German city dominates. Berlin, Hamburg, Munich, Cologne, and Frankfurt share national economic functions across a polycentric network — the product of centuries of political fragmentation under the Holy Roman Empire. Ioannides and Overman showed Germany's city-size distribution closely approximates the theoretical Zipf distribution. The scenario encodes this with strong secondary city bonuses, wide spread, and mild overstretch penalties.",
+      "reference_ids": [
+        "henderson1974cities",
+        "krugman1991geography"
+      ],
+      "sections": [
+        {
+          "id": "two-intelligences",
+          "title": "Two Forms Of Intelligence, One Outcome",
+          "paragraphs": [
+            "Whittle and SW-UCB are nearly tied for first (5201 vs 5197). The mechanism differs: Whittle succeeds through spatial intelligence — recognising that the reward landscape favours distribution. SW-UCB succeeds through temporal intelligence — detecting when a site's marginal return diminishes at the secondary city bonus peak and redirecting investment. Two forms of intelligence, convergent outcome: polycentric prosperity.",
+            "UCB1 produces Zipf -2.80 — the steepest primacy in the entire suite, more concentrated than even the megacity-trap scenario. In an environment designed to reward distribution, UCB1's optimistic averaging creates maximum concentration. The policy's structural inability to diversify actively inverts the reward landscape's intent."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Two forms of intelligence — spatial and temporal — converge on the same polycentric outcome."
+        }
+      ],
+      "figure_captions": []
+    },
+    "baseline": {
+      "slug": "baseline",
+      "title": "Baseline",
+      "dek": "Default peninsula dynamics — the control condition against which all other scenarios are measured.",
+      "lede": "No city analogy, no extreme parameters, no institutional pathologies. The baseline represents a 'normal' developing economy with moderate resources and gradual urbanisation. All parameters take their defaults. The resource curse is mild, shocks are absent, and network effects are moderate. This is the world where everything works and nothing is dramatic.",
+      "reference_ids": [
+        "lattimore2020bandit",
+        "henderson1974cities"
+      ],
+      "sections": [
+        {
+          "id": "paradise",
+          "title": "The Institutional Paradise",
+          "paragraphs": [
+            "All policies drive openness to 1.000 and extraction near 0. Reforms always win, the curse is too weak to trap anyone, and even naive approaches converge on good outcomes. SW-UCB leads at 2962 against the oracle's 2892 — the narrowest margin in the suite, confirming that algorithm choice matters least when the environment is benign.",
+            "The baseline exists to calibrate expectations. Every scenario's story is told relative to this control: the resource curse shows what happens when institutional buffers fail, the megacity trap shows what happens when distribution incentives collapse, and Botswana shows what happens when institutions are strong enough to make the baseline's benignity permanent even under resource pressure."
+          ]
+        }
+      ],
+      "pull_quotes": [
+        {
+          "quote": "Algorithm choice matters least when the environment is benign. The interesting cases are the ones where it matters most."
+        }
+      ],
+      "figure_captions": []
     }
   },
   "bibliography_annotations": {
     "lattimore2020bandit": {
       "category": "bandits",
-      "annotation": "The archive's formal backbone: regret, policy interfaces, and the discipline that keeps the prose from dissolving into metaphor."
+      "annotation": "The formal backbone: regret bounds, policy interfaces, and the discipline that keeps the prose from dissolving into metaphor."
     },
     "russo2018thompson": {
       "category": "bandits",
-      "annotation": "A defense of probabilistic humility and the best theoretical companion to the repo's strongest measured answer in UCB Bait."
+      "annotation": "A defence of probabilistic humility and the best theoretical companion to Thompson sampling's measured performance across the scenario suite."
     },
     "auer2002ucb1": {
       "category": "bandits",
@@ -513,19 +399,19 @@
     },
     "akbarzadeh2020whittle": {
       "category": "bandits",
-      "annotation": "The technical anchor for the repo's approximate Whittle construction and its surrogate view of restless settlement dynamics."
+      "annotation": "The technical anchor for the approximate Whittle construction and the surrogate model that makes spatial intelligence possible — and sometimes catastrophic."
     },
     "levine2017rotting": {
       "category": "bandits",
-      "annotation": "Useful because it names the core problem directly: some arms degrade under use, and exploitation helps write the decline."
+      "annotation": "Names the core problem directly: some arms degrade under use, and exploitation helps write the decline."
     },
     "henderson1974cities": {
       "category": "urban-geography",
-      "annotation": "The city's scale problem, treated seriously rather than aesthetically. A key frame for hierarchy and specialization."
+      "annotation": "The city's scale problem treated seriously. Optimal concentration, agglomeration, congestion — the framework that makes the megacity trap and balanced urban scenarios legible."
     },
     "krugman1991geography": {
       "category": "urban-geography",
-      "annotation": "The conceptual basis for accessibility, agglomeration, and circular causation across the peninsula."
+      "annotation": "Circular causation, accessibility, and the conceptual basis for the peninsula's network spillovers."
     },
     "sachs1995resourcegrowth": {
       "category": "institutions",
@@ -533,11 +419,11 @@
     },
     "ross1999resourcecurse": {
       "category": "institutions",
-      "annotation": "The project's best vocabulary for rents, elite capture, and why windfalls deform institutions instead of merely boosting output."
+      "annotation": "The project's vocabulary for rents, elite capture, and why windfalls deform institutions instead of boosting output."
     },
     "acemoglu2001colonial": {
       "category": "institutions",
-      "annotation": "The available Acemoglu reference in the repo and the cleanest support for the archive's wager that institutional starting points still matter."
+      "annotation": "The cleanest support for the wager that institutional starting points still matter — and that the divergence is not inevitable."
     }
   }
 }

@@ -37,8 +37,8 @@ export function ComparisonModule({
     <section className="comparison-card">
       <div className="comparison-card__header">
         <div>
-          <div className="section-kicker">Live Comparison Module</div>
-          <h2 style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>Runtime Compare</h2>
+          <div className="section-kicker">Live Experiment</div>
+          <h2 style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>Policy Comparison</h2>
           <p className="comparison-note">{note}</p>
         </div>
         <button
@@ -84,7 +84,7 @@ export function ComparisonModule({
           </div>
         ) : (
           <div className="comparison-note">
-            No comparison data loaded. Press &ldquo;Run Comparison&rdquo; to fetch a fresh experimental run against the Python backend.
+            Run a live simulation against the Python backend. Each policy plays the same peninsula, same seed, same institutional dynamics &mdash; only the allocation strategy differs.
           </div>
         )}
       </div>

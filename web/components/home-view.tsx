@@ -48,7 +48,7 @@ export function HomeView({
               id: section.id,
               title: section.title,
             }))}
-            caption="The archive proceeds like an annotated field report: terrain first, then policy, then the consequences of choosing speed over durability."
+            caption="The archive proceeds through five chapters: the peninsula as political economy, the intelligence of forgetting, the urban morphology of algorithms, the institutional divergence theorem, and the case against fatalism."
           />
         </section>
 
@@ -106,8 +106,8 @@ export function HomeView({
             <div className="pull-quote">
               <span>
                 {'\u201C'}
-                The archive is trying to keep two incompatible things visible at once: the lure of
-                extractive acceleration and the slow institutional cost it conceals.
+                Forgetting what was true yesterday is how you learn what is true now. SW-UCB
+                beats the oracle in every scenario because amnesia is the correct epistemology.
                 {'\u201D'}
               </span>
               <div className="pull-quote__attribution">Landing plate</div>
@@ -138,7 +138,7 @@ export function HomeView({
               ))}
             </div>
             <div className="site-footer__tagline">
-              An editorial exhibition on city formation and multi-armed bandits.
+              A computational archive on city formation, institutional drift, and the resource curse.
             </div>
           </div>
         </footer>

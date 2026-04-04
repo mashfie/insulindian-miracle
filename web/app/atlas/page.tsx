@@ -21,13 +21,13 @@ export default async function AtlasPage() {
       <HeroScene title="Atlas" variant="archive" />
       <article className="site-shell">
         <header className="atlas__header">
-          <div className="eyebrow">Chaptered Map</div>
+          <div className="eyebrow">Field Report</div>
           <h1 className="headline">Atlas</h1>
           <p className="dek">
-            A non-sticky explorable plate derived from the backend terrain model. Each chapter pivots the same peninsula through a different inferential layer.
+            The peninsula as experimental apparatus. Each chapter pivots the same Perlin-noise terrain through a different inferential layer — elevation, hydrology, resource endowment, institutional allocation, settlement outcome.
           </p>
           <p className="lede">
-            Terrain is not a neutral surface. It is already sorted into access, slope, river adjacency, defensive depth, and pockets of extractive promise before policy begins to choose.
+            Terrain is not neutral. It is already sorted into coastal access, river adjacency, defensive depth, and pockets of extractive promise before any algorithm begins to choose. Geography is the prior; institutions are the posterior.
           </p>
         </header>
         {source ? (

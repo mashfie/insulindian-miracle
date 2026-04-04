@@ -266,6 +266,217 @@ export function EquationFigure({
   );
 }
 
+export function RewardTrajectory({
+  figure,
+  series,
+}: {
+  figure: FigureRef;
+  series: Array<{
+    label: string;
+    mean: number[];
+    std: number[];
+    color: string;
+  }>;
+}) {
+  const [step, setStep] = useState(0);
+
+  const maxLen = Math.max(...series.map((s) => s.mean.length), 1);
+
+  useEffect(() => {
+    setStep(0);
+    const timer = setInterval(() => {
+      setStep((s) => {
+        if (s >= maxLen) {
+          clearInterval(timer);
+          return maxLen;
+        }
+        return s + Math.max(1, Math.floor(maxLen / 120));
+      });
+    }, 30);
+    return () => clearInterval(timer);
+  }, [maxLen]);
+
+  const allValues = series.flatMap((s) => {
+    const cumMean: number[] = [];
+    let acc = 0;
+    for (const v of s.mean) {
+      acc += v;
+      cumMean.push(acc);
+    }
+    return cumMean;
+  });
+  const { min, max } = extent(allValues.length > 0 ? allValues : [0, 1]);
+
+  function toX(i: number) {
+    return 42 + (i / Math.max(maxLen - 1, 1)) * 340;
+  }
+  function toY(v: number) {
+    return 210 - ((v - min) / Math.max(max - min, 0.0001)) * 186;
+  }
+
+  return (
+    <figure className="figure-card">
+      <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
+        <path d="M42 24V210H388" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        {[0, 1, 2, 3].map((s) => {
+          const y = 40 + s * 42;
+          return (
+            <path key={s} d={`M42 ${y}H388`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
+          );
+        })}
+        {series.map((s) => {
+          const cumMean: number[] = [];
+          const cumUpper: number[] = [];
+          const cumLower: number[] = [];
+          let accMean = 0;
+          let accVar = 0;
+          for (let i = 0; i < Math.min(step, s.mean.length); i++) {
+            accMean += s.mean[i];
+            accVar += s.std[i] * s.std[i];
+            cumMean.push(accMean);
+            const band = Math.sqrt(accVar);
+            cumUpper.push(accMean + band);
+            cumLower.push(accMean - band);
+          }
+
+          if (cumMean.length === 0) return null;
+
+          const bandPath =
+            cumUpper.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(v)}`).join(" ") +
+            " " +
+            [...cumLower].reverse().map((v, i) => `L${toX(cumLower.length - 1 - i)},${toY(v)}`).join(" ") +
+            " Z";
+
+          const linePath = cumMean
+            .map((v, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(v)}`)
+            .join(" ");
+
+          return (
+            <g key={s.label}>
+              <path d={bandPath} fill={s.color} opacity="0.12" />
+              <path d={linePath} fill="none" stroke={s.color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+            </g>
+          );
+        })}
+      </svg>
+      <div className="figure-meta">
+        <span>{figure.title}</span>
+        <span>T={step}</span>
+      </div>
+      <p className="figure-caption">{figure.caption}</p>
+      <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", marginTop: "0.5rem", fontSize: "0.75rem", fontFamily: "var(--font-ui)", letterSpacing: "0.05em" }}>
+        {series.map((s) => (
+          <span key={s.label} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ width: 12, height: 3, background: s.color, display: "inline-block" }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+    </figure>
+  );
+}
+
+export function PolicyRankingBars({
+  figure,
+  items,
+  oracle,
+}: {
+  figure: FigureRef;
+  items: Array<{ label: string; value: number; color?: string }>;
+  oracle?: number;
+}) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    setProgress(0);
+    const timer = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 1) {
+          clearInterval(timer);
+          return 1;
+        }
+        return p + 0.04;
+      });
+    }, 40);
+    return () => clearInterval(timer);
+  }, [items]);
+
+  const sorted = [...items].sort((a, b) => b.value - a.value);
+  const max = Math.max(...sorted.map((i) => i.value), oracle ?? 0, 1);
+  const barHeight = Math.min(22, Math.max(14, 180 / sorted.length));
+  const gap = Math.min(6, Math.max(2, (200 - barHeight * sorted.length) / sorted.length));
+
+  return (
+    <figure className="figure-card">
+      <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
+        <path d="M100 16V224H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        {oracle !== undefined ? (
+          <>
+            <line
+              x1={100 + (oracle / max) * 280}
+              y1={16}
+              x2={100 + (oracle / max) * 280}
+              y2={224}
+              stroke="rgba(19,19,19,0.3)"
+              strokeWidth="1.2"
+              strokeDasharray="4 4"
+            />
+            <text
+              x={100 + (oracle / max) * 280}
+              y={12}
+              textAnchor="middle"
+              fill="rgba(19,19,19,0.5)"
+              fontFamily="var(--font-ui)"
+              fontSize="9"
+              letterSpacing="1.2"
+            >
+              ORACLE
+            </text>
+          </>
+        ) : null}
+        {sorted.map((item, index) => {
+          const y = 22 + index * (barHeight + gap);
+          const width = (item.value / max) * 280 * progress;
+          return (
+            <g key={item.label}>
+              <text
+                x="94"
+                y={y + barHeight / 2 + 4}
+                textAnchor="end"
+                fill="rgba(19,19,19,0.72)"
+                fontFamily="var(--font-ui)"
+                fontSize="10"
+                letterSpacing="1"
+              >
+                {item.label.toUpperCase()}
+              </text>
+              <rect
+                x="100"
+                y={y}
+                width={width}
+                height={barHeight}
+                fill={item.color ?? "var(--paper)"}
+                stroke="var(--ink)"
+                strokeWidth="1.2"
+              />
+              <text
+                x={106 + width}
+                y={y + barHeight / 2 + 4}
+                fill="rgba(19,19,19,0.78)"
+                fontFamily="var(--font-ui)"
+                fontSize="11"
+              >
+                {(item.value * progress).toFixed(0)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <FigureMeta figure={figure} />
+    </figure>
+  );
+}
+
 export function StatsTable({
   title,
   rows,

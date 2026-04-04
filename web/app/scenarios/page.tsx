@@ -11,9 +11,9 @@ export default async function ScenariosPage() {
 
   return (
     <CatalogGrid
-      eyebrow="Scenario Archive"
+      eyebrow="Case Studies"
       title="Scenarios"
-      description="Counterfactual dossiers, each tying geography, institutional drift, and policy choice into a distinct urban formation problem."
+      description="Nine institutional experiments, each grounded in real economic history. Iran's petrodollar trap, Norway's sovereign wealth fund, the Hanseatic League's trade network, Korea's post-crisis reform. The history leads; the parameters follow."
       items={pages.map((page) => ({
         href: `/scenarios/${page.slug}/`,
         meta: page.result?.scenario.name ?? "scenario",

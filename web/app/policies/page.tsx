@@ -7,9 +7,9 @@ export default async function PoliciesPage() {
 
   return (
     <CatalogGrid
-      eyebrow="Policy Archive"
+      eyebrow="Academic Dossier"
       title="Policies"
-      description="Bandit policies treated as competing political technologies: each one selects, concentrates, hesitates, and overcommits differently."
+      description="Ten multi-armed bandit policies, each with a different epistemology of investment. Optimism, forgetting, spatial modelling, posterior sampling. The math speaks for itself; the results table settles the argument."
       items={pages.map((page) => ({
         href: `/policies/${page.slug}/`,
         meta: page.evidenceScenario ? `evidence: ${page.evidenceScenario}` : "policy note",
