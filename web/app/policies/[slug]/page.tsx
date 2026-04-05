@@ -7,7 +7,9 @@ import {
   getPolicyPage,
   getPolicyPages,
   getReferenceEntries,
+  getRawResultFile,
 } from "@/lib/content/repository";
+import { buildPolicyVisuals } from "@/lib/data/archive-figures";
 
 export async function generateStaticParams() {
   const pages: PolicyPage[] = await getPolicyPages();
@@ -29,12 +31,16 @@ export default async function PolicyDetailPage({
     reference.category.includes("bandit"),
   );
 
+  const raw = page.evidenceScenario ? getRawResultFile(page.evidenceScenario) : null;
+  const visuals = buildPolicyVisuals({ page, rawResult: raw });
+
   return (
     <DocumentView
       document={page.document}
       deck={page.archive.dek}
       slug={slug}
       references={references}
+      visuals={visuals}
       aside={
         page.evidenceScenario ? (
           <ComparisonModule

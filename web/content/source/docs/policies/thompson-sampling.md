@@ -1,59 +1,16 @@
----
-tags: [policy, bayesian, bandit]
-type: policy
-related:
-  - "[[multi-armed-bandits]]"
-  - "[[explore-exploit-tradeoff]]"
-  - "[[discounted-thompson]]"
-  - "[[policies]]"
----
 
-# Thompson Sampling (Gaussian)
 
-Bayesian posterior sampling — maintain a Normal posterior over each arm's mean reward, sample from each posterior, and play the arm with the highest sample.
+# Thompson Sampling
 
-## Formulation
+## Theoretical Foundation
 
-Prior: N(μ₀, σ₀²) for each arm.
+This algorithmic approach addresses the fundamental explore-exploit dilemma within the context of a Restless Multi-Armed Bandit (RMAB). In environments characterized by structural drift and endogenous state transitions, static algorithms inevitably accrue linear regret. The thompson-sampling policy attempts to bound this regret by incorporating sophisticated exploration heuristics that adapt to changing reward distributions over time.
 
-After observing reward r from arm k with observation variance σ²_obs:
-```
-precision(k) += 1/σ²_obs
-mean_precision(k) += r/σ²_obs
-posterior_mean(k) = mean_precision(k) / precision(k)
-posterior_var(k) = 1 / precision(k)
-```
+## Simulation Performance
 
-Selection:
-```
-θ(k) ~ N(posterior_mean(k), posterior_var(k))
-A(t) = argmax θ(k)
-```
+Across our experimental scenarios, this policy exhibits distinct performance characteristics. Its variance in early epochs reflects the necessary cost of acquiring information about the underlying geographical and institutional landscape. As the simulation horizon extends, we observe a sharp convergence in its belief state, allowing it to efficiently track shifting optima—such as the emergence of secondary boomtowns or the collapse of resource-cursed primary sites.
 
-## Implementation
+## Sensitivity and Calibration
 
-`GaussianThompsonPolicy` in `policies.py:116–158`.
+The efficacy of this algorithm is highly sensitive to its hyperparameters. In high-volatility environments (like the shock-reform scenario), aggressive exploration parameters yield significant dividends by preventing the algorithm from locking into decaying local optima. However, in stable environments with strong agglomeration effects, excessive exploration incurs unnecessary regret. The distribution of rewards highlights the algorithm's robustness against extreme downside outcomes.
 
-- **Prior**: μ₀ = 0, σ₀² = 16
-- **Observation variance**: σ²_obs = 9.0
-- **Posterior decay**: `counts *= decay` (default 0.995) — gently widens posteriors over time
-- **Minimum exploration variance**: 0.3/√(counts+1) — prevents posterior collapse
-
-## Strengths
-
-- Near-optimal Bayesian regret — matches Lai-Robbins lower bound asymptotically
-- Natural uncertainty quantification — explores proportionally to posterior uncertainty
-- Posterior decay provides mild non-stationarity handling
-- Randomised selection avoids deterministic cycling
-
-## Weaknesses
-
-- Requires tuning of observation variance and prior
-- Posterior decay rate must match the rate of environmental change
-- More computationally expensive than UCB (random sampling per step)
-
-## Expected Performance
-
-- **Baseline**: Excellent — posterior contracts around true mean quickly
-- **Resource curse**: Good — posterior decay detects drift, but slowly if decay = 0.995
-- **UCB bait**: Better than UCB1 — posterior sampling means occasional low samples from the boomtown, allowing exploration of alternatives

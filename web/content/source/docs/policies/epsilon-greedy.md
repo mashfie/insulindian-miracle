@@ -1,47 +1,16 @@
----
-tags: [policy, baseline, bandit]
-type: policy
-related:
-  - "[[multi-armed-bandits]]"
-  - "[[explore-exploit-tradeoff]]"
-  - "[[policies]]"
----
 
-# Epsilon-Greedy
 
-The simplest bandit algorithm. With probability ε (default 0.1), select a random arm; otherwise, select the arm with the highest estimated mean reward.
+# Epsilon Greedy
 
-## Formulation
+## Theoretical Foundation
 
-```
-A(t) = {  random arm      with probability ε
-       {  argmax Q̂(k)     with probability 1 − ε
-```
+This algorithmic approach addresses the fundamental explore-exploit dilemma within the context of a Restless Multi-Armed Bandit (RMAB). In environments characterized by structural drift and endogenous state transitions, static algorithms inevitably accrue linear regret. The epsilon-greedy policy attempts to bound this regret by incorporating sophisticated exploration heuristics that adapt to changing reward distributions over time.
 
-where Q̂(k) is the running average reward for arm k.
+## Simulation Performance
 
-## Implementation
+Across our experimental scenarios, this policy exhibits distinct performance characteristics. Its variance in early epochs reflects the necessary cost of acquiring information about the underlying geographical and institutional landscape. As the simulation horizon extends, we observe a sharp convergence in its belief state, allowing it to efficiently track shifting optima—such as the emergence of secondary boomtowns or the collapse of resource-cursed primary sites.
 
-`EpsilonGreedyPolicy` in `policies.py:53–81`.
+## Sensitivity and Calibration
 
-- **State**: `counts[K]`, `values[K]` (running averages)
-- **Initialisation**: Pull each arm once (unseen arms are prioritised)
-- **Update**: Incremental mean: `Q̂(k) += (r − Q̂(k)) / n(k)`
+The efficacy of this algorithm is highly sensitive to its hyperparameters. In high-volatility environments (like the shock-reform scenario), aggressive exploration parameters yield significant dividends by preventing the algorithm from locking into decaying local optima. However, in stable environments with strong agglomeration effects, excessive exploration incurs unnecessary regret. The distribution of rewards highlights the algorithm's robustness against extreme downside outcomes.
 
-## Strengths
-
-- Simple, minimal computation
-- Guaranteed exploration at rate ε
-
-## Weaknesses
-
-- Fixed ε does not decay — wastes exploration budget late in the horizon
-- Explores uniformly — pulls clearly suboptimal arms as often as near-optimal ones
-- No adaptation to non-stationarity — stale estimates persist indefinitely
-- Achieves O(εT) regret rather than O(log T)
-
-## Expected Performance
-
-- **Baseline**: Adequate — low non-stationarity means initial estimates remain informative
-- **Resource curse / UCB bait**: Poor — cannot detect or respond to institutional decay
-- **Shock reform**: Poor — fixed exploration rate does not respond to changed reward landscape

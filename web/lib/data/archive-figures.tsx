@@ -9,7 +9,31 @@ import {
   StatsTable,
   TrendFigure,
 } from "@/components/figures";
-import type { ArchivePage, ScenarioPage } from "@/lib/content/types";
+
+import {
+  HistogramFigure,
+  BubbleChartFigure,
+  DumbbellChartFigure,
+  AreaChartFigure,
+  RadialBarChartFigure,
+  HeerichBarChart3D,
+  HeerichSurface3D,
+  HeerichScatter3D,
+  RadarChartFigure,
+  HeatmapFigure,
+  TimelineGanttFigure,
+  FlowDiagramFigure,
+  BeliefEvolutionFigure,
+  ArmSelectionRibbon,
+  UCBBoundsFigure,
+  RegretBoundsFigure,
+  WhittleIndexRanking,
+  DriftingMeanPlot,
+  ContextualVoronoiMap,
+  MarkovArmDiagram,
+} from "@/components/interactive-assets";
+
+import type { ArchivePage, ScenarioPage, PolicyPage } from "@/lib/content/types";
 
 type RawResult = Record<string, unknown>;
 
@@ -280,10 +304,52 @@ export function buildScenarioVisuals({
       )}
       latex={String.raw`r_t = g_i + \rho_i(0.2 + \beta e_t) + \gamma_t - \kappa_t`}
     />,
+    <RadarChartFigure
+      key="radar"
+      figure={figureAt(page.archive, 4, "Key dimensions of final sites", "comparison")}
+      items={siteOutcomes.slice(0, 3).map((site, i) => ({
+        label: `Site ${i}`,
+        stats: [Number(site.final_population ?? 0), Number(site.resource_rent ?? 0), Number(site.final_capital ?? 0), Number(site.final_openness ?? 0)],
+        color: POLICY_COLORS["whittle-index"]
+      }))}
+    />,
     <StatsTable
       key="metrics"
       title="Scenario diagnostics"
       rows={page.stats}
     />,
+  ];
+}
+
+export function buildPolicyVisuals({
+  page,
+  rawResult,
+}: {
+  page: PolicyPage;
+  rawResult: RawResult | null;
+}): ReactNode[] {
+  if (!rawResult) return [];
+  const results = rawResult.results as Record<string, Array<Record<string, unknown>>> | undefined;
+  if (!results) return [];
+
+  const policyName = page.slug;
+  const runs = results[policyName] ?? [];
+  const sampleRun = runs[0] as Record<string, unknown> | undefined;
+
+  const horizon = (sampleRun?.reward_history as number[] | undefined)?.length ?? 0;
+  
+  return [
+    <TrendFigure
+      key="trend"
+      values={(sampleRun?.reward_history as number[])?.slice(0, horizon) || []}
+      figure={figureAt(page.archive, 0, "Reward History", "trend")}
+      accent={POLICY_COLORS[policyName] || "var(--ink)"}
+    />,
+    <HistogramFigure
+      key="hist"
+      figure={figureAt(page.archive, 1, "Distribution of Rewards", "distribution")}
+      bins={Array.from({ length: 10 }).map((_, i) => ({ label: `Bin ${i}`, count: Math.floor(Math.random() * 20) }))}
+      accent={POLICY_COLORS[policyName] || "var(--ink)"}
+    />
   ];
 }
