@@ -3,13 +3,11 @@ import { buildLandingVisuals } from "@/lib/data/archive-figures";
 import {
   getLandingArchivePage,
   getRawResultFile,
-  getReferenceEntries,
 } from "@/lib/content/repository";
 
 export default async function Page() {
-  const [archive, references, whittleRun, ucbBaitSummary] = await Promise.all([
+  const [archive, whittleRun, ucbBaitSummary] = await Promise.all([
     getLandingArchivePage(),
-    getReferenceEntries(),
     getRawResultFile("whittle-run"),
     getRawResultFile("ucb-bait-boomtown-v4"),
   ]);
@@ -20,5 +18,5 @@ export default async function Page() {
     ucbBaitSummary,
   });
 
-  return <HomeView archive={archive} references={references} visuals={visuals} />;
+  return <HomeView archive={archive} visuals={visuals} />;
 }

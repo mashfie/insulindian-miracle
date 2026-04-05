@@ -11,12 +11,11 @@ export default async function ScenariosPage() {
 
   return (
     <CatalogGrid
-      eyebrow="Case Studies"
       title="Scenarios"
       description="Nine institutional experiments, each grounded in real economic history. Iran's petrodollar trap, Norway's sovereign wealth fund, the Hanseatic League's trade network, Korea's post-crisis reform. The history leads; the parameters follow."
       items={pages.map((page) => ({
         href: `/scenarios/${page.slug}/`,
-        meta: page.result?.scenario.name ?? "scenario",
+        meta: page.result?.runs ? `${page.result.runs} runs` : "scenario case",
         title: page.document?.title ?? page.archive.title,
         description:
           page.result?.scenario.description ??

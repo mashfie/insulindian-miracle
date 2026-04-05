@@ -32,13 +32,9 @@ export default async function PolicyDetailPage({
   return (
     <DocumentView
       document={page.document}
-      eyebrow="Policy Dossier"
       deck={page.archive.dek}
+      slug={slug}
       references={references}
-      breadcrumbItems={[
-        { href: "/", label: "Home" },
-        { href: "/policies/", label: "Policies" },
-      ]}
       aside={
         page.evidenceScenario ? (
           <ComparisonModule
