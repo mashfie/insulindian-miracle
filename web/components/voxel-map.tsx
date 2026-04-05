@@ -16,9 +16,7 @@ type VoxelMapProps = {
 
 /**
  * Heerich-powered isometric terrain renderer.
- * Terrain shape comes from `data` (elevation). When `overlayData` is provided,
- * face color is driven by that layer instead — enabling thematic map coloring
- * over a consistent 3D terrain form.
+ * Fixed for Y-up/down visual alignment and subtle gradients.
  */
 export function VoxelMap({
   data,
@@ -49,6 +47,7 @@ export function VoxelMap({
         }
         const elev = data[z]?.[x] ?? 0;
         const stackH = Math.floor(elev * maxStack);
+        // Builds from Y=0 (bottom) up to stackH (top)
         return y <= stackH;
       },
       style: {
@@ -56,32 +55,33 @@ export function VoxelMap({
           const elev = data[z]?.[x] ?? 0;
           const maxH = Math.floor(elev * maxStack);
           const isTop = y === maxH;
-          // Color driven by overlayData when present, elevation otherwise
           const t = overlayData?.[z]?.[x] ?? elev;
 
-          const r = Math.round(color[0] + t * 80);
-          const g = Math.round(color[1] + t * 60);
-          const b = Math.round(color[2] - t * 30);
+          // Hiroshige palette mapping: Indigo for valleys, Sandstone/Moss for mid, Dawn Pink for peaks
+          const baseColor = t < 0.3 ? "#243D5C" : t < 0.7 ? "#5D7275" : "#F0C1A4";
+          const stroke = "#2B2821";
 
           if (isTop) {
             return {
-              fill: `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 45)}, ${Math.min(255, b + 20)})`,
-              stroke: `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.15)`,
+              fill: `color-mix(in lab, ${baseColor}, #fff ${10 + y * 4}%)`,
+              stroke,
               strokeWidth: 0.3,
             };
           }
           return {
-            fill: `rgb(${Math.max(0, r - 30)}, ${Math.max(0, g - 25)}, ${Math.max(0, b - 10)})`,
-            stroke: `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.08)`,
+            fill: `color-mix(in lab, ${baseColor}, #000 ${20 - y * 3}%)`,
+            stroke,
             strokeWidth: 0.2,
+            opacity: 0.8,
           };
         },
-        top: (x: number, _y: number, z: number) => {
+        top: (x: number, y: number, z: number) => {
           const elev = data[z]?.[x] ?? 0;
           const t = overlayData?.[z]?.[x] ?? elev;
+          const baseColor = t < 0.3 ? "#243D5C" : t < 0.7 ? "#5D7275" : "#F0C1A4";
           return {
-            fill: `rgb(${Math.min(255, Math.round(color[0] + t * 130))}, ${Math.min(255, Math.round(color[1] + t * 105))}, ${Math.min(255, Math.round(color[2] + t * 50))})`,
-            stroke: `rgba(13, 13, 13, 0.12)`,
+            fill: `color-mix(in lab, ${baseColor}, #fff ${30 + y * 5}%)`,
+            stroke: "#2B2821",
             strokeWidth: 0.4,
           };
         },
@@ -90,8 +90,6 @@ export function VoxelMap({
 
     for (const site of sites) {
       const sx = Math.round(site.x * (width - 1));
-      // site.y is normalized top-to-bottom in source coords; data rows are
-      // flipped so z=0 is the last source row — mirror the y coordinate
       const sz = (height - 1) - Math.round(site.y * (height - 1));
       const baseElev = data[sz]?.[sx] ?? 0;
       const baseH = Math.floor(baseElev * maxStack);
@@ -102,8 +100,8 @@ export function VoxelMap({
           position: [sx, baseH + 1, sz],
           size: [1, 4, 1],
           style: {
-            default: { fill: "#8a3824", stroke: "#4a1810", strokeWidth: 0.5 },
-            top: { fill: "#c44d32", stroke: "#8a3824", strokeWidth: 0.5 },
+            default: { fill: "#8a3824", stroke: "rgba(13,13,13,0.2)", strokeWidth: 0.4 },
+            top: { fill: "#c44d32", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4 },
           },
         });
       } else if (site.trade_cluster) {
@@ -112,8 +110,8 @@ export function VoxelMap({
           position: [sx - 1, baseH + 1, sz - 1],
           size: [3, 2, 3],
           style: {
-            default: { fill: "#3f5c52", stroke: "#1a2c26", strokeWidth: 0.5 },
-            top: { fill: "#5a8a78", stroke: "#3f5c52", strokeWidth: 0.5 },
+            default: { fill: "#3f5c52", stroke: "rgba(13,13,13,0.2)", strokeWidth: 0.4 },
+            top: { fill: "#5a8a78", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4 },
           },
         });
       } else {
@@ -122,8 +120,8 @@ export function VoxelMap({
           position: [sx, baseH + 1, sz],
           size: [1, 2, 1],
           style: {
-            default: { fill: "#0d0d0d", stroke: "#333", strokeWidth: 0.4 },
-            top: { fill: "#fef5f0", stroke: "#0d0d0d", strokeWidth: 0.5 },
+            default: { fill: "#0d0d0d", stroke: "rgba(13,13,13,0.2)", strokeWidth: 0.4 },
+            top: { fill: "#fef5f0", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4 },
           },
         });
       }

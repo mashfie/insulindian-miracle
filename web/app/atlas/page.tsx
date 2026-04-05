@@ -1,4 +1,3 @@
-import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
 import { AtlasMap } from "@/components/atlas-map";
 import { HeroScene } from "@/components/hero-scene";
 import {
@@ -13,15 +12,9 @@ export default async function AtlasPage() {
 
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
-      <ArchiveSettingsPanel
-        links={SITE_ROUTES}
-        accentLabel="Layered field"
-        motionLabel="Atlas kinetics"
-      />
       <HeroScene title="Atlas" variant="archive" />
       <article className="site-shell">
         <header className="atlas__header">
-          <div className="eyebrow">Field Report</div>
           <h1 className="headline">Atlas</h1>
           <p className="dek">
             The peninsula as experimental apparatus. Each chapter pivots the same Perlin-noise terrain through a different inferential layer — elevation, hydrology, resource endowment, institutional allocation, settlement outcome.

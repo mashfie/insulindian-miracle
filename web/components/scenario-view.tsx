@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 
-import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
-import { Breadcrumb } from "@/components/breadcrumb";
 import { ComparisonModule } from "@/components/comparison-module";
 import { HeroScene } from "@/components/hero-scene";
 import { ProseHtml } from "@/components/prose-html";
@@ -29,23 +27,10 @@ export function ScenarioView({
 
   return (
     <main id="main-content" className="archive-page" data-variant={variant}>
-      <ArchiveSettingsPanel
-        links={SITE_ROUTES}
-        accentLabel={page.slug === "ucb-bait" ? "Boomtown / collapse" : "Comparative scenario"}
-        motionLabel="Atlas kinetics"
-      />
-      <HeroScene title={archive.title} variant={variant} />
+      <HeroScene title={archive.title} variant={variant} slug={page.slug} />
       <article className="site-shell">
-        <Breadcrumb
-          items={[
-            { href: "/", label: "Home" },
-            { href: "/scenarios/", label: "Scenarios" },
-          ]}
-          current={archive.title}
-        />
-        <section className="intro-grid motion-reveal">
+        <section className="intro-grid motion-reveal" style={{ ["--reveal-order" as string]: 0 }}>
           <div>
-            <div className="eyebrow">Scenario Plate</div>
             <h1 className="headline">{archive.title}</h1>
             <p className="dek">{archive.dek}</p>
             <p className="lede">{archive.lede}</p>
@@ -73,40 +58,47 @@ export function ScenarioView({
           {visuals[0]}
         </section>
 
-        {archive.sections.map((section, index) => (
-          <section key={section.id} id={section.id} className="section-row section-block motion-reveal" style={{ ["--reveal-order" as string]: index + 1 }}>
-            <div className="section-row__text">
-              <div className="section-kicker">Scenario reading {String(index + 1).padStart(2, "0")}</div>
-              <h2>{section.title}</h2>
-              <div className={index === 0 ? "article-columns-2 article-body drop-cap" : "article-columns-2 article-body"}>
-                <ProseHtml html={section.html} />
-              </div>
-              {index === archive.sections.length - 1 && page.document ? (
-                <div style={{ marginTop: "2rem" }}>
-                  <div className="section-kicker">Repository note</div>
-                  <ProseHtml html={page.document.summaryHtml} />
+        {archive.sections.map((section, index) => {
+          // Skip first two visuals as they are already used prominently at the top.
+          // Skip the last visual if it's the duplicate stats table (index 4).
+          const availableVisuals = visuals.slice(2, 4);
+          const visual = availableVisuals[index % availableVisuals.length];
+
+          return (
+            <section key={section.id} id={section.id} className="section-row section-block motion-reveal" style={{ ["--reveal-order" as string]: index + 1 }}>
+              <div className="section-row__text">
+                <div className="section-kicker">Scenario reading {String(index + 1).padStart(2, "0")}</div>
+                <h2>{section.title}</h2>
+                <div className={index === 0 ? "article-columns-2 article-body drop-cap" : "article-columns-2 article-body"}>
+                  <ProseHtml html={section.html} />
                 </div>
-              ) : null}
-            </div>
-            <div className="section-row__figure">
-              {visuals[(index + 1) % visuals.length]}
-              {archive.pullQuotes[index] ? (
-                <aside className="pull-quote">
-                  <span>
-                    {'\u201C'}
-                    {archive.pullQuotes[index]?.text}
-                    {'\u201D'}
-                  </span>
-                  {archive.pullQuotes[index]?.attribution ? (
-                    <div className="pull-quote__attribution">
-                      {archive.pullQuotes[index]?.attribution}
-                    </div>
-                  ) : null}
-                </aside>
-              ) : null}
-            </div>
-          </section>
-        ))}
+                {index === archive.sections.length - 1 && page.document ? (
+                  <div style={{ marginTop: "2rem" }}>
+                    <div className="section-kicker">Repository note</div>
+                    <ProseHtml html={page.document.summaryHtml} />
+                  </div>
+                ) : null}
+              </div>
+              <div className="section-row__figure">
+                {visual}
+                {archive.pullQuotes[index] ? (
+                  <aside className="pull-quote">
+                    <span>
+                      {'\u201C'}
+                      {archive.pullQuotes[index]?.text}
+                      {'\u201D'}
+                    </span>
+                    {archive.pullQuotes[index]?.attribution ? (
+                      <div className="pull-quote__attribution">
+                        {archive.pullQuotes[index]?.attribution}
+                      </div>
+                    ) : null}
+                  </aside>
+                ) : null}
+              </div>
+            </section>
+          );
+        })}
 
         <section className="section-full section-block">
           <div className="section-kicker">Runtime Hook</div>

@@ -38,7 +38,7 @@ export function ComparisonModule({
       <div className="comparison-card__header">
         <div>
           <div className="section-kicker">Live Experiment</div>
-          <h2 style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>Policy Comparison</h2>
+          <h2>Policy Comparison</h2>
           <p className="comparison-note">{note}</p>
         </div>
         <button

@@ -1,8 +1,6 @@
 import Link from "next/link";
 
-import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
 import { HeroScene } from "@/components/hero-scene";
-import { SITE_ROUTES } from "@/lib/navigation";
 
 type CatalogItem = {
   href: string;
@@ -13,26 +11,18 @@ type CatalogItem = {
 
 export function CatalogGrid({
   title,
-  eyebrow,
   description,
   items,
 }: {
   title: string;
-  eyebrow: string;
   description: string;
   items: CatalogItem[];
 }) {
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
-      <ArchiveSettingsPanel
-        links={SITE_ROUTES}
-        accentLabel="Paper / ink"
-        motionLabel="Atlas kinetics"
-      />
       <HeroScene title={title} variant="archive" />
       <article className="document-view site-shell">
         <header className="document-view__header">
-          <div className="eyebrow">{eyebrow}</div>
           <h1 className="headline">{title}</h1>
           <p className="dek">{description}</p>
         </header>

@@ -1,22 +1,19 @@
 import type { ReactNode } from "react";
 
-import { ArchiveSettingsPanel } from "@/components/archive-settings-panel";
 import { HeroScene } from "@/components/hero-scene";
 import { ProseHtml } from "@/components/prose-html";
 import { SectionNav } from "@/components/section-nav";
-import type { ArchivePage, ReferenceEntry } from "@/lib/content/types";
+import type { ArchivePage } from "@/lib/content/types";
 import { SITE_ROUTES } from "@/lib/navigation";
 
 type HomeViewProps = {
   archive: ArchivePage;
-  references: ReferenceEntry[];
   visuals: ReactNode[];
   variant?: "archive" | "cartographic-ledger" | "polyhedral-report";
 };
 
 export function HomeView({
   archive,
-  references,
   visuals,
   variant = "archive",
 }: HomeViewProps) {
@@ -24,16 +21,10 @@ export function HomeView({
 
   return (
     <main id="main-content" className="archive-page" data-variant={variant}>
-      <ArchiveSettingsPanel
-        links={routeLinks}
-        accentLabel={variant === "polyhedral-report" ? "Brass / umber" : "Sea-green / ink"}
-        motionLabel="Atlas kinetics"
-      />
       <HeroScene title={archive.title} variant={variant} />
       <article className="site-shell">
         <section className="intro-grid motion-reveal" style={{ ["--reveal-order" as string]: 0 }}>
           <div>
-            <div className="eyebrow">Insulindian Miracle Archive</div>
             <h1 className="headline">{archive.title}</h1>
             <p className="dek">{archive.dek}</p>
             <p className="lede">{archive.lede}</p>
@@ -101,33 +92,7 @@ export function HomeView({
           );
         })}
 
-        <footer className="site-footer section-block">
-          <div className="site-footer__figure">
-            <div className="pull-quote">
-              <span>
-                {'\u201C'}
-                Forgetting what was true yesterday is how you learn what is true now. SW-UCB
-                beats the oracle in every scenario because amnesia is the correct epistemology.
-                {'\u201D'}
-              </span>
-              <div className="pull-quote__attribution">Landing plate</div>
-            </div>
-          </div>
-          <div>
-            <div className="section-kicker">Annotated Archive</div>
-            <h2 style={{ fontSize: "2.8rem" }}>Reference Field</h2>
-            <div className="reference-grid">
-              {references.slice(0, 4).map((reference) => (
-                <article key={reference.id} className="reference-card">
-                  <div className="reference-card__meta">
-                    {reference.category} / {reference.year ?? "n.d."}
-                  </div>
-                  <h3>{reference.title}</h3>
-                  <p>{reference.annotation ?? reference.notes}</p>
-                </article>
-              ))}
-            </div>
-          </div>
+        <footer className="site-footer">
           <div className="site-footer__colophon">
             <div className="site-footer__identity">Insulindian Miracle Archive</div>
             <div className="footer-links">
@@ -136,9 +101,6 @@ export function HomeView({
                   {link.label}
                 </a>
               ))}
-            </div>
-            <div className="site-footer__tagline">
-              A computational archive on city formation, institutional drift, and the resource curse.
             </div>
           </div>
         </footer>

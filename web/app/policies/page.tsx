@@ -7,8 +7,7 @@ export default async function PoliciesPage() {
 
   return (
     <CatalogGrid
-      eyebrow="Academic Dossier"
-      title="Policies"
+      title="Policy Dossier"
       description="Ten multi-armed bandit policies, each with a different epistemology of investment. Optimism, forgetting, spatial modelling, posterior sampling. The math speaks for itself; the results table settles the argument."
       items={pages.map((page) => ({
         href: `/policies/${page.slug}/`,

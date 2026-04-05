@@ -23,7 +23,7 @@ function toSvgPoint(
 ) {
   const x = 28 + (index / Math.max(count - 1, 1)) * 364;
   const y = 212 - ((value - min) / Math.max(max - min, 0.0001)) * 176;
-  return `${x},${y}`;
+  return { x, y };
 }
 
 export function formatMetric(
@@ -63,9 +63,9 @@ export function TrendFigure({
   accent?: string;
 }) {
   const [step, setStep] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setStep(0);
     const timer = setInterval(() => {
       setStep((s) => {
         if (s >= values.length) {
@@ -80,10 +80,9 @@ export function TrendFigure({
 
   const currentValues = values.slice(0, step);
   const { min, max } = extent(values.length > 0 ? values : [0, 1]); 
-  const points = currentValues
-    .map((v, i) => toSvgPoint(i, v, values.length, min, max))
-    .join(" ");
-  const area = points.length > 0 ? `M28,212 L${points} L${28 + ((step - 1) / Math.max(values.length - 1, 1)) * 364},212 Z` : "";
+  
+  const pointCoords = currentValues.map((v, i) => toSvgPoint(i, v, values.length, min, max));
+  const points = pointCoords.map(p => `${p.x},${p.y}`).join(" ");
 
   return (
     <figure className="figure-card">
@@ -95,7 +94,13 @@ export function TrendFigure({
             <path key={s} d={`M28 ${y}H392`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
           );
         })}
-        {area && <path d={area} fill={accent} opacity="0.10" />}
+        
+        {hoveredIndex !== null && step > 0 && hoveredIndex < step && (
+          <text x={392} y={24} textAnchor="end" fill="var(--ink)" fontFamily="var(--font-ui)" fontSize="10" letterSpacing="0.05em" fontWeight="bold">
+            T={hoveredIndex} : {values[hoveredIndex].toFixed(2)}
+          </text>
+        )}
+
         {points && (
           <polyline
             fill="none"
@@ -105,6 +110,25 @@ export function TrendFigure({
             vectorEffect="non-scaling-stroke"
           />
         )}
+
+        {/* Hover overlay targets */}
+        {pointCoords.map((p, i) => (
+          <g 
+            key={i} 
+            onMouseEnter={() => setHoveredIndex(i)} 
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={{ cursor: "crosshair" }}
+          >
+            {/* Invisible larger hit target */}
+            <circle cx={p.x} cy={p.y} r="10" fill="none" pointerEvents="all" />
+            {hoveredIndex === i && (
+              <circle cx={p.x} cy={p.y} r="4" fill="var(--paper)" stroke={accent} strokeWidth="2" />
+            )}
+            {hoveredIndex === i && (
+              <line x1={p.x} y1={36} x2={p.x} y2={212} stroke="var(--ink-faint)" strokeWidth="1" strokeDasharray="2 2" pointerEvents="none" />
+            )}
+          </g>
+        ))}
       </svg>
       <FigureMeta figure={figure} iteration={step} />
     </figure>
@@ -119,9 +143,9 @@ export function ComparisonBars({
   items: Array<{ label: string; value: number; color?: string }>;
 }) {
   const [progress, setProgress] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setProgress(0);
     const timer = setInterval(() => {
       setProgress((p) => {
         if (p >= 1) {
@@ -139,32 +163,52 @@ export function ComparisonBars({
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
         <path d="M84 24V210H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        
+        {hoveredIndex !== null && progress > 0.9 && (
+          <text x={392} y={16} textAnchor="end" fill="var(--ink)" fontFamily="var(--font-ui)" fontSize="10" letterSpacing="0.05em" fontWeight="bold">
+            {items[hoveredIndex].label.toUpperCase()} : {items[hoveredIndex].value.toFixed(2)}
+          </text>
+        )}
+
         {items.map((item, index) => {
           const y = 42 + index * 40;
           const width = (item.value / max) * 280 * progress;
+          const isHovered = hoveredIndex === index;
+          const opacity = hoveredIndex === null ? 0.85 : isHovered ? 1 : 0.3;
+
           return (
-            <g key={item.label}>
+            <g 
+              key={item.label}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{ transition: "opacity 0.2s ease-out", cursor: "crosshair" }}
+              opacity={opacity}
+            >
               <text
                 x="76"
                 y={y + 14}
                 textAnchor="end"
-                fill="rgba(19,19,19,0.72)"
+                fill={isHovered ? "var(--ink)" : "rgba(19,19,19,0.72)"}
                 fontFamily="var(--font-ui)"
                 fontSize="11"
                 letterSpacing="1.4"
+                fontWeight={isHovered ? "bold" : "normal"}
               >
                 {item.label.toUpperCase()}
               </text>
-              <rect x="94" y={y} width={width} height="22" fill={item.color ?? "var(--paper)"} stroke="var(--ink)" strokeWidth="1.5" opacity="0.85" />
-              <text
-                x={100 + width}
-                y={y + 15}
-                fill="rgba(19,19,19,0.78)"
-                fontFamily="var(--font-ui)"
-                fontSize="12"
-              >
-                {(item.value * progress).toFixed(1)}
-              </text>
+              <rect x="94" y={y} width={width} height="22" fill={item.color ?? "var(--paper)"} stroke="var(--ink)" strokeWidth={isHovered ? "2" : "1.5"} />
+              {progress > 0.9 && (
+                <text
+                  x={100 + width}
+                  y={y + 15}
+                  fill={isHovered ? "var(--ink)" : "rgba(19,19,19,0.78)"}
+                  fontFamily="var(--font-ui)"
+                  fontSize="12"
+                  fontWeight={isHovered ? "bold" : "normal"}
+                >
+                  {(item.value * progress).toFixed(1)}
+                </text>
+              )}
             </g>
           );
         })}
@@ -187,9 +231,9 @@ export function OutcomeScatter({
   }>;
 }) {
   const [visibleCount, setVisibleCount] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setVisibleCount(0);
     const timer = setInterval(() => {
       setVisibleCount((c) => {
         if (c >= points.length) {
@@ -209,24 +253,44 @@ export function OutcomeScatter({
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
         <path d="M42 24V212H388" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        
+        {hoveredIndex !== null && visibleCount > hoveredIndex && (
+          <text x={388} y={16} textAnchor="end" fill="var(--ink)" fontFamily="var(--font-ui)" fontSize="10" letterSpacing="0.05em" fontWeight="bold">
+            {points[hoveredIndex].label.toUpperCase()} : X({points[hoveredIndex].x.toFixed(1)}) Y({points[hoveredIndex].y.toFixed(1)}) {points[hoveredIndex].boomtown ? "[BOOMTOWN]" : ""}
+          </text>
+        )}
+
         {points.slice(0, visibleCount).map((point, i) => {
           const cx = 42 + ((point.x - xExtent.min) / (xExtent.max - xExtent.min)) * 346;
           const cy = 212 - ((point.y - yExtent.min) / (yExtent.max - yExtent.min)) * 188;
 
+          const isHovered = hoveredIndex === i;
+          const baseOpacity = Math.min(1, (visibleCount - i) / 2);
+          const opacity = hoveredIndex === null ? baseOpacity : isHovered ? 1 : 0.2;
+
           return (
-            <g key={point.label} style={{ opacity: Math.min(1, (visibleCount - i) / 2) }}>
+            <g 
+              key={point.label} 
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{ transition: "opacity 0.2s ease-out, transform 0.2s", cursor: "crosshair", transformOrigin: `${cx}px ${cy}px` }} 
+              opacity={opacity}
+              transform={isHovered ? "scale(1.2)" : "scale(1)"}
+            >
+              {/* Invisible larger hit target */}
+              <circle cx={cx} cy={cy} r="12" fill="none" pointerEvents="all" />
               <circle
                 cx={cx}
                 cy={cy}
                 r={point.boomtown ? 6.2 : 4.6}
                 fill={point.boomtown ? "#8a3824" : "#4a6a7a"}
                 stroke={point.boomtown ? "#4a1810" : "#2a3a48"}
-                strokeWidth="1.5"
-                opacity="0.88"
+                strokeWidth={isHovered ? "2.5" : "1.5"}
+                opacity={isHovered ? "1" : "0.88"}
               />
               <text
-                x={cx + 8}
-                y={cy - 8}
+                x={cx + (isHovered ? 10 : 8)}
+                y={cy - (isHovered ? 10 : 8)}
                 fill="var(--ink)"
                 fontFamily="var(--font-ui)"
                 fontSize="10"
@@ -280,11 +344,11 @@ export function RewardTrajectory({
   }>;
 }) {
   const [step, setStep] = useState(0);
+  const [hoveredSeries, setHoveredSeries] = useState<number | null>(null);
 
   const maxLen = Math.max(...series.map((s) => s.mean.length), 1);
 
   useEffect(() => {
-    setStep(0);
     const timer = setInterval(() => {
       setStep((s) => {
         if (s >= maxLen) {
@@ -325,15 +389,15 @@ export function RewardTrajectory({
             <path key={s} d={`M42 ${y}H388`} stroke="rgba(19,19,19,0.08)" strokeDasharray="6 8" strokeWidth="1" />
           );
         })}
-        {series.map((s) => {
+        {series.map((s, i) => {
           const cumMean: number[] = [];
           const cumUpper: number[] = [];
           const cumLower: number[] = [];
           let accMean = 0;
           let accVar = 0;
-          for (let i = 0; i < Math.min(step, s.mean.length); i++) {
-            accMean += s.mean[i];
-            accVar += s.std[i] * s.std[i];
+          for (let j = 0; j < Math.min(step, s.mean.length); j++) {
+            accMean += s.mean[j];
+            accVar += s.std[j] * s.std[j];
             cumMean.push(accMean);
             const band = Math.sqrt(accVar);
             cumUpper.push(accMean + band);
@@ -343,19 +407,30 @@ export function RewardTrajectory({
           if (cumMean.length === 0) return null;
 
           const bandPath =
-            cumUpper.map((v, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(v)}`).join(" ") +
+            cumUpper.map((v, idx) => `${idx === 0 ? "M" : "L"}${toX(idx)},${toY(v)}`).join(" ") +
             " " +
-            [...cumLower].reverse().map((v, i) => `L${toX(cumLower.length - 1 - i)},${toY(v)}`).join(" ") +
+            [...cumLower].reverse().map((v, idx) => `L${toX(cumLower.length - 1 - idx)},${toY(v)}`).join(" ") +
             " Z";
 
           const linePath = cumMean
-            .map((v, i) => `${i === 0 ? "M" : "L"}${toX(i)},${toY(v)}`)
+            .map((v, idx) => `${idx === 0 ? "M" : "L"}${toX(idx)},${toY(v)}`)
             .join(" ");
 
+          const isHovered = hoveredSeries === i;
+          const isFaded = hoveredSeries !== null && !isHovered;
+
           return (
-            <g key={s.label}>
-              <path d={bandPath} fill={s.color} opacity="0.12" />
-              <path d={linePath} fill="none" stroke={s.color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+            <g 
+              key={s.label}
+              onMouseEnter={() => setHoveredSeries(i)}
+              onMouseLeave={() => setHoveredSeries(null)}
+              style={{ transition: "opacity 0.2s ease-out", cursor: "crosshair" }}
+              opacity={isFaded ? 0.15 : 1}
+            >
+              <path d={bandPath} fill={s.color} opacity={isHovered ? "0.2" : "0.12"} />
+              <path d={linePath} fill="none" stroke={s.color} strokeWidth={isHovered ? "3" : "2"} vectorEffect="non-scaling-stroke" />
+              {/* Invisible larger hit target for hover */}
+              <path d={linePath} fill="none" stroke="transparent" strokeWidth="16" vectorEffect="non-scaling-stroke" />
             </g>
           );
         })}
@@ -366,10 +441,22 @@ export function RewardTrajectory({
       </div>
       <p className="figure-caption">{figure.caption}</p>
       <div style={{ display: "flex", gap: "1.2rem", flexWrap: "wrap", marginTop: "0.5rem", fontSize: "0.75rem", fontFamily: "var(--font-ui)", letterSpacing: "0.05em" }}>
-        {series.map((s) => (
-          <span key={s.label} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+        {series.map((s, i) => (
+          <span 
+            key={s.label} 
+            style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              gap: "0.3rem",
+              cursor: "pointer",
+              opacity: hoveredSeries === null || hoveredSeries === i ? 1 : 0.4,
+              transition: "opacity 0.2s"
+            }}
+            onMouseEnter={() => setHoveredSeries(i)}
+            onMouseLeave={() => setHoveredSeries(null)}
+          >
             <span style={{ width: 12, height: 3, background: s.color, display: "inline-block" }} />
-            {s.label}
+            {s.label.toUpperCase()}
           </span>
         ))}
       </div>
@@ -387,9 +474,9 @@ export function PolicyRankingBars({
   oracle?: number;
 }) {
   const [progress, setProgress] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setProgress(0);
     const timer = setInterval(() => {
       setProgress((p) => {
         if (p >= 1) {
@@ -411,6 +498,13 @@ export function PolicyRankingBars({
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
         <path d="M100 16V224H392" stroke="rgba(19,19,19,0.18)" strokeWidth="1.4" />
+        
+        {hoveredIndex !== null && progress > 0.9 && (
+          <text x={392} y={16} textAnchor="end" fill="var(--ink)" fontFamily="var(--font-ui)" fontSize="10" letterSpacing="0.05em" fontWeight="bold">
+            {sorted[hoveredIndex].label.toUpperCase()} : {sorted[hoveredIndex].value.toFixed(1)}
+          </text>
+        )}
+
         {oracle !== undefined ? (
           <>
             <line
@@ -435,19 +529,31 @@ export function PolicyRankingBars({
             </text>
           </>
         ) : null}
+        
         {sorted.map((item, index) => {
           const y = 22 + index * (barHeight + gap);
           const width = (item.value / max) * 280 * progress;
+          
+          const isHovered = hoveredIndex === index;
+          const opacity = hoveredIndex === null ? 1 : isHovered ? 1 : 0.3;
+
           return (
-            <g key={item.label}>
+            <g 
+              key={item.label}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{ transition: "opacity 0.2s ease-out", cursor: "crosshair" }}
+              opacity={opacity}
+            >
               <text
                 x="94"
                 y={y + barHeight / 2 + 4}
                 textAnchor="end"
-                fill="rgba(19,19,19,0.72)"
+                fill={isHovered ? "var(--ink)" : "rgba(19,19,19,0.72)"}
                 fontFamily="var(--font-ui)"
                 fontSize="10"
                 letterSpacing="1"
+                fontWeight={isHovered ? "bold" : "normal"}
               >
                 {item.label.toUpperCase()}
               </text>
@@ -458,17 +564,20 @@ export function PolicyRankingBars({
                 height={barHeight}
                 fill={item.color ?? "var(--paper)"}
                 stroke="var(--ink)"
-                strokeWidth="1.2"
+                strokeWidth={isHovered ? "2" : "1.2"}
               />
-              <text
-                x={106 + width}
-                y={y + barHeight / 2 + 4}
-                fill="rgba(19,19,19,0.78)"
-                fontFamily="var(--font-ui)"
-                fontSize="11"
-              >
-                {(item.value * progress).toFixed(0)}
-              </text>
+              {progress > 0.9 && (
+                <text
+                  x={106 + width}
+                  y={y + barHeight / 2 + 4}
+                  fill={isHovered ? "var(--ink)" : "rgba(19,19,19,0.78)"}
+                  fontFamily="var(--font-ui)"
+                  fontSize="11"
+                  fontWeight={isHovered ? "bold" : "normal"}
+                >
+                  {(item.value * progress).toFixed(0)}
+                </text>
+              )}
             </g>
           );
         })}
@@ -504,4 +613,3 @@ export function StatsTable({
     </div>
   );
 }
-
