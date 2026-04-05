@@ -60,8 +60,8 @@ export function ScenarioView({
 
         {archive.sections.map((section, index) => {
           // Skip first two visuals as they are already used prominently at the top.
-          // Skip the last visual if it's the duplicate stats table (index 4).
-          const availableVisuals = visuals.slice(2, 4);
+          // Skip the last visual if it's the duplicate stats table.
+          const availableVisuals = visuals.slice(2, visuals.length - 1);
           const visual = availableVisuals[index % availableVisuals.length];
 
           return (

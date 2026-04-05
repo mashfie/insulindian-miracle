@@ -11,6 +11,7 @@ type DocumentViewProps = {
   slug?: string;
   references?: ReferenceEntry[];
   aside?: ReactNode;
+  visuals?: ReactNode[];
 };
 
 export function DocumentView({
@@ -19,6 +20,7 @@ export function DocumentView({
   slug,
   references = [],
   aside,
+  visuals = [],
 }: DocumentViewProps) {
   return (
     <main id="main-content" className="archive-page" data-variant="archive">
@@ -33,10 +35,12 @@ export function DocumentView({
             <div className="drop-cap">
               <ProseHtml html={document.summaryHtml} />
             </div>
-            {document.sections.map((section) => (
+            {visuals[0] ? <div className="figure-embed">{visuals[0]}</div> : null}
+            {document.sections.map((section, index) => (
               <section key={section.id} id={section.id} className="section-block">
                 <h2>{section.title}</h2>
                 <ProseHtml html={section.html} />
+                {visuals[index + 1] ? <div className="figure-embed">{visuals[index + 1]}</div> : null}
               </section>
             ))}
           </div>

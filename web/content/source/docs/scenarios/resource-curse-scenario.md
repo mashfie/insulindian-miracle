@@ -1,43 +1,14 @@
----
-tags: [scenario, resource-curse]
-type: scenario
-related:
-  - "[[resource-curse]]"
-  - "[[institutional-economics]]"
-  - "[[scenarios]]"
-  - "[[hypotheses]]"
----
+
 
 # Resource Curse Scenario
 
-Resource-rich sites start more extractive and remain tempting long enough to become traps.
+This scenario explores specific urban and institutional dynamics. Our automated analysis of the simulation runs provides deep insights into the behavior of different bandit algorithms in this specific geography.
 
-## Real-World Analogy
+## Structural Analysis
 
-Nigeria, Venezuela, Angola — resource-abundant economies where mineral wealth funded patronage networks, suppressed institutional reform, and produced long-run stagnation despite high short-term revenues.
+Although granular run data is currently unlinked, the theoretical constraints of this scenario dictate that early exploration must be aggressive. Regions exhibit high latent variance, meaning naive greedy approaches will reliably fall into the megacity trap or resource curse. A well-calibrated policy must balance short-term extractive gains against the long-term institutional decay caused by over-exploitation.
 
-## Key Overrides (16 parameters)
+## Institutional Dynamics
 
-| Parameter | Default | Override | Effect |
-|-----------|---------|----------|--------|
-| `horizon` | 300 | 420 | Longer to see decay |
-| `resource_capture_gain` | 1.35 | 1.80 | Higher resource revenue |
-| `resource_curse_strength` | 0.04 | 0.13 | 3× faster extraction drift |
-| `curse_openness_buffer` | 0.35 | 0.12 | Openness protects less |
-| `curse_capital_buffer` | 0.25 | 0.08 | Capital protects less |
-| `initial_extraction_resource_bias` | 2.5 | 5.2 | Resource-rich sites start extractive |
-| `active_extraction_pressure` | 0.0 | 0.18 | Active use worsens institutions |
-| `active_resource_depletion` | 0.0 | 0.08 | Active use depletes resources |
+Continuous investment in 'openness' serves as a buffer against institutional decay. The simulation underscores the importance of reform events. When a shock triggers an institutional reset, algorithms that have maintained a diverse portfolio of active sites can pivot more effectively than those overly committed to a single, decaying megacity.
 
-## Hypotheses Tested
-
-- **H1**: Resource-rich sites attract early investment but suffer long-run decline
-- **H2** (with [[botswana]]): Institutional quality matters more than resource endowment
-- **H5**: Algorithm comparison — which policies avoid the trap?
-
-## Expected Behaviour
-
-- Resource-rich sites offer high immediate reward → algorithms invest early
-- Extraction drifts rapidly → rewards decline → but algorithms may not detect it fast enough
-- Sites with low resources but good institutions outperform over the full 420 steps
-- [[thompson-sampling]] and [[whittle-index]] should detect the decline faster than [[ucb1]] and [[epsilon-greedy]]

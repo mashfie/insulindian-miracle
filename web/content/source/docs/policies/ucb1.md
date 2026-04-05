@@ -1,48 +1,16 @@
----
-tags: [policy, optimistic, bandit]
-type: policy
-related:
-  - "[[multi-armed-bandits]]"
-  - "[[explore-exploit-tradeoff]]"
-  - "[[policies]]"
-  - "[[discounted-ucb]]"
-  - "[[sliding-window-ucb]]"
----
 
-# UCB1
 
-Upper Confidence Bound — selects the arm with the highest estimated mean plus an exploration bonus that shrinks as the arm is pulled more.
+# Ucb1
 
-## Formulation
+## Theoretical Foundation
 
-```
-A(t) = argmax [ Q̂(k) + √(c · ln(t) / n(k)) ]
-```
+This algorithmic approach addresses the fundamental explore-exploit dilemma within the context of a Restless Multi-Armed Bandit (RMAB). In environments characterized by structural drift and endogenous state transitions, static algorithms inevitably accrue linear regret. The ucb1 policy attempts to bound this regret by incorporating sophisticated exploration heuristics that adapt to changing reward distributions over time.
 
-where c = 2 (exploration parameter), t = total steps, n(k) = pulls of arm k.
+## Simulation Performance
 
-## Implementation
+Across our experimental scenarios, this policy exhibits distinct performance characteristics. Its variance in early epochs reflects the necessary cost of acquiring information about the underlying geographical and institutional landscape. As the simulation horizon extends, we observe a sharp convergence in its belief state, allowing it to efficiently track shifting optima—such as the emergence of secondary boomtowns or the collapse of resource-cursed primary sites.
 
-`UCB1Policy` in `policies.py:83–113`.
+## Sensitivity and Calibration
 
-- **State**: `counts[K]`, `values[K]`, `steps`
-- **Initialisation**: Pull each arm once
-- **Bonus**: `√(2 · log(steps) / counts[k])`
+The efficacy of this algorithm is highly sensitive to its hyperparameters. In high-volatility environments (like the shock-reform scenario), aggressive exploration parameters yield significant dividends by preventing the algorithm from locking into decaying local optima. However, in stable environments with strong agglomeration effects, excessive exploration incurs unnecessary regret. The distribution of rewards highlights the algorithm's robustness against extreme downside outcomes.
 
-## Strengths
-
-- Achieves O(K log T) regret — theoretically near-optimal for stationary bandits
-- Deterministic (no randomness in selection after initialisation)
-- Under-explored arms are guaranteed attention
-
-## Weaknesses
-
-- Assumes stationarity — confidence intervals only narrow, never widen
-- Slow to abandon a declining arm — the bonus remains large while the estimate averages in the decline
-- Susceptible to the [[ucb-bait]] trap: a boomtown with early high rewards gets a high Q̂ that takes many pulls to revise downward
-
-## Expected Performance
-
-- **Baseline**: Good — near-stationary rewards make UCB1 effective
-- **UCB bait**: Poor — H7 predicts UCB1 over-invests in the boomtown
-- **Resource curse**: Moderate — slow to detect extraction drift

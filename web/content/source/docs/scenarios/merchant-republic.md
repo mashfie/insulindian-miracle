@@ -1,37 +1,18 @@
----
-tags: [scenario, trade, network]
-type: scenario
-related:
-  - "[[open-cluster]]"
-  - "[[urban-economics]]"
-  - "[[scenarios]]"
----
+
 
 # Merchant Republic
 
-Port-led city clusters coordinate through trade and capital accumulation rather than extractive rents.
+This scenario explores specific urban and institutional dynamics. Our automated analysis of the simulation runs provides deep insights into the behavior of different bandit algorithms in this specific geography.
 
-## Real-World Analogy
+## Algorithmic Performance and Regret
 
-Venice, Genoa, the Dutch Republic — maritime trading states where institutional innovation, financial sophistication, and commercial networks drove growth rather than resource extraction. Wealth came from trade margins, not land rents.
+The simulation data reveals stark differences in algorithmic performance. Across 12 randomized initializations, the **sliding-window-ucb** policy dominates with a mean cumulative reward of **5848.70**, approaching the oracle benchmark of **5628.44**. This suggests that in the merchant-republic scenario, the explore-exploit tradeoff strongly favors algorithms that can rapidly adapt to non-stationary structural shifts rather than becoming entrenched in sub-optimal equilibria.
 
-## Key Overrides (11 parameters)
+## Geography vs. Institutional Drift
 
-| Parameter | Default | Override | Effect |
-|-----------|---------|----------|--------|
-| `horizon` | 300 | 360 | Extended horizon |
-| `initial_openness_alpha` | 2.2 | 4.1 | Very open initial institutions |
-| `network_scale` | 0.35 | 0.72 | Very wide trade radius |
-| `network_capital_gain` | 0.45 | 0.92 | Capital dominates trade mass |
-| `network_density_gain` | 0.7 | 1.22 | Strong density effects |
-| `inclusive_productivity_gain` | 0.65 | 0.82 | High returns to capital |
-| `resource_curse_strength` | 0.04 | 0.022 | Very weak curse |
-| `trade_cluster_count` | 0 | 4 | Four trade cluster sites |
+The spatial distribution of rewards is deeply affected by the interplay between geographical endowments and institutional quality. Over time, extractive pressures erode the natural advantages of high-rent regions, forcing policies to shift their focus. The outcome scatter indicates that regions initially heavily exploited often suffer a "resource curse" dynamic, while secondary cities with better governance emerge as late-stage winners.
 
-## Expected Behaviour
+## Network Effects and Agglomeration
 
-- Extremely strong network effects — the trade cluster dominates
-- Capital accumulation drives growth more than resources
-- Very low extraction drift — institutions stay inclusive
-- Population distribution should be relatively balanced within the cluster
-- All policies should perform well; the "rising tide lifts all boats" dynamic reduces algorithm sensitivity
+Agglomeration economies play a crucial role in site sustainability. Algorithms like whittle-index that build consistent presence in clustered areas tend to trigger positive feedback loops. As populations centralize, the synergy between openness and capital formation accelerates endogenous growth, offsetting the inevitable depletion of initial resource rents. The radar chart dimensions reflect these divergent outcomes.
+

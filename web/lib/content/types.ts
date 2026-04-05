@@ -9,7 +9,7 @@ export type FigureRef = {
   id: string;
   title: string;
   caption: string;
-  kind: "trend" | "comparison" | "scatter" | "table" | "atlas" | "equation";
+  kind: "trend" | "comparison" | "scatter" | "table" | "atlas" | "equation" | "distribution";
 };
 
 export type PullQuote = {

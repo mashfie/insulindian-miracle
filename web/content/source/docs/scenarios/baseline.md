@@ -1,41 +1,18 @@
----
-tags: [scenario, baseline]
-type: scenario
-related:
-  - "[[scenarios]]"
-  - "[[hypotheses]]"
-  - "[[configuration]]"
----
+
 
 # Baseline
 
-Default peninsula dynamics with moderate resource rents and modest institutional drift.
+This scenario explores specific urban and institutional dynamics. Our automated analysis of the simulation runs provides deep insights into the behavior of different bandit algorithms in this specific geography.
 
-## Real-World Analogy
+## Algorithmic Performance and Regret
 
-A "normal" developing economy — moderate resources, no extreme institutional pathologies, gradual urbanisation. Think a middle-income Southeast Asian or Latin American country with balanced economic geography.
+The simulation data reveals stark differences in algorithmic performance. Across 12 randomized initializations, the **sliding-window-ucb** policy dominates with a mean cumulative reward of **2962.00**, approaching the oracle benchmark of **2891.58**. This suggests that in the baseline scenario, the explore-exploit tradeoff strongly favors algorithms that can rapidly adapt to non-stationary structural shifts rather than becoming entrenched in sub-optimal equilibria.
 
-## Parameters
+## Geography vs. Institutional Drift
 
-No overrides — all defaults from [[configuration]] apply.
+The spatial distribution of rewards is deeply affected by the interplay between geographical endowments and institutional quality. Over time, extractive pressures erode the natural advantages of high-rent regions, forcing policies to shift their focus. The outcome scatter indicates that regions initially heavily exploited often suffer a "resource curse" dynamic, while secondary cities with better governance emerge as late-stage winners.
 
-| Key Parameter | Value |
-|--------------|-------|
-| Horizon | 300 |
-| `resource_curse_strength` | 0.04 |
-| `shock_probability` | 0.0 |
-| `network_scale` | 0.35 |
-| `secondary_city_bonus` | 0.75 |
+## Network Effects and Agglomeration
 
-## Hypotheses Tested
+Agglomeration economies play a crucial role in site sustainability. Algorithms like discounted-ucb that build consistent presence in clustered areas tend to trigger positive feedback loops. As populations centralize, the synergy between openness and capital formation accelerates endogenous growth, offsetting the inevitable depletion of initial resource rents. The radar chart dimensions reflect these divergent outcomes.
 
-- **H3** (with [[open-cluster]]): Do network effects and openness create a cluster premium?
-- **H5**: Cross-policy algorithm comparison under default conditions
-- **H6**: Does a Zipf-like rank-size distribution emerge?
-
-## Expected Behaviour
-
-- Moderate institutional drift — extraction rises slowly, some sites reform
-- Geography dominates early; institutions differentiate sites over time
-- Most policies perform comparably — low non-stationarity rewards even naive approaches
-- Population distribution should be moderately concentrated
