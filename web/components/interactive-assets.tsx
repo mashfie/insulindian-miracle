@@ -1193,7 +1193,7 @@ export function ArmSelectionRibbon({
   const toY = (val: number) => 210 - (val / 100) * 186; // assuming sum is 100
 
   // Calculate cumulative stacks
-  const stackedData: number[][] = [];
+  const stackedData: Array<Array<{start: number, end: number}>> = [];
   for (let i = 0; i < maxLen; i++) {
     let currentSum = 0;
     const col = series.map(s => {
@@ -1202,7 +1202,6 @@ export function ArmSelectionRibbon({
       currentSum += val;
       return { start, end: currentSum };
     });
-    // @ts-expect-error Typescript doesn't infer stacked data properly without complex generics
     stackedData.push(col);
   }
 
@@ -1234,7 +1233,7 @@ export function ArmSelectionRibbon({
           const bottomPoints = [];
           
           for (let i = 0; i < step; i++) {
-             const points = (stackedData as Array<Array<{start: number, end: number}>>)[i];
+             const points = stackedData[i];
              if (points) {
                const data = points[seriesIdx];
                topPoints.push(`${toX(i)},${toY(data.end)}`);
@@ -1265,7 +1264,7 @@ export function ArmSelectionRibbon({
                 <line x1={toX(i)} y1={24} x2={toX(i)} y2={210} stroke="var(--ink)" strokeWidth="1" strokeDasharray="2 2" pointerEvents="none" />
                 {series.map((s, seriesIdx) => {
                    const val = s.values[i];
-                   const midY = toY(((stackedData as Array<Array<{start: number, end: number}>>)[i][seriesIdx]).start + val/2);
+                   const midY = toY(stackedData[i][seriesIdx].start + val/2);
                    if (val > 5) { // Only show label if there's enough space
                      return (
                        <text key={seriesIdx} x={toX(i) + 4} y={midY} fill="var(--paper)" fontFamily="var(--font-ui)" fontSize="9" fontWeight="bold" alignmentBaseline="middle" pointerEvents="none">

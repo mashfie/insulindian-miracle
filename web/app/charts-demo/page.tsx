@@ -310,7 +310,7 @@ export default function ChartsDemoPage() {
               <tr key={name} style={{ borderBottom: "1px solid var(--line)" }}>
                 <td style={{ padding: "1rem", fontWeight: "bold" }}>{name.toUpperCase()}</td>
                 {styles.map(s => {
-                  const Component = (Icons as Record<string, React.ElementType>)[`${s.prefix}${name}Icon`];
+                  const Component = (Icons as unknown as Record<string, React.ElementType>)[`${s.prefix}${name}Icon`];
                   return (
                     <td key={s.id} style={{ padding: "1rem", textAlign: "center" }}>
                       {Component ? <Component size={32} /> : "—"}
