@@ -174,9 +174,7 @@ def _distance_to_mask(mask: np.ndarray) -> np.ndarray:
 
 
 def _derive_land_mask(elevation: np.ndarray, sea_level: float) -> np.ndarray:
-    mask = elevation > sea_level
-    mask[:, 0] = True
-    return mask
+    return elevation > sea_level
 
 
 def _derive_coast_mask(land_mask: np.ndarray) -> np.ndarray:
@@ -185,9 +183,6 @@ def _derive_coast_mask(land_mask: np.ndarray) -> np.ndarray:
     for y in range(height):
         for x in range(width):
             if not land_mask[y, x]:
-                continue
-            if y in (0, height - 1) or x in (0, width - 1):
-                coast[y, x] = True
                 continue
             for ny, nx in _neighbors(y, x, height, width):
                 if not land_mask[ny, nx]:
@@ -353,10 +348,13 @@ def select_candidate_sites(terrain: TerrainField, count: int = 15, min_spacing: 
 
     ranked = sorted(interior_cells if len(interior_cells) >= count else cells, reverse=True)
     sites: list[Site] = []
-    while ranked and len(sites) < count:
+    selected_indices: set[int] = set()
+    while len(sites) < count and len(selected_indices) < len(ranked):
         best_index = -1
         best_score = -1.0
         for index, (priority, y, x, _is_border) in enumerate(ranked):
+            if index in selected_indices:
+                continue
             norm_x = float(x / max(width - 1, 1))
             norm_y = float(y / max(height - 1, 1))
             if sites:
@@ -373,7 +371,8 @@ def select_candidate_sites(terrain: TerrainField, count: int = 15, min_spacing: 
         if best_index < 0:
             break
 
-        _priority, y, x, _is_border = ranked.pop(best_index)
+        selected_indices.add(best_index)
+        _priority, y, x, _is_border = ranked[best_index]
         norm_x = float(x / max(width - 1, 1))
         norm_y = float(y / max(height - 1, 1))
         river_access = math.exp(-0.22 * float(terrain.river_distance[y, x]))

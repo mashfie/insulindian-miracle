@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 import json
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -74,7 +75,7 @@ def fetch_papers(manifest_path: str | Path, cache_dir: str | Path) -> FetchRepor
             entry["fetched_at"] = datetime.now(UTC).isoformat()
             entry["last_error"] = None
             report.fetched += 1
-        except Exception as exc:
+        except (URLError, HTTPError, OSError, TimeoutError) as exc:
             entry["last_error"] = str(exc)
             report.failed += 1
 

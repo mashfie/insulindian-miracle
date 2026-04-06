@@ -384,13 +384,14 @@ def _evaluate_h3(baseline_experiment: dict[str, Any], cluster_experiment: dict[s
     by_policy: dict[str, Any] = {}
     for policy in policies:
         cluster_runs = cluster_experiment["results"][policy]
-        treatment_stats = _series_stats([_treatment_premium(run["site_outcomes"], "trade_cluster") for run in cluster_runs])
+        premia = [_treatment_premium(run["site_outcomes"], "trade_cluster") for run in cluster_runs]
+        treatment_stats = _series_stats(premia)
         reward_stats = _paired_stats(_policy_rewards(cluster_experiment, policy), _policy_rewards(baseline_experiment, policy))
         by_policy[policy] = {
             "treated_cluster_population_premium": treatment_stats,
             "cumulative_reward_difference": reward_stats,
         }
-        treatment_premia.extend([_treatment_premium(run["site_outcomes"], "trade_cluster") for run in cluster_runs])
+        treatment_premia.extend(premia)
         reward_diffs.extend((np.asarray(_policy_rewards(cluster_experiment, policy)) - np.asarray(_policy_rewards(baseline_experiment, policy))).tolist())
     overall_premium = _series_stats(treatment_premia)
     overall_reward = _series_stats(reward_diffs)

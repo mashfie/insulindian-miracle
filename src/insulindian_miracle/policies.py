@@ -65,7 +65,6 @@ class EpsilonGreedyPolicy:
         self.values = np.zeros(self.arm_count, dtype=float)
 
     def select_arm(self, states: list[SiteState]) -> int:
-        del states
         unseen = np.where(self.counts == 0)[0]
         if unseen.size:
             return int(unseen[0])
@@ -74,7 +73,6 @@ class EpsilonGreedyPolicy:
         return int(np.argmax(self.values))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         self.counts[chosen_arm] += 1
         count = self.counts[chosen_arm]
         self.values[chosen_arm] += (reward - self.values[chosen_arm]) / count
@@ -97,7 +95,6 @@ class UCB1Policy:
         self.steps = 0
 
     def select_arm(self, states: list[SiteState]) -> int:
-        del states
         unseen = np.where(self.counts == 0)[0]
         if unseen.size:
             return int(unseen[0])
@@ -105,7 +102,6 @@ class UCB1Policy:
         return int(np.argmax(self.values + bonus))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         self.steps += 1
         self.counts[chosen_arm] += 1
         count = self.counts[chosen_arm]
@@ -144,14 +140,12 @@ class GaussianThompsonPolicy:
         return int(np.argmax(draws))
 
     def select_arm(self, states: list[SiteState]) -> int:
-        del states
         unseen = np.where(self.counts < 0.5)[0]
         if unseen.size:
             return int(unseen[0])
         return self._sample_arm()
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         obs_precision = 1.0 / self.observation_variance
         self.counts *= self.posterior_decay
         self.counts[chosen_arm] += 1.0
@@ -180,7 +174,6 @@ class DiscountedUCBPolicy:
         self.total_mass = 0.0
 
     def select_arm(self, states: list[SiteState]) -> int:
-        del states
         unseen = np.where(self.counts <= 1e-9)[0]
         if unseen.size:
             return int(unseen[0])
@@ -189,7 +182,6 @@ class DiscountedUCBPolicy:
         return int(np.argmax(means + bonus))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         self.counts *= self.gamma
         self.reward_sums *= self.gamma
         self.total_mass = self.total_mass * self.gamma + 1.0
@@ -216,7 +208,6 @@ class SlidingWindowUCBPolicy:
         self.reward_sums = np.zeros(self.arm_count, dtype=float)
 
     def select_arm(self, states: list[SiteState]) -> int:
-        del states
         unseen = np.where(self.counts <= 1e-9)[0]
         if unseen.size:
             return int(unseen[0])
@@ -226,7 +217,6 @@ class SlidingWindowUCBPolicy:
         return int(np.argmax(means + bonus))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         if len(self.observation_window) == self.window_size:
             expired_arm, expired_reward = self.observation_window.popleft()
             self.counts[expired_arm] = max(self.counts[expired_arm] - 1.0, 0.0)
@@ -251,7 +241,6 @@ class DiscountedGaussianThompsonPolicy(GaussianThompsonPolicy):
         self.observed = np.zeros(self.arm_count, dtype=bool)
 
     def select_arm(self, states: list[SiteState]) -> int:
-        del states
         unseen = np.where(~self.observed)[0]
         if unseen.size:
             return int(unseen[0])
@@ -291,7 +280,6 @@ class LinUCBPolicy:
         return int(np.argmax(scores))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         feature = self.last_features[chosen_arm]
         self.covariance += np.outer(feature, feature)
         self.reward_vector += reward * feature
@@ -331,7 +319,6 @@ class LinearThompsonPolicy:
         return int(np.argmax(scores))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del states
         feature = self.last_features[chosen_arm]
         obs_precision = 1.0 / self.observation_variance
         self.precision += obs_precision * np.outer(feature, feature)
@@ -759,7 +746,7 @@ class WhittleIndexPolicy:
         return int(np.argmax(indices))
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del chosen_arm, reward, states
+        pass
 
 
 @dataclass(slots=True)
@@ -785,7 +772,7 @@ class MyopicOraclePolicy:
         return best_arm
 
     def update(self, chosen_arm: int, reward: float, states: list[SiteState]) -> None:
-        del chosen_arm, reward, states
+        pass
 
 
 def build_policy(name: str, arm_count: int, seed: int, config: SimulationConfig) -> Policy:
