@@ -31,14 +31,12 @@ class CompareRequest(BaseModel):
 
 app = FastAPI(title="Insulindian Miracle Compare API")
 
-_raw_origins = os.getenv("COMPARE_ALLOWED_ORIGINS", "")
+_raw_origins = os.getenv("COMPARE_ALLOWED_ORIGINS", "*")
 allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
-if not allowed_origins and os.getenv("COMPARE_ALLOW_ALL_ORIGINS", "").lower() == "true":
-    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"] if allowed_origins == ["*"] else allowed_origins,
     allow_credentials=False,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
