@@ -16,6 +16,7 @@ if str(SRC) not in sys.path:
     sys.path.append(str(SRC))
 
 from insulindian_miracle import SimulationConfig, run_policy_comparison  # noqa: E402
+from insulindian_miracle.sim import DEFAULT_POLICIES  # noqa: E402
 
 
 class CompareRequest(BaseModel):
@@ -30,15 +31,14 @@ class CompareRequest(BaseModel):
 
 app = FastAPI(title="Insulindian Miracle Compare API")
 
-allowed_origins = [
-    origin.strip()
-    for origin in os.getenv("COMPARE_ALLOWED_ORIGINS", "*").split(",")
-    if origin.strip()
-]
+_raw_origins = os.getenv("COMPARE_ALLOWED_ORIGINS", "")
+allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+if not allowed_origins and os.getenv("COMPARE_ALLOW_ALL_ORIGINS", "").lower() == "true":
+    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if allowed_origins == ["*"] else allowed_origins,
+    allow_origins=allowed_origins,
     allow_credentials=False,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
@@ -76,6 +76,9 @@ def healthcheck() -> dict[str, str]:
 @app.post("/")
 @app.post("/api/compare")
 def compare(payload: CompareRequest) -> dict[str, Any]:
+    unknown_policies = set(payload.policies) - set(DEFAULT_POLICIES)
+    if unknown_policies:
+        raise HTTPException(status_code=422, detail=f"Unknown policies: {sorted(unknown_policies)}")
     try:
         config = _build_config(payload)
         return run_policy_comparison(

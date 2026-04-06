@@ -258,6 +258,10 @@ def apply_scenario(config: SimulationConfig, name: str | None) -> SimulationConf
         return config
 
     scenario = get_scenario(name)
+    valid_keys = set(SimulationConfig.__dataclass_fields__) | {"terrain"}
+    unknown = set(scenario.overrides) - valid_keys
+    if unknown:
+        raise ValueError(f"Scenario '{name}' has unknown config keys: {sorted(unknown)}")
     payload = asdict(config)
     for key, value in scenario.overrides.items():
         if key == "terrain":

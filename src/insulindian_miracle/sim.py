@@ -66,16 +66,15 @@ def _apply_boomtown_shape(sites, config: SimulationConfig) -> None:
         reverse=True,
     )
 
-    chosen: list[int] = []
+    chosen: set[int] = set()
     for index in ranked:
         if geography_scores[index] <= geography_cutoff:
-            chosen.append(index)
+            chosen.add(index)
         if len(chosen) >= config.boomtown_count:
             break
     if len(chosen) < config.boomtown_count:
         for index in ranked:
-            if index not in chosen:
-                chosen.append(index)
+            chosen.add(index)
             if len(chosen) >= config.boomtown_count:
                 break
 
@@ -109,25 +108,26 @@ def _apply_trade_cluster_shape(sites, config: SimulationConfig) -> None:
             - 0.25 * sites[index].resource_rent
         ),
     )
-    ranked = sorted(
-        range(len(sites)),
-        key=lambda index: (
-            math.hypot(sites[index].x - sites[anchor].x, sites[index].y - sites[anchor].y),
-            -(0.55 * sites[index].accessibility + 0.3 * sites[index].port_access + 0.15 * sites[index].river_access),
+    ranked_with_dist = sorted(
+        (
+            (math.hypot(sites[i].x - sites[anchor].x, sites[i].y - sites[anchor].y), i)
+            for i in range(len(sites))
+        ),
+        key=lambda t: (
+            t[0],
+            -(0.55 * sites[t[1]].accessibility + 0.3 * sites[t[1]].port_access + 0.15 * sites[t[1]].river_access),
         ),
     )
 
-    chosen: list[int] = []
-    for index in ranked:
-        distance = math.hypot(sites[index].x - sites[anchor].x, sites[index].y - sites[anchor].y)
-        if distance <= config.trade_cluster_radius or index == anchor:
-            chosen.append(index)
+    chosen: set[int] = set()
+    for dist, index in ranked_with_dist:
+        if dist <= config.trade_cluster_radius or index == anchor:
+            chosen.add(index)
         if len(chosen) >= config.trade_cluster_count:
             break
     if len(chosen) < config.trade_cluster_count:
-        for index in ranked:
-            if index not in chosen:
-                chosen.append(index)
+        for _dist, index in ranked_with_dist:
+            chosen.add(index)
             if len(chosen) >= config.trade_cluster_count:
                 break
 
@@ -167,7 +167,7 @@ def _gini(values: list[float]) -> float:
     if array.size == 0 or math.isclose(total, 0.0):
         return 0.0
     ranks = np.arange(1, array.size + 1, dtype=float)
-    return float((2.0 * np.dot(ranks, array)) / (array.size * total) - (array.size + 1.0) / array.size)
+    return float((2.0 * np.dot(ranks, array)) / (array.size * total) - (1.0 + 1.0 / array.size))
 
 
 def _zipf_slope(populations: list[float]) -> float:
@@ -177,7 +177,10 @@ def _zipf_slope(populations: list[float]) -> float:
     tail_count = max(3, min(len(positive), max(3, len(positive) // 3)))
     tail = positive[:tail_count]
     ranks = np.arange(1, len(tail) + 1, dtype=float)
-    slope, _intercept = np.polyfit(np.log(ranks), np.log(np.asarray(tail, dtype=float)), 1)
+    log_tail = np.log(np.asarray(tail, dtype=float))
+    if not np.all(np.isfinite(log_tail)):
+        return 0.0
+    slope, _intercept = np.polyfit(np.log(ranks), log_tail, 1)
     return float(slope)
 
 
@@ -228,7 +231,7 @@ def _build_site_outcomes(
                 post_shock_persistence=state.post_shock_persistence,
                 final_population=state.population,
                 cumulative_reward=state.cumulative_reward,
-                selection_count=int(selection_counts[state.site.id]) if selection_counts.size else 0,
+                selection_count=int(selection_counts[state.site.id]) if state.site.id < selection_counts.size else 0,
                 reforms_triggered=state.reforms_triggered,
                 shock_hits=state.shock_hits,
                 first_shock_step=state.first_shock_step,
@@ -281,10 +284,10 @@ def _result_metrics(site_outcomes: list[SiteOutcome], selected_sites: list[int])
         "resource_capital_correlation": _safe_correlation(resources, productive_capital),
         "initial_extraction_population_correlation": _safe_correlation(initial_extractions, populations),
         "geography_population_correlation": _safe_correlation(geographies, populations),
-        "top_resource_site_share": float(populations[max_resource_index] / total_population) if total_population > 0.0 and populations else 0.0,
-        "top_resource_selection_share": float(selection_counts[max_resource_index] / total_selections) if total_selections > 0.0 and selection_counts.size else 0.0,
-        "top_resource_reforms_triggered": float(reforms[max_resource_index]) if reforms else 0.0,
-        "top_resource_shock_hits": float(shocks[max_resource_index]) if shocks else 0.0,
+        "top_resource_site_share": float(populations[max_resource_index] / total_population) if resources and total_population > 0.0 else 0.0,
+        "top_resource_selection_share": float(selection_counts[max_resource_index] / total_selections) if resources and total_selections > 0.0 and max_resource_index < selection_counts.size else 0.0,
+        "top_resource_reforms_triggered": float(reforms[max_resource_index]) if resources else 0.0,
+        "top_resource_shock_hits": float(shocks[max_resource_index]) if resources else 0.0,
         "boomtown_count": float(len(boomtown_indices)),
         "boomtown_selection_share": float(selection_counts[boomtown_indices].sum() / total_selections) if total_selections > 0.0 and boomtown_indices else 0.0,
         "boomtown_population_share": float(sum(populations[index] for index in boomtown_indices) / total_population) if total_population > 0.0 and boomtown_indices else 0.0,

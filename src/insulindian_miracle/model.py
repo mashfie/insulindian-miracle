@@ -316,13 +316,14 @@ def network_bonus(index: int, states: list[SiteState], config: SimulationConfig)
     return state.institution.openness * local_market * (1.0 + config.network_density_gain * local_density)
 
 
-def compute_reward(index: int, states: list[SiteState], config: SimulationConfig) -> float:
+def compute_reward(index: int, states: list[SiteState], config: SimulationConfig, network: float | None = None) -> float:
     state = states[index]
     institution = state.institution
     population = max(state.population, 1)
     active_steps = max(population - 1, 0)
 
-    network = network_bonus(index, states, config)
+    if network is None:
+        network = network_bonus(index, states, config)
     resource_payoff = state.resource_rent * (config.resource_base_payoff + config.resource_capture_gain * institution.extraction)
     extractive_cashflow = (
         config.extractive_cashflow_premium
@@ -374,6 +375,8 @@ def compute_reward(index: int, states: list[SiteState], config: SimulationConfig
 
 
 def _choose_shock_target(states: list[SiteState], config: SimulationConfig, rng: np.random.Generator) -> int:
+    if not states:
+        raise ValueError("cannot choose shock target from empty states")
     if config.shock_target_resource_bias <= 0.0:
         return int(rng.integers(0, len(states)))
 
@@ -398,7 +401,8 @@ def evolve_sites(
     active_site: int | None = None,
     step: int | None = None,
 ) -> EvolveReport:
-    rewards = [compute_reward(index, states, config) for index in range(len(states))]
+    bonuses = [network_bonus(i, states, config) for i in range(len(states))]
+    rewards = [compute_reward(index, states, config, network=bonuses[index]) for index in range(len(states))]
     mean_reward = float(np.mean(rewards)) if rewards else 0.0
     reward_scale = max(float(np.std(rewards)), 1.0)
     target_log = math.log1p(max(config.secondary_city_target, 1.0))
@@ -407,7 +411,7 @@ def evolve_sites(
         reward = rewards[index]
         delta = reward - state.last_reward
         institution = state.institution
-        network = network_bonus(index, states, config)
+        network = bonuses[index]
         if state.shock_memory > 0:
             state.shock_memory -= 1
         legacy_factor = state.shock_reform_stock
