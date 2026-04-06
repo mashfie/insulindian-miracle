@@ -5,6 +5,7 @@ import math
 from typing import Iterable
 
 import numpy as np
+import scipy.ndimage
 
 
 @dataclass(slots=True)
@@ -167,15 +168,9 @@ def _neighbors(y: int, x: int, height: int, width: int) -> Iterable[tuple[int, i
 
 
 def _distance_to_mask(mask: np.ndarray) -> np.ndarray:
-    coords = np.argwhere(mask)
-    if coords.size == 0:
+    if not np.any(mask):
         return np.full(mask.shape, float(mask.shape[0] + mask.shape[1]))
-
-    grid_y, grid_x = np.indices(mask.shape)
-    flat_points = np.column_stack((grid_y.ravel(), grid_x.ravel()))
-    diff = flat_points[:, None, :] - coords[None, :, :]
-    distances = np.sqrt(np.square(diff).sum(axis=2)).min(axis=1)
-    return distances.reshape(mask.shape)
+    return scipy.ndimage.distance_transform_edt(~mask)
 
 
 def _derive_land_mask(elevation: np.ndarray, sea_level: float) -> np.ndarray:

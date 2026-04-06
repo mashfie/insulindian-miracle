@@ -31,7 +31,7 @@ export default function ChartsDemoPage() {
     id: title.toLowerCase().replace(/ /g, "-"),
     title,
     caption: "A demonstration of the interactive asset component.",
-    kind: kind as any,
+    kind: kind as FigureRef["kind"],
   });
 
   const iconNames = [
@@ -310,7 +310,7 @@ export default function ChartsDemoPage() {
               <tr key={name} style={{ borderBottom: "1px solid var(--line)" }}>
                 <td style={{ padding: "1rem", fontWeight: "bold" }}>{name.toUpperCase()}</td>
                 {styles.map(s => {
-                  const Component = (Icons as any)[`${s.prefix}${name}Icon`];
+                  const Component = (Icons as Record<string, React.ElementType>)[`${s.prefix}${name}Icon`];
                   return (
                     <td key={s.id} style={{ padding: "1rem", textAlign: "center" }}>
                       {Component ? <Component size={32} /> : "—"}
