@@ -21,10 +21,10 @@ export async function POST(request: Request) {
       
       return {
         policy,
-        cumulative: performance * 100,
-        regret: (1 - performance) * 50,
+        cumulative_reward: performance * 100,
+        oracle_regret: (1 - performance) * 50,
         // Mock timeseries data for charts
-        history: Array.from({ length: 10 }, (_, i) => ({
+        reward_history: Array.from({ length: 10 }, (_, i) => ({
           step: i * 10,
           reward: performance + Math.sin(i) * 0.05,
         })),

@@ -468,9 +468,11 @@ class WhittleIndexPolicy:
         )
 
     def _surrogate_reward(self, state: dict[str, float], *, active: bool) -> float:
-        population = state["population"] + (1.0 if active else 0.0)
+        population = max(state["population"] + (1.0 if active else 0.0), 1.0)
         extraction = state["extraction"]
         network = self._local_network(state, population)
+        active_steps = max(population - 1.0, 0.0)
+
         resource_payoff = state["resource"] * (
             self.config.resource_base_payoff + self.config.resource_capture_gain * extraction
         )
@@ -493,13 +495,22 @@ class WhittleIndexPolicy:
         spread = max(self.config.secondary_city_spread, 1e-3)
         mid_city_multiplier = math.exp(-((math.log1p(population) - target_log) ** 2) / (2.0 * spread * spread))
         secondary_city_dividend = self.config.secondary_city_bonus * network * mid_city_multiplier
-        path_dependence_dividend = 0.12 * state["geography"] * math.log1p(population) * (
-            0.6 + state["capital"] + 0.25 * state["network_reference"]
-        )
+        
         extractive_drag = extraction * self.config.extraction_drag * population
         congestion = self.config.congestion * population * population
         overstretch = max(0.0, population - self.config.metropolitan_overstretch_threshold)
         metropolitan_drag = self.config.metropolitan_overstretch_penalty * math.pow(overstretch, 1.35)
+        
+        boomtown_bonus = 0.0
+        if state["boomtown"] > 0.5 and self.config.boomtown_bonus_duration > 0 and active_steps <= self.config.boomtown_bonus_duration:
+            remaining_window = 1.0 - (active_steps / max(self.config.boomtown_bonus_duration, 1))
+            boomtown_bonus += self.config.boomtown_early_reward_bonus * max(remaining_window, 0.25)
+
+        collapse_penalty = 0.0
+        if state["boomtown"] > 0.5 and active_steps > self.config.boomtown_collapse_threshold:
+            overflow = active_steps - self.config.boomtown_collapse_threshold
+            collapse_penalty = self.config.boomtown_collapse_penalty * overflow
+
         reward = (
             state["geography"]
             + resource_payoff
@@ -507,21 +518,13 @@ class WhittleIndexPolicy:
             + inclusive
             + reinvestment_dividend
             + secondary_city_dividend
-            + path_dependence_dividend
             - extractive_drag
             - congestion
             - metropolitan_drag
             + network
+            + boomtown_bonus
+            - collapse_penalty
         )
-        if state["trade_cluster"] > 0.5:
-            reward += 0.18 * network
-        if state["boomtown"] > 0.5 and active:
-            active_steps = max(population - 1.0, 0.0)
-            if self.config.boomtown_bonus_duration > 0 and active_steps <= self.config.boomtown_bonus_duration:
-                remaining_window = 1.0 - active_steps / max(self.config.boomtown_bonus_duration, 1)
-                reward += self.config.boomtown_early_reward_bonus * max(remaining_window, 0.25)
-            if active_steps > self.config.boomtown_collapse_threshold:
-                reward -= self.config.boomtown_collapse_penalty * (active_steps - self.config.boomtown_collapse_threshold)
         return reward
 
     def _activity_load(self, population: float) -> float:

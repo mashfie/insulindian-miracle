@@ -22,7 +22,7 @@ export function SiteHeader() {
       
       // Try to find a matching route label
       const route = SITE_ROUTES.find(r => r.href === currentPath || r.href === currentPath.slice(0, -1));
-      let label = route ? route.label : segment.replace(/-/g, " ");
+      const label = route ? route.label : segment.replace(/-/g, " ");
 
       crumbs.push({
         href: currentPath,
