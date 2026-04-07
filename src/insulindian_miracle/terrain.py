@@ -249,26 +249,34 @@ def _derive_river(elevation: np.ndarray, land_mask: np.ndarray, coast_mask: np.n
     return river, flux
 
 
-def generate_terrain(config: TerrainConfig) -> TerrainField:
-    rng = np.random.default_rng(config.seed)
-    base_noise = _fractal_noise(config, rng)
-    alt_config = TerrainConfig(**{**asdict(config), "seed": config.seed + 97})
-    resource_noise = _fractal_noise(alt_config, np.random.default_rng(config.seed + 97))
+def generate_terrain(config: Any, rng: np.random.Generator | None = None) -> TerrainField:
+    # Note: Any used for config to avoid circular import or complex typing in Phase 1
+    if rng is None:
+        rng = np.random.default_rng(7)
+    
+    # Handle both SimulationConfig and TerrainConfig
+    tc = config.terrain if hasattr(config, "terrain") else config
+    base_noise = _fractal_noise(tc, rng)
+    # We use a derived RNG for resource noise to keep it stable but varied
+    res_rng = np.random.default_rng(rng.integers(0, 1000000))
+    resource_noise = _fractal_noise(tc, res_rng)
 
-    xs = np.linspace(-1.0, 1.0, config.width)
-    ys = np.linspace(-1.0, 1.0, config.height)
+    xs = np.linspace(-1.0, 1.0, tc.width)
+    ys = np.linspace(-1.0, 1.0, tc.height)
     grid_x, grid_y = np.meshgrid(xs, ys)
 
-    spine = 0.9 - 1.45 * np.square(grid_y)
-    taper = 0.35 - 0.45 * np.square(grid_x + 0.15) - 0.55 * grid_x
-    headland = 0.28 * np.exp(-((grid_x - 0.45) ** 2 / 0.09 + grid_y**2 / 0.26))
-    mainland_bridge = 0.22 * np.exp(-((grid_x + 1.0) ** 2 / 0.02 + grid_y**2 / 0.5))
+    # Base shapes
+    spine = config.spine_height - config.spine_curvature * np.square(grid_y)
+    taper = config.taper_offset - config.taper_curvature_x * np.square(grid_x + config.taper_bias_x) - config.taper_linear_x * grid_x
+    headland = config.headland_height * np.exp(-((grid_x - config.headland_x) ** 2 / 0.09 + grid_y**2 / 0.26))
+    mainland_bridge = config.mainland_bridge_height * np.exp(-((grid_x + 1.0) ** 2 / 0.02 + grid_y**2 / 0.5))
     elevation = 0.85 * base_noise + spine + taper + headland + mainland_bridge
+
     elevation = _normalize(elevation)
 
-    land_mask = _derive_land_mask(elevation, config.sea_level)
+    land_mask = _derive_land_mask(elevation, tc.sea_level)
     coast_mask = _derive_coast_mask(land_mask)
-    river_mask, water_flux = _derive_river(elevation, land_mask, coast_mask, config)
+    river_mask, water_flux = _derive_river(elevation, land_mask, coast_mask, tc)
     coastal_distance = _distance_to_mask(coast_mask)
     river_distance = _distance_to_mask(river_mask)
 
@@ -279,7 +287,7 @@ def generate_terrain(config: TerrainConfig) -> TerrainField:
     accessibility = np.exp(-np.sqrt(np.square(grid_x + 1.0) + np.square(grid_y)) * 1.2)
     accessibility = _normalize(accessibility, land_mask)
 
-    arability = (1.0 - slope) * np.exp(-0.18 * river_distance) * (1.0 - np.clip(elevation - config.sea_level, 0.0, 1.0))
+    arability = (1.0 - slope) * np.exp(-0.18 * river_distance) * (1.0 - np.clip(elevation - tc.sea_level, 0.0, 1.0))
     arability = _normalize(arability, land_mask)
 
     defensibility = 0.55 * slope + 0.45 * _normalize(coastal_distance, land_mask)
@@ -313,7 +321,7 @@ def generate_terrain(config: TerrainConfig) -> TerrainField:
     suitability[~land_mask] = 0.0
 
     return TerrainField(
-        config=config,
+        config=tc,
         elevation=elevation,
         land_mask=land_mask,
         coast_mask=coast_mask,
@@ -328,7 +336,6 @@ def generate_terrain(config: TerrainConfig) -> TerrainField:
         port_quality=port_quality,
         suitability=suitability,
     )
-
 
 def select_candidate_sites(terrain: TerrainField, count: int = 15, min_spacing: float = 0.1) -> list[Site]:
     height, width = terrain.elevation.shape

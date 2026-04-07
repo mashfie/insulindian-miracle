@@ -4,11 +4,15 @@ from dataclasses import asdict, dataclass, field
 import json
 import math
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 
 from .terrain import Site, TerrainConfig
+
+
+# Type alias for the decision-making action (choosing a site index for investment)
+Action: TypeAlias = int
 
 
 def sigmoid(value: float) -> float:
@@ -47,6 +51,39 @@ class SiteState:
     shock_reform_stock: float = 0.0
     shock_readiness: float = 0.0
     post_shock_persistence: float = 0.0
+
+    def snapshot(self) -> SiteStateSnapshot:
+        return SiteStateSnapshot(
+            site_id=self.site.id,
+            x=self.site.x,
+            y=self.site.y,
+            boomtown=self.site.boomtown,
+            trade_cluster=self.site.trade_cluster,
+            extraction=self.institution.extraction,
+            openness=self.institution.openness,
+            adaptability=self.institution.adaptability,
+            resource_rent=self.resource_rent,
+            productive_capital=self.productive_capital,
+            population=self.population,
+            shock_reform_stock=self.shock_reform_stock,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class SiteStateSnapshot:
+    """Immutable snapshot of a site's state for policy decision making."""
+    site_id: int
+    x: float
+    y: float
+    boomtown: bool
+    trade_cluster: bool
+    extraction: float
+    openness: float
+    adaptability: float
+    resource_rent: float
+    productive_capital: float
+    population: int
+    shock_reform_stock: float
 
 
 @dataclass(slots=True)
@@ -142,6 +179,27 @@ class SimulationConfig:
     depletion_rate: float = 0.18
     shock_target_resource_bias: float = 0.0
     geography_weights: tuple[float, float, float, float, float] = (0.28, 0.18, 0.2, 0.16, 0.18)
+    # Terrain Shaping
+    spine_height: float = 0.9
+    spine_curvature: float = 1.45
+    taper_offset: float = 0.35
+    taper_curvature_x: float = 0.45
+    taper_bias_x: float = 0.15
+    taper_linear_x: float = 0.55
+    headland_height: float = 0.28
+    headland_x: float = 0.45
+    mainland_bridge_height: float = 0.22
+    # Evolution Constants
+    shock_readiness_base: float = 0.35
+    shock_legacy_readiness_base: float = 0.25
+    reform_openness_gain: float = 0.08
+    reform_adaptability_gain: float = 0.35
+    passive_investment_scale: float = 0.45
+    network_openness_influence: float = 0.035
+    growth_structural_weight: float = 0.9
+    migration_threshold: float = 0.75
+    lod: str = "LOW"
+    run_id: int = 0
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> "SimulationConfig":
@@ -220,6 +278,54 @@ class EvolveReport:
     shock_site: int | None = None
 
 
+class Simulation:
+    def __init__(self, config: SimulationConfig, sites: list[Site]):
+        self.config = config
+        self.rng = np.random.default_rng(config.seed)
+        self.states = initialize_site_states(sites, config, self.rng)
+        self.step = 0
+        self.cumulative_reward = 0.0
+        self.selected_sites: list[int] = []
+        self.reward_history: list[float] = []
+        
+        # Performance Caching
+        self.geographies = np.fromiter((base_geography(s.site, config) for s in self.states), dtype=float)
+        
+        n = len(self.states)
+        xs = np.fromiter((s.site.x for s in self.states), dtype=float)
+        ys = np.fromiter((s.site.y for s in self.states), dtype=float)
+        dx = xs[:, np.newaxis] - xs[np.newaxis, :]
+        dy = ys[:, np.newaxis] - ys[np.newaxis, :]
+        dist = np.sqrt(dx * dx + dy * dy)
+        np.clip(dist, 1e-6, None, out=dist)
+        self.decay_matrix = np.exp(-dist / config.network_scale)
+        np.fill_diagonal(self.decay_matrix, 0.0)
+
+    def run_step(self, action: int) -> float:
+        """Advance the simulation by one step given an action (site index)."""
+        if action < 0 or action >= len(self.states):
+            raise ValueError(f"Action {action} is out of bounds for {len(self.states)} sites.")
+
+        self.states[action].population += 1
+        evolve_report = evolve_sites(
+            self.states, 
+            self.config, 
+            self.rng, 
+            active_site=action, 
+            step=self.step,
+            decay_matrix=self.decay_matrix,
+            geographies=self.geographies
+        )
+        reward = float(evolve_report.rewards[action])
+
+        self.selected_sites.append(action)
+        self.reward_history.append(reward)
+        self.cumulative_reward += reward
+        self.step += 1
+
+        return reward
+
+
 def initialize_site_states(sites: list[Site], config: SimulationConfig, rng: np.random.Generator) -> list[SiteState]:
     states: list[SiteState] = []
     for site in sites:
@@ -267,6 +373,8 @@ def institutional_readiness(
     productive_capital: float,
 ) -> float:
     capital_scale = min(max(productive_capital / 1.5, 0.0), 1.0)
+    # These weights are still somewhat fixed, but we could parameterize them if needed.
+    # For now, keeping them as is but using capital_scale.
     readiness = (
         0.28 * (1.0 - extraction)
         + 0.28 * openness
@@ -289,6 +397,125 @@ def base_geography(site: Site, config: SimulationConfig) -> float:
 
 def site_distance(left: Site, right: Site) -> float:
     return math.hypot(left.x - right.x, left.y - right.y)
+
+
+def calculate_all_network_bonuses(
+    states: list[SiteState], config: SimulationConfig, decay_matrix: np.ndarray | None = None
+) -> np.ndarray:
+    n = len(states)
+    if n <= 1:
+        return np.zeros(n)
+
+    openness = np.fromiter((s.institution.openness for s in states), dtype=float)
+    populations = np.fromiter((s.population for s in states), dtype=float)
+    capitals = np.fromiter((s.productive_capital for s in states), dtype=float)
+
+    if decay_matrix is None:
+        xs = np.fromiter((s.site.x for s in states), dtype=float)
+        ys = np.fromiter((s.site.y for s in states), dtype=float)
+        dx = xs[:, np.newaxis] - xs[np.newaxis, :]
+        dy = ys[:, np.newaxis] - ys[np.newaxis, :]
+        dist = np.sqrt(dx * dx + dy * dy)
+        np.clip(dist, 1e-6, None, out=dist)
+
+        decay_matrix = np.exp(-dist / config.network_scale)
+        np.fill_diagonal(decay_matrix, 0.0)
+
+    partner_scale = (
+        openness
+        * (1.0 + config.network_population_gain * np.log1p(populations))
+        * (1.0 + config.network_capital_gain * capitals)
+    )
+
+    trade_mass = decay_matrix @ partner_scale
+    weight_sum = decay_matrix.sum(axis=1)
+
+    valid_mask = weight_sum > 1e-9
+    local_density = np.zeros(n)
+    local_market = np.zeros(n)
+    local_density[valid_mask] = weight_sum[valid_mask] / (n - 1)
+    local_market[valid_mask] = trade_mass[valid_mask] / weight_sum[valid_mask]
+
+    return openness * local_market * (1.0 + config.network_density_gain * local_density)
+
+
+def compute_all_rewards(
+    states: list[SiteState],
+    config: SimulationConfig,
+    bonuses: np.ndarray,
+    geographies: np.ndarray | None = None,
+) -> np.ndarray:
+    n = len(states)
+    extractions = np.fromiter((s.institution.extraction for s in states), dtype=float)
+    openness = np.fromiter((s.institution.openness for s in states), dtype=float)
+    populations = np.fromiter((max(s.population, 1) for s in states), dtype=float)
+    resource_rents = np.fromiter((s.resource_rent for s in states), dtype=float)
+    capitals = np.fromiter((s.productive_capital for s in states), dtype=float)
+    active_steps = np.maximum(populations - 1, 0)
+    reform_timers = np.fromiter((s.institution.reform_timer for s in states), dtype=int)
+
+    if geographies is None:
+        geographies = np.fromiter((base_geography(s.site, config) for s in states), dtype=float)
+
+    resource_payoff = resource_rents * (config.resource_base_payoff + config.resource_capture_gain * extractions)
+    extractive_cashflow = (
+        config.extractive_cashflow_premium
+        * resource_rents
+        * extractions
+        * np.maximum(0.55, 1.0 - 0.2 * capitals)
+    )
+    inclusive = (1.0 - extractions) * np.power(populations, config.agglomeration_alpha) * (
+        1.0 + config.inclusive_productivity_gain * capitals
+    )
+    reinvestment_dividend = config.inclusive_investment_gain * resource_rents * (1.0 - extractions) * (
+        0.45 + openness + 0.35 * capitals
+    )
+
+    target_log = math.log1p(max(config.secondary_city_target, 1.0))
+    spread = max(config.secondary_city_spread, 1e-3)
+    mid_city_multiplier = np.exp(-((np.log1p(populations) - target_log) ** 2) / (2.0 * spread * spread))
+    secondary_city_dividend = config.secondary_city_bonus * bonuses * mid_city_multiplier
+
+    extractive_drag = extractions * config.extraction_drag * populations
+    congestion = config.congestion * populations * populations
+    overstretch = np.maximum(0.0, populations - config.metropolitan_overstretch_threshold)
+    metropolitan_drag = config.metropolitan_overstretch_penalty * np.power(overstretch, 1.35)
+    reform_cost = np.where(reform_timers > 0, config.reform_cost, 0.0)
+
+    boomtown_bonus = np.zeros(n)
+    is_boomtown = np.fromiter((s.site.boomtown for s in states), dtype=bool)
+    boomtown_duration = np.fromiter((s.site.boomtown_bonus_duration for s in states), dtype=int)
+    boomtown_reward_bonus = np.fromiter((s.site.boomtown_reward_bonus for s in states), dtype=float)
+
+    mask_bt = is_boomtown & (boomtown_duration > 0) & (active_steps <= boomtown_duration)
+    if np.any(mask_bt):
+        rem = 1.0 - (active_steps[mask_bt] / np.maximum(boomtown_duration[mask_bt], 1))
+        boomtown_bonus[mask_bt] = boomtown_reward_bonus[mask_bt] * np.maximum(rem, 0.25)
+
+    collapse_penalty = np.zeros(n)
+    bt_threshold = np.fromiter((s.site.boomtown_collapse_threshold for s in states), dtype=int)
+    bt_penalty = np.fromiter((s.site.boomtown_collapse_penalty for s in states), dtype=float)
+    mask_coll = is_boomtown & (active_steps > bt_threshold)
+    if np.any(mask_coll):
+        overflow = active_steps[mask_coll] - bt_threshold[mask_coll]
+        collapse_penalty[mask_coll] = bt_penalty[mask_coll] * overflow
+
+    rewards = (
+        geographies
+        + resource_payoff
+        + extractive_cashflow
+        + inclusive
+        + reinvestment_dividend
+        + secondary_city_dividend
+        - extractive_drag
+        - congestion
+        - metropolitan_drag
+        + bonuses
+        - reform_cost
+        + boomtown_bonus
+        - collapse_penalty
+    )
+    return rewards
 
 
 def network_bonus(index: int, states: list[SiteState], config: SimulationConfig) -> float:
@@ -400,15 +627,17 @@ def evolve_sites(
     rng: np.random.Generator,
     active_site: int | None = None,
     step: int | None = None,
+    decay_matrix: np.ndarray | None = None,
+    geographies: np.ndarray | None = None,
 ) -> EvolveReport:
-    bonuses = [network_bonus(i, states, config) for i in range(len(states))]
-    rewards = [compute_reward(index, states, config, network=bonuses[index]) for index in range(len(states))]
-    mean_reward = float(np.mean(rewards)) if rewards else 0.0
+    bonuses = calculate_all_network_bonuses(states, config, decay_matrix=decay_matrix)
+    rewards = compute_all_rewards(states, config, bonuses, geographies=geographies)
+    mean_reward = float(np.mean(rewards)) if rewards.size > 0 else 0.0
     reward_scale = max(float(np.std(rewards)), 1.0)
     target_log = math.log1p(max(config.secondary_city_target, 1.0))
     spread = max(config.secondary_city_spread * 1.2, 1e-3)
     for index, state in enumerate(states):
-        reward = rewards[index]
+        reward = float(rewards[index])
         delta = reward - state.last_reward
         institution = state.institution
         network = bonuses[index]
@@ -427,13 +656,13 @@ def evolve_sites(
             productive_capital=state.productive_capital,
         )
         readiness_scale = (
-            0.35 + config.shock_readiness_weight * readiness
+            config.shock_readiness_base + config.shock_readiness_weight * readiness
             if config.shock_readiness_weight > 0.0
             else 1.0
         )
         transition_support = transition_factor * readiness_scale
         legacy_support = legacy_factor * (
-            0.25 + config.shock_readiness_weight * readiness
+            config.shock_legacy_readiness_base + config.shock_readiness_weight * readiness
             if config.shock_readiness_weight > 0.0
             else 1.0
         )
@@ -456,7 +685,7 @@ def evolve_sites(
             if rng.random() < reform_probability:
                 reform_scale = 1.0 + config.shock_reform_step_bonus * shock_factor
                 institution.extraction = max(0.0, institution.extraction - config.reform_step * reform_scale)
-                institution.openness = min(1.0, institution.openness + 0.08 + config.shock_openness_bonus * shock_factor)
+                institution.openness = min(1.0, institution.openness + config.reform_openness_gain + config.shock_openness_bonus * shock_factor)
                 institution.reform_timer = config.reform_duration
                 state.reforms_triggered += 1
                 state.productive_capital = min(1.5, state.productive_capital + config.shock_capital_rebuild * shock_factor)
@@ -465,7 +694,7 @@ def evolve_sites(
                         1.0,
                         max(
                             state.shock_reform_stock,
-                            0.08 + 0.75 * readiness * max(shock_factor, transition_factor),
+                            config.reform_openness_gain + 0.75 * readiness * max(shock_factor, transition_factor),
                         ),
                     )
             else:
@@ -511,7 +740,7 @@ def evolve_sites(
             0.4 + institution.openness + 0.25 * network
         )
         capital_erosion = config.extractive_capital_erosion * institution.extraction * (0.35 + state.resource_rent)
-        passive_scale = 1.0 if active_site is not None and index == active_site else 0.45
+        passive_scale = 1.0 if active_site is not None and index == active_site else config.passive_investment_scale
         state.productive_capital = min(
             1.5,
             max(0.0, state.productive_capital + passive_scale * capital_investment + 0.015 * network - capital_erosion),
@@ -555,7 +784,7 @@ def evolve_sites(
             institution.extraction = min(1.0, max(0.0, institution.extraction + snapback - lock_in))
             institution.openness = min(1.0, max(0.0, institution.openness + 0.35 * lock_in - 0.15 * snapback))
 
-        institution.openness = min(1.0, max(0.0, institution.openness + 0.035 * (network - institution.openness)))
+        institution.openness = min(1.0, max(0.0, institution.openness + config.network_openness_influence * (network - institution.openness)))
         reward_signal = (reward - mean_reward) / reward_scale
         mid_city_signal = math.exp(-((math.log1p(max(state.population, 1)) - target_log) ** 2) / (2.0 * spread * spread))
         overstretch_ratio = max(0.0, state.population - config.metropolitan_overstretch_threshold) / max(
@@ -563,7 +792,7 @@ def evolve_sites(
             1.0,
         )
         structural_signal = base_geography(state.site, config) + 0.45 * network + 0.35 * state.productive_capital
-        growth_signal = reward_signal + 0.9 * (structural_signal - 0.75) + 0.45 * (mid_city_signal - 0.35)
+        growth_signal = reward_signal + config.growth_structural_weight * (structural_signal - 0.75) + 0.45 * (mid_city_signal - 0.35)
         momentum_delta = config.endogenous_growth_rate * growth_signal - config.endogenous_decline_rate * overstretch_ratio
         state.population_momentum = config.endogenous_growth_decay * state.population_momentum + momentum_delta
         if legacy_factor > 0.0 and config.shock_legacy_fade > 0.0:
@@ -578,7 +807,7 @@ def evolve_sites(
     if donor_candidates:
         recipient = max(range(len(states)), key=lambda idx: states[idx].population_momentum)
         donor = min(donor_candidates, key=lambda idx: states[idx].population_momentum)
-        migration_threshold = 0.75
+        migration_threshold = config.migration_threshold
         if (
             recipient != donor
             and states[recipient].population_momentum >= migration_threshold

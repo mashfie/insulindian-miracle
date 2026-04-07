@@ -9,7 +9,8 @@ from typing import Any
 
 import numpy as np
 
-from .model import SiteOutcome, SimulationConfig, SimulationResult, base_geography, evolve_sites, initialize_site_states
+from .data import DuckDBResultBuffer
+from .model import SiteOutcome, Simulation, SimulationConfig, SimulationResult, base_geography, evolve_sites, initialize_site_states
 from .policies import build_policy
 from .scenarios import apply_scenario, get_scenario
 from .terrain import generate_terrain, select_candidate_sites
@@ -320,7 +321,8 @@ def _aggregate_results(results: list[SimulationResult], oracle_results: list[Sim
 
 
 def _prepare_world(config: SimulationConfig) -> tuple[Any, Any, list[Any]]:
-    terrain = generate_terrain(config.terrain)
+    rng = np.random.default_rng(config.seed)
+    terrain = generate_terrain(config, rng=rng)
     sites = select_candidate_sites(terrain, count=config.num_sites, min_spacing=config.min_site_spacing)
     _apply_trade_cluster_shape(sites, config)
     _apply_boomtown_shape(sites, config)
@@ -336,8 +338,7 @@ def _run_policy_on_sites(
     policy_name: str,
 ) -> SimulationResult:
     working_sites = deepcopy(sites)
-    rng = np.random.default_rng(config.seed)
-    states = initialize_site_states(working_sites, config, rng)
+    sim = Simulation(config, working_sites)
     initial_snapshots = {
         state.site.id: {
             "extraction": state.institution.extraction,
@@ -345,34 +346,29 @@ def _run_policy_on_sites(
             "adaptability": state.institution.adaptability,
             "resource_rent": state.resource_rent,
         }
-        for state in states
+        for state in sim.states
     }
-    policy = build_policy(policy_name, len(states), config.seed, config)
+    policy = build_policy(policy_name, len(sim.states), config.seed, config)
 
-    selected_sites: list[int] = []
-    reward_history: list[float] = []
-    cumulative_reward = 0.0
-    for step in range(config.horizon):
-        chosen = policy.select_arm(states)
-        states[chosen].population += 1
-        evolve_report = evolve_sites(states, config, rng, active_site=chosen, step=step)
-        reward = evolve_report.rewards[chosen]
-        policy.update(chosen, reward, states)
-        selected_sites.append(chosen)
-        reward_history.append(reward)
-        cumulative_reward += reward
+    for _ in range(config.horizon):
+        # Create immutable snapshots for the policy
+        snapshots = [state.snapshot() for state in sim.states]
+        chosen = policy.select_site(snapshots)
+        reward = sim.run_step(chosen)
+        # Update policy with snapshots
+        policy.update(chosen, reward, snapshots)
 
-    site_outcomes = _build_site_outcomes(states, initial_snapshots, selected_sites, config)
-    metrics = _result_metrics(site_outcomes, selected_sites)
+    site_outcomes = _build_site_outcomes(sim.states, initial_snapshots, sim.selected_sites, config)
+    metrics = _result_metrics(site_outcomes, sim.selected_sites)
     return SimulationResult(
         policy=policy.name,
         seed=config.seed,
-        cumulative_reward=cumulative_reward,
-        selected_sites=selected_sites,
-        reward_history=reward_history,
-        population_by_site={state.site.id: state.population for state in states},
-        final_extraction_by_site={state.site.id: state.institution.extraction for state in states},
-        final_openness_by_site={state.site.id: state.institution.openness for state in states},
+        cumulative_reward=sim.cumulative_reward,
+        selected_sites=sim.selected_sites,
+        reward_history=sim.reward_history,
+        population_by_site={state.site.id: state.population for state in sim.states},
+        final_extraction_by_site={state.site.id: state.institution.extraction for state in sim.states},
+        final_openness_by_site={state.site.id: state.institution.openness for state in sim.states},
         site_outcomes=site_outcomes,
         metrics=metrics,
         terrain_summary=_terrain_summary(terrain),
@@ -430,15 +426,59 @@ def run_sweep(
     policies: list[str],
     runs: int,
     scenario_name: str | None = None,
-) -> dict[str, list[dict[str, Any]]]:
+    output_parquet: str | None = None,
+) -> dict[str, Any]:
     base_config = apply_scenario(config, scenario_name)
-    output: dict[str, list[dict[str, Any]]] = {}
+    buffer = DuckDBResultBuffer(batch_size=min(1000, runs))
+    
     for policy in policies:
-        output[policy] = []
         for offset in range(runs):
-            result = run_simulation(_seeded_config(base_config, offset), policy_name=policy)
-            output[policy].append(result.to_dict())
-    return output
+            seeded = _seeded_config(base_config, offset)
+            result = run_simulation(seeded, policy_name=policy)
+            buffer.add_result(result, run_id=offset, scenario=scenario_name or "baseline")
+    
+    if output_parquet:
+        buffer.export_to_parquet(output_parquet)
+        buffer.close()
+        return {"status": "success", "path": output_parquet}
+    
+    # If no output path, return summary (optional, could just return status)
+    buffer.flush()
+    summary = buffer.con.execute("SELECT policy, AVG(cumulative_reward) as mean_reward FROM results GROUP BY policy").fetchall()
+    buffer.close()
+    return {"status": "success", "summary": summary}
+
+
+from concurrent.futures import ThreadPoolExecutor
+
+def run_sweep_from_file(
+    input_jsonl: str | Path,
+    policies: list[str],
+    output_parquet: str,
+    batch_limit: int | None = None,
+    max_workers: int = 18,
+) -> None:
+    buffer = DuckDBResultBuffer(batch_size=1000)
+    
+    def worker(config: SimulationConfig):
+        for policy in policies:
+            result = run_simulation(config, policy_name=policy)
+            buffer.add_result(result, run_id=config.run_id, scenario="sweep")
+
+    count = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with open(input_jsonl, "r") as f:
+            for line in f:
+                config_dict = json.loads(line)
+                config = SimulationConfig.from_dict(config_dict)
+                executor.submit(worker, config)
+                
+                count += 1
+                if batch_limit and count >= batch_limit:
+                    break
+                
+    buffer.export_to_parquet(output_parquet)
+    buffer.close()
 
 
 def run_experiment(
