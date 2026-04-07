@@ -26,14 +26,14 @@ To enable 1,000,000+ simulated runs with high granularity, leveraging the 20-thr
 
 - [x] **Externalize Configuration:** Move all 80+ parameters in `SimulationConfig` to `configs/default.json`.
 - [x] **JSON Scenario Manifests:** Replace the `SCENARIOS` dictionary in `scenarios.py` with external JSON/YAML files.
-- [ ] **Sweep Generator Tool:** Create a Python utility (`generate_sweep.py`) that produces a batch of 1,000,000 unique simulation configurations based on user-defined parameter ranges (e.g., varying `agglomeration_alpha` from 0.4 to 0.7).
+- [x] **Sweep Generator Tool:** Create a Python utility (`generate_sweep.py`) that produces a batch of 1,000,000 unique simulation configurations based on user-defined parameter ranges (e.g., varying `agglomeration_alpha` from 0.4 to 0.7).
 
 ## Phase 3: Data Backbone (DuckDB + Parquet)
 **Objective:** Handle massive datasets on 16GB RAM.
 
-- [ ] **Parquet Integration:** Implement `pyarrow` to save simulation results. Parquet is highly compressed and optimized for the columnar analysis performed in Phase 5.
-- [ ] **DuckDB Buffer:** Implement a streaming architecture where the engine writes small batches of results to a local DuckDB instance. This prevents memory overflow and allows for "interrupted" sweeps to resume.
-- [ ] **Granularity Selection:** Define a "Level of Detail" (LoD) flag. 
+- [x] **Parquet Integration:** Implement `pyarrow` to save simulation results. Parquet is highly compressed and optimized for the columnar analysis performed in Phase 5.
+- [x] **DuckDB Buffer:** Implement a streaming architecture where the engine writes small batches of results to a local DuckDB instance. This prevents memory overflow and allows for "interrupted" sweeps to resume.
+- [x] **Granularity Selection:** Define a "Level of Detail" (LoD) flag. 
     - `LOD_LOW`: Only final metrics.
     - `LOD_HIGH`: Full history of every site at every step (only for exemplar runs).
 

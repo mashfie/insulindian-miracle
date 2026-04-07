@@ -1,0 +1,32 @@
+{
+  "name": "ucb-bait",
+  "description": "Short-run resource returns spike hard while institutional decay accelerates behind them.",
+  "overrides": {
+    "horizon": 280,
+    "resource_capture_gain": 2.45,
+    "resource_curse_strength": 0.14,
+    "curse_openness_buffer": 0.12,
+    "curse_capital_buffer": 0.08,
+    "inclusive_investment_gain": 0.06,
+    "inclusive_productivity_gain": 0.48,
+    "extractive_capital_erosion": 0.09,
+    "active_extraction_pressure": 0.28,
+    "active_resource_depletion": 0.12,
+    "active_openness_drag": 0.035,
+    "active_decay_onset": 6,
+    "boomtown_count": 1,
+    "boomtown_resource_bonus": 0.65,
+    "boomtown_geography_penalty": 0.05,
+    "boomtown_initial_extraction_boost": 0.2,
+    "boomtown_early_reward_bonus": 6.0,
+    "boomtown_bonus_duration": 42,
+    "boomtown_collapse_penalty": 0.5,
+    "boomtown_collapse_threshold": 24,
+    "boomtown_decay_multiplier": 6.0,
+    "thompson_posterior_decay": 0.92,
+    "initial_extraction_resource_bias": 5.75,
+    "reform_sensitivity": 1.8,
+    "reform_step": 0.12,
+    "network_scale": 0.24
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "merchant-republic",
+  "description": "Port-led city clusters coordinate through trade and capital accumulation rather than extractive rents.",
+  "overrides": {
+    "horizon": 360,
+    "initial_openness_alpha": 4.1,
+    "initial_openness_beta": 1.4,
+    "network_scale": 0.72,
+    "network_population_gain": 0.16,
+    "network_capital_gain": 0.92,
+    "network_density_gain": 1.22,
+    "inclusive_investment_gain": 0.19,
+    "inclusive_productivity_gain": 0.82,
+    "resource_curse_strength": 0.022,
+    "congestion": 0.0018,
+    "trade_cluster_count": 4,
+    "trade_cluster_radius": 0.24,
+    "trade_cluster_openness_bonus": 0.28,
+    "trade_cluster_capital_bonus": 0.32,
+    "trade_cluster_accessibility_bonus": 0.18
+  }
+}

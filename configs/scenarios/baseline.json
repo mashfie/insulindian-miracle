@@ -1,0 +1,5 @@
+{
+  "name": "baseline",
+  "description": "Default peninsula dynamics with moderate resource rents and modest institutional drift.",
+  "overrides": {}
+}

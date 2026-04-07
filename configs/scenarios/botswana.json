@@ -1,0 +1,25 @@
+{
+  "name": "botswana",
+  "description": "Resource rents remain high, but inclusive and adaptive initial institutions soften the curse.",
+  "overrides": {
+    "horizon": 420,
+    "resource_capture_gain": 1.45,
+    "resource_curse_strength": 0.035,
+    "curse_openness_buffer": 0.7,
+    "curse_capital_buffer": 0.62,
+    "inclusive_investment_gain": 0.22,
+    "inclusive_productivity_gain": 0.9,
+    "extractive_capital_erosion": 0.022,
+    "active_extraction_pressure": 0.015,
+    "active_resource_depletion": 0.006,
+    "active_openness_drag": 0.003,
+    "active_decay_onset": 10,
+    "initial_extraction_resource_bias": 0.15,
+    "initial_openness_alpha": 3.6,
+    "initial_openness_beta": 1.6,
+    "initial_adaptability_alpha": 4.0,
+    "initial_adaptability_beta": 2.0,
+    "network_scale": 0.46,
+    "network_capital_gain": 0.62
+  }
+}

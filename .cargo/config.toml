@@ -1,0 +1,7 @@
+[env]
+PYO3_USE_ABI3_FORWARD_COMPATIBILITY = "1"
+
+# Safer than pasting "cargo test" and "cargo run" on one line (avoids `testandcargo`).
+[alias]
+t = "test"
+ucb-smoke = "run -- run --policy ucb1"
