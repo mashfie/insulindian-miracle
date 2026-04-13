@@ -7,7 +7,6 @@ import {
   getPolicyPage,
   getPolicyPages,
   getReferenceEntries,
-  getRawResultFile,
 } from "@/lib/content/repository";
 import { buildPolicyVisuals } from "@/lib/data/archive-figures";
 
@@ -31,8 +30,7 @@ export default async function PolicyDetailPage({
     reference.category.includes("bandit"),
   );
 
-  const raw = page.evidenceScenario ? getRawResultFile(page.evidenceScenario) : null;
-  const visuals = buildPolicyVisuals({ page, rawResult: raw });
+  const visuals = buildPolicyVisuals({ page });
 
   return (
     <DocumentView
@@ -46,7 +44,7 @@ export default async function PolicyDetailPage({
           <ComparisonModule
             scenario={page.evidenceScenario}
             policies={["ucb1", "gaussian-thompson", "whittle-index"]}
-            note="Policy pages can request a fresh compare against the backend without changing the static archive shell."
+            note="Policy pages resolve comparisons against the checked-in cohort synthesis, so the figures stay deterministic across builds."
           />
         ) : null
       }

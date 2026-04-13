@@ -1,14 +1,24 @@
-__pycache__/
-.pytest_cache/
-*.pyc
-*.pyo
-*.pyd
+# Rust
+/target/
+Cargo.lock
 
-.cache/
-results/*
-!results/.gitkeep
-build/
-dist/
-*.egg-info/
-tests/runtime_artifacts/*
-!tests/runtime_artifacts/.gitkeep
+# Data & Results
+/results/*
+!/results/.gitkeep
+*.parquet
+*.jsonl
+
+# Web / Frontend
+/web/node_modules
+/web/.next
+/web/out
+/web/build
+/web/.vercel
+/web/*.tsbuildinfo
+/web/next-env.d.ts
+
+# Misc
+.DS_Store
+*.pem
+.env*
+.vercel

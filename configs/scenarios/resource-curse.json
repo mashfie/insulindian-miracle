@@ -1,0 +1,25 @@
+{
+  "name": "resource-curse",
+  "description": "Resource-rich sites start more extractive and remain tempting long enough to become traps.",
+  "overrides": {
+    "horizon": 420,
+    "resource_capture_gain": 1.8,
+    "resource_curse_strength": 0.13,
+    "curse_openness_buffer": 0.12,
+    "curse_capital_buffer": 0.08,
+    "inclusive_investment_gain": 0.06,
+    "inclusive_productivity_gain": 0.46,
+    "extractive_capital_erosion": 0.09,
+    "active_extraction_pressure": 0.18,
+    "active_resource_depletion": 0.08,
+    "active_openness_drag": 0.028,
+    "active_decay_onset": 1,
+    "initial_extraction_resource_bias": 5.2,
+    "initial_openness_alpha": 1.8,
+    "initial_openness_beta": 2.8,
+    "initial_adaptability_alpha": 2.2,
+    "initial_adaptability_beta": 3.4,
+    "reform_sensitivity": 2.4,
+    "network_scale": 0.28
+  }
+}

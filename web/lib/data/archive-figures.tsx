@@ -5,39 +5,32 @@ import {
   EquationFigure,
   OutcomeScatter,
   PolicyRankingBars,
-  RewardTrajectory,
   StatsTable,
   TrendFigure,
 } from "@/components/figures";
 
 import {
-  HistogramFigure,
-  BubbleChartFigure,
   DumbbellChartFigure,
-  AreaChartFigure,
-  RadialBarChartFigure,
-  HeerichBarChart3D,
-  HeerichSurface3D,
-  HeerichScatter3D,
-  RadarChartFigure,
   HeatmapFigure,
-  TimelineGanttFigure,
-  FlowDiagramFigure,
-  BeliefEvolutionFigure,
-  ArmSelectionRibbon,
+  HistogramFigure,
   UCBBoundsFigure,
-  RegretBoundsFigure,
-  WhittleIndexRanking,
-  DriftingMeanPlot,
-  ContextualVoronoiMap,
-  MarkovArmDiagram,
 } from "@/components/interactive-assets";
 
-import type { ArchivePage, ScenarioPage, PolicyPage } from "@/lib/content/types";
+import type {
+  ArchivePage,
+  CohortSynthesis,
+  PolicyPage,
+  ScenarioPage,
+} from "@/lib/content/types";
 
 type RawResult = Record<string, unknown>;
 
-function figureAt(archive: ArchivePage, index: number, fallbackTitle: string, kind: ArchivePage["figureRefs"][number]["kind"]) {
+function figureAt(
+  archive: ArchivePage,
+  index: number,
+  fallbackTitle: string,
+  kind: ArchivePage["figureRefs"][number]["kind"],
+) {
   return (
     archive.figureRefs[index] ?? {
       id: `${archive.slug}-${index}`,
@@ -48,65 +41,188 @@ function figureAt(archive: ArchivePage, index: number, fallbackTitle: string, ki
   );
 }
 
+const POLICY_COLORS: Record<string, string> = {
+  "sliding-window-ucb": "#4a6a7a",
+  "whittle-index": "#7a5c6e",
+  "discounted-ucb": "#3f5c52",
+  "gaussian-thompson": "#b08060",
+  "ucb1": "#8a3824",
+  "epsilon-greedy": "#8a8070",
+  "discounted-gaussian-thompson": "#5a7890",
+  "linucb": "#6a7850",
+  "linear-thompson": "#a07848",
+  "myopic-oracle": "#a08d81",
+};
+
+function shortPolicyName(policyName: string) {
+  return policyName
+    .replace("sliding-window-", "SW-")
+    .replace("discounted-", "D-")
+    .replace("gaussian-", "G-")
+    .replace("linear-", "Lin-")
+    .replace("epsilon-greedy", "Eps")
+    .replace("whittle-index", "Whittle")
+    .replace("linucb", "LinUCB")
+    .replace("ucb1", "UCB1")
+    .replace("myopic-oracle", "Oracle");
+}
+
+function landingRanking(synthesis: CohortSynthesis | null) {
+  if (!synthesis) return [];
+  return synthesis.combined_ranking.slice(0, 4).map((entry) => ({
+    label: entry.label,
+    value: entry.value,
+    color: POLICY_COLORS[entry.policy] ?? "var(--ink)",
+  }));
+}
+
 export function buildLandingVisuals({
   archive,
+  cohortSynthesis,
   whittleRun,
-  ucbBaitSummary,
 }: {
   archive: ArchivePage;
+  cohortSynthesis: CohortSynthesis | null;
   whittleRun: RawResult | null;
-  ucbBaitSummary: RawResult | null;
 }): ReactNode[] {
   const rewardHistory = Array.isArray(whittleRun?.reward_history)
-    ? (whittleRun?.reward_history as number[])
+    ? (whittleRun.reward_history as number[])
     : [];
   const siteOutcomes = Array.isArray(whittleRun?.site_outcomes)
-    ? (whittleRun?.site_outcomes as Array<Record<string, number | boolean>>)
+    ? (whittleRun.site_outcomes as Array<Record<string, number | boolean>>)
     : [];
-  const summary = (ucbBaitSummary?.summary ?? {}) as Record<string, Record<string, number>>;
-  const oracleSummary = (ucbBaitSummary?.oracle_summary ?? {}) as Record<string, number>;
-  const metrics = (whittleRun?.metrics ?? {}) as Record<string, number>;
+
+  const totals = cohortSynthesis?.headline_totals ?? {};
+  const cohortItems = Object.entries(totals)
+    .filter(([label]) => label !== "total")
+    .map(([label, value]) => ({
+      label: label.replace("_", " "),
+      value,
+      color:
+        label === "legacy_1m"
+          ? "#8a3824"
+          : label === "historical_90k"
+            ? "#4a6a7a"
+            : "#3f5c52",
+    }));
+  const oracleGapArms = (cohortSynthesis?.paired_vs_oracle ?? []).slice(0, 6).map((entry) => {
+    const policy = String(entry.policy ?? "unknown");
+    const meanGap = Math.abs(Number(entry.mean_gap ?? 0));
+    const ciLow = Number(entry.ci_low ?? 0);
+    const ciHigh = Number(entry.ci_high ?? 0);
+    return {
+      label: shortPolicyName(policy),
+      mean: meanGap,
+      ucb: Math.max(Math.abs(ciHigh - Number(entry.mean_gap ?? 0)), Math.abs(Number(entry.mean_gap ?? 0) - ciLow)),
+      color: POLICY_COLORS[policy] ?? "var(--ink)",
+    };
+  });
 
   return [
-    <TrendFigure
-      key="trend"
-      values={rewardHistory.slice(0, 80)}
-      figure={figureAt(archive, 0, "Reward history across a single Whittle-index run.", "trend")}
-      accent={POLICY_COLORS["whittle-index"]}
+    <ComparisonBars
+      key="cohorts"
+      figure={figureAt(
+        archive,
+        0,
+        "The evidence program is organized around three cohorts totalling 1,590,008 planned policy executions.",
+        "comparison",
+      )}
+      items={cohortItems}
     />,
     <ComparisonBars
-      key="comparison"
+      key="ranking"
       figure={figureAt(
         archive,
         1,
-        "Mean cumulative reward in the ucb-bait scenario, benchmarked against the oracle.",
+        "Current policy ranking across the cohort synthesis.",
         "comparison",
       )}
-      items={[
-        { label: "Oracle", value: oracleSummary.mean_cumulative_reward ?? 0, color: "#a08d81" },
-        { label: "Gauss TS", value: summary["gaussian-thompson"]?.mean_cumulative_reward ?? 0, color: POLICY_COLORS["gaussian-thompson"] },
-        { label: "UCB1", value: summary.ucb1?.mean_cumulative_reward ?? 0, color: POLICY_COLORS["ucb1"] },
-        { label: "Whittle", value: summary["whittle-index"]?.mean_cumulative_reward ?? 0, color: POLICY_COLORS["whittle-index"] },
-      ]}
+      items={landingRanking(cohortSynthesis)}
     />,
+    cohortSynthesis ? (
+      <HeatmapFigure
+        key="heatmap"
+        figure={figureAt(
+          archive,
+          2,
+          "Reward, gap, extraction, concentration, and Zipf response across the current top policy block.",
+          "comparison",
+        )}
+        labelsX={cohortSynthesis.scenario_heatmap.labelsX}
+        labelsY={cohortSynthesis.scenario_heatmap.labelsY}
+        data={cohortSynthesis.scenario_heatmap.data}
+      />
+    ) : null,
     <EquationFigure
       key="equation"
       figure={figureAt(
         archive,
-        2,
-        "The archive tracks regret against the oracle and concentration through HHI rather than treating raw reward as a sufficient statistic.",
+        3,
+        "The archive now treats the evidence base as a stratified program rather than a single undifferentiated sweep.",
         "equation",
       )}
-      latex={String.raw`\mathrm{regret}_{\pi}=R_{\mathrm{oracle}}-R_{\pi}, \qquad \mathrm{HHI}=\sum_i s_i^2`}
+      latex={String.raw`N_{\mathrm{total}}=N_{\mathrm{legacy}}+N_{\mathrm{historical}}+N_{\mathrm{stress}}=1{,}000{,}008+90{,}000+500{,}000`}
     />,
-    <OutcomeScatter
-      key="scatter"
-      figure={figureAt(
-        archive,
-        3,
-        "Resource rent and final population do not collapse into a single axis; boomtowns can remain rich while failing to dominate the urban system.",
-        "scatter",
-      )}
+    oracleGapArms.length ? (
+      <UCBBoundsFigure
+        key="oracle-gap"
+        figure={figureAt(
+          archive,
+          4,
+          "Mean oracle gap with a 95% bootstrap interval for the leading non-oracle policies in the scenario-backed cohorts.",
+          "comparison",
+        )}
+        arms={oracleGapArms}
+      />
+    ) : null,
+    rewardHistory.length ? (
+      <TrendFigure
+        key="trend"
+        values={rewardHistory.slice(0, 80)}
+        figure={figureAt(
+          archive,
+          5,
+          "A single Whittle-index trace remains in the archive as a concrete path-dependent run, not as a substitute for cohort evidence.",
+          "trend",
+        )}
+        accent={POLICY_COLORS["whittle-index"]}
+      />
+    ) : (
+      <StatsTable
+        key="fallback"
+        title="Evidence status"
+        rows={[
+          {
+            label: "Planned executions",
+            value: cohortSynthesis?.headline_totals.total ?? 0,
+            format: "number",
+          },
+          {
+            label: "Legacy cohort",
+            value: cohortSynthesis?.headline_totals.legacy_1m ?? 0,
+            format: "number",
+          },
+          {
+            label: "Historical cohort",
+            value: cohortSynthesis?.headline_totals.historical_90k ?? 0,
+            format: "number",
+          },
+          {
+            label: "Stress cohort",
+            value: cohortSynthesis?.headline_totals.stress_500k ?? 0,
+            format: "number",
+          },
+        ]}
+      />
+    ),
+      <OutcomeScatter
+        key="scatter"
+        figure={figureAt(
+          archive,
+          6,
+          "The checked-in raw run still anchors the site-level story: resource rent and final population refuse to collapse into one dimension.",
+          "scatter",
+        )}
       points={siteOutcomes.slice(0, 15).map((site, index) => ({
         x: Number(site.resource_rent ?? 0),
         y: Number(site.final_population ?? 0),
@@ -116,103 +232,31 @@ export function buildLandingVisuals({
     />,
     <StatsTable
       key="table"
-      title="Run diagnostics"
+      title="Program diagnostics"
       rows={[
         {
-          label: "Mean final extraction",
-          value: Number(metrics.mean_final_extraction ?? 0),
-          format: "percent",
+          label: "Planned evidence base",
+          value: cohortSynthesis?.headline_totals.total ?? 0,
+          format: "number",
         },
         {
-          label: "Population HHI",
-          value: Number(metrics.population_hhi ?? 0),
-          format: "percent",
+          label: "Legacy planned",
+          value: cohortSynthesis?.headline_totals.legacy_1m ?? 0,
+          format: "number",
         },
         {
-          label: "Zipf slope",
-          value: Number(metrics.zipf_slope ?? 0),
-          format: "signed",
+          label: "Historical planned",
+          value: cohortSynthesis?.headline_totals.historical_90k ?? 0,
+          format: "number",
         },
         {
-          label: "Selection HHI",
-          value: Number(metrics.selection_hhi ?? 0),
-          format: "percent",
+          label: "Stress planned",
+          value: cohortSynthesis?.headline_totals.stress_500k ?? 0,
+          format: "number",
         },
       ]}
     />,
-  ];
-}
-
-// Hiroshige-inspired desaturated palette — earthy woodblock tones
-// anchored to the hero voxel's warm taupe/brown/teal palette
-const POLICY_COLORS: Record<string, string> = {
-  "sliding-window-ucb":            "#4a6a7a", // indigo-slate
-  "whittle-index":                 "#7a5c6e", // dusty plum
-  "discounted-ucb":                "#3f5c52", // dark sage (matches trade-cluster voxel)
-  "gaussian-thompson":             "#b08060", // warm ochre / raw sienna
-  "ucb1":                          "#8a3824", // brick rust (matches --danger / boomtown voxel)
-  "epsilon-greedy":                "#8a8070", // warm ash
-  "discounted-gaussian-thompson":  "#5a7890", // faded denim
-  "linucb":                        "#6a7850", // olive drab
-  "linear-thompson":               "#a07848", // tawny amber
-};
-
-function computeAggregateSeries(
-  rawResult: RawResult | null,
-  policies: string[],
-) {
-  if (!rawResult) return [];
-  const results = rawResult.results as Record<string, Array<Record<string, unknown>>> | undefined;
-  if (!results) return [];
-
-  return policies
-    .filter((p) => results[p] && results[p].length > 0)
-    .map((policyName) => {
-      const runs = results[policyName];
-      const horizon = (runs[0]?.reward_history as number[] | undefined)?.length ?? 0;
-      const mean: number[] = [];
-      const std: number[] = [];
-
-      for (let t = 0; t < horizon; t++) {
-        let sum = 0;
-        let count = 0;
-        for (const run of runs) {
-          const rh = run.reward_history as number[] | undefined;
-          if (rh && t < rh.length) {
-            sum += rh[t];
-            count++;
-          }
-        }
-        const m = count > 0 ? sum / count : 0;
-        let varSum = 0;
-        for (const run of runs) {
-          const rh = run.reward_history as number[] | undefined;
-          if (rh && t < rh.length) {
-            varSum += (rh[t] - m) ** 2;
-          }
-        }
-        mean.push(m);
-        std.push(count > 1 ? Math.sqrt(varSum / (count - 1)) : 0);
-      }
-
-      const shortName = policyName
-        .replace("sliding-window-", "SW-")
-        .replace("discounted-", "D-")
-        .replace("gaussian-", "G-")
-        .replace("linear-", "Lin-")
-        .replace("epsilon-greedy", "Eps")
-        .replace("whittle-index", "Whittle")
-        .replace("linucb", "LinUCB")
-        .replace("ucb1", "UCB1")
-        .replace("myopic-oracle", "Oracle");
-
-      return {
-        label: shortName,
-        mean,
-        std,
-        color: POLICY_COLORS[policyName] ?? "#555",
-      };
-    });
+  ].filter(Boolean);
 }
 
 export function buildScenarioVisuals({
@@ -223,6 +267,27 @@ export function buildScenarioVisuals({
   rawResult: RawResult | null;
 }): ReactNode[] {
   const summary = page.result?.summary ?? {};
+  const visuals = (page.result?.visuals ?? {}) as Record<string, unknown>;
+  const ranking = Array.isArray(visuals.ranking)
+    ? (visuals.ranking as Array<{ label: string; value: number; policy: string }>)
+    : Object.entries(summary)
+        .map(([name, data]) => ({
+          label: shortPolicyName(name),
+          value: Number(data.mean_cumulative_reward ?? 0),
+          policy: name,
+        }))
+        .sort((left, right) => right.value - left.value);
+  const dumbbellItems = Array.isArray(visuals.oracle_gap_dumbbell)
+    ? (visuals.oracle_gap_dumbbell as Array<{ label: string; start: number; end: number }>)
+    : [];
+  const heatmap = (visuals.metric_heatmap ?? {
+    labelsX: [],
+    labelsY: [],
+    data: [],
+  }) as { labelsX: string[]; labelsY: string[]; data: number[][] };
+  const rewardHistogram = Array.isArray(visuals.reward_histogram)
+    ? (visuals.reward_histogram as Array<{ label: string; count: number }>)
+    : [];
   const sampleRun = ((rawResult?.results as Record<string, Array<Record<string, unknown>>> | undefined)?.[
     "gaussian-thompson"
   ] ?? [])[0] as Record<string, unknown> | undefined;
@@ -230,126 +295,194 @@ export function buildScenarioVisuals({
     ? (sampleRun.site_outcomes as Array<Record<string, number | boolean>>)
     : [];
 
-  const keyPolicies = ["sliding-window-ucb", "whittle-index", "gaussian-thompson", "ucb1"];
-  const aggregateSeries = computeAggregateSeries(rawResult, keyPolicies);
-
-  const policyItems = Object.entries(summary)
-    .map(([name, data]) => ({
-      label: name
-        .replace("sliding-window-", "SW-")
-        .replace("discounted-", "D-")
-        .replace("gaussian-", "G-")
-        .replace("linear-", "Lin-")
-        .replace("epsilon-greedy", "Eps")
-        .replace("whittle-index", "Whittle")
-        .replace("linucb", "LinUCB")
-        .replace("ucb1", "UCB1"),
-      value: data.mean_cumulative_reward ?? 0,
-      color: POLICY_COLORS[name],
-    }))
-    .sort((a, b) => b.value - a.value);
-
   return [
     <PolicyRankingBars
       key="ranking"
       figure={figureAt(
         page.archive,
         0,
-        "Policy ranking by mean cumulative reward across 12 runs.",
+        `Policy ranking by mean cumulative reward across ${page.result?.runs ?? 0} scenario runs.`,
         "comparison",
       )}
-      items={policyItems}
+      items={ranking.map((entry) => ({
+        label: entry.label,
+        value: entry.value,
+        color: POLICY_COLORS[entry.policy] ?? "var(--ink)",
+      }))}
       oracle={page.result?.oracleSummary.mean_cumulative_reward}
     />,
-    aggregateSeries.length > 0 ? (
-      <RewardTrajectory
-        key="trajectory"
+    dumbbellItems.length ? (
+      <DumbbellChartFigure
+        key="dumbbell"
         figure={figureAt(
           page.archive,
           1,
-          "Cumulative reward over time: mean across 12 runs with ±1σ confidence band.",
-          "trend",
+          "Oracle-gap shift between the historical and stress cohorts for the dominant policy block.",
+          "comparison",
         )}
-        series={aggregateSeries}
+        items={dumbbellItems}
       />
     ) : (
-      <TrendFigure
-        key="trend-fallback"
-        values={[]}
-        figure={figureAt(page.archive, 1, "Reward trajectory", "trend")}
+      <HistogramFigure
+        key="histogram"
+        figure={figureAt(page.archive, 1, "Scenario reward distribution.", "distribution")}
+        bins={rewardHistogram}
+        accent={POLICY_COLORS[ranking[0]?.policy ?? "whittle-index"] ?? "var(--ink)"}
       />
     ),
-    <OutcomeScatter
-      key="scatter"
-      figure={figureAt(
-        page.archive,
-        2,
-        "Resource rent vs final population across candidate sites — boomtowns marked in black.",
-        "scatter",
-      )}
-      points={siteOutcomes.slice(0, 15).map((site, index) => ({
-        x: Number(site.resource_rent ?? 0),
-        y: Number(site.final_population ?? 0),
-        label: `S${index}`,
-        boomtown: Boolean(site.boomtown),
-      }))}
-    />,
+    heatmap.data.length ? (
+      <HeatmapFigure
+        key="heatmap"
+        figure={figureAt(
+          page.archive,
+          2,
+          "Relative policy intensity across reward, regret, extraction, concentration, and Zipf response.",
+          "comparison",
+        )}
+        labelsX={heatmap.labelsX}
+        labelsY={heatmap.labelsY}
+        data={heatmap.data}
+      />
+    ) : null,
+    siteOutcomes.length ? (
+      <OutcomeScatter
+        key="scatter"
+        figure={figureAt(
+          page.archive,
+          3,
+          "A checked-in raw exemplar still anchors the site-level mechanism story.",
+          "scatter",
+        )}
+        points={siteOutcomes.slice(0, 15).map((site, index) => ({
+          x: Number(site.resource_rent ?? 0),
+          y: Number(site.final_population ?? 0),
+          label: `S${index}`,
+          boomtown: Boolean(site.boomtown),
+        }))}
+      />
+    ) : null,
     <EquationFigure
-      key="equation"
+      key="heatmap"
       figure={figureAt(
         page.archive,
-        3,
-        "The reward function decomposes into geography, resource payoff, institutional quality, network effects, and congestion penalties.",
+        4,
+        "Scenario evidence stays tied to reward gaps rather than a single scalar ranking.",
         "equation",
       )}
-      latex={String.raw`r_t = g_i + \rho_i(0.2 + \beta e_t) + \gamma_t - \kappa_t`}
+      latex={String.raw`\Delta_{\pi,\pi'}=\mathbb{E}[R_{\pi}-R_{\pi'}], \qquad \widehat{\Delta}\pm \mathrm{CI}_{0.95}`}
     />,
-    <RadarChartFigure
-      key="radar"
-      figure={figureAt(page.archive, 4, "Key dimensions of final sites", "comparison")}
-      items={siteOutcomes.slice(0, 3).map((site, i) => ({
-        label: `Site ${i}`,
-        stats: [Number(site.final_population ?? 0), Number(site.resource_rent ?? 0), Number(site.final_capital ?? 0), Number(site.final_openness ?? 0)],
-        color: POLICY_COLORS["whittle-index"]
-      }))}
-    />,
-    <StatsTable
-      key="metrics"
-      title="Scenario diagnostics"
-      rows={page.stats}
-    />,
-  ];
+    <StatsTable key="metrics" title="Scenario diagnostics" rows={page.stats} />,
+  ].filter(Boolean);
 }
 
 export function buildPolicyVisuals({
   page,
-  rawResult,
 }: {
   page: PolicyPage;
-  rawResult: RawResult | null;
 }): ReactNode[] {
-  if (!rawResult) return [];
-  const results = rawResult.results as Record<string, Array<Record<string, unknown>>> | undefined;
-  if (!results) return [];
+  if (!page.dossier) return [];
+  const cohortItems = page.dossier.cohort_reward_items.map((item) => ({
+    label: item.label.replace("_", " "),
+    value: item.value,
+    color:
+      item.label === "legacy_1m"
+        ? "#8a3824"
+        : item.label === "historical_90k"
+          ? "#4a6a7a"
+          : "#3f5c52",
+  }));
+  const rewardBins = page.dossier.distribution_bins;
+  const heatmap = page.dossier.heatmap;
+  const scenarioGapItems = page.dossier.scenario_gap_items;
+  const summary = page.dossier.summary;
 
-  const policyName = page.slug;
-  const runs = results[policyName] ?? [];
-  const sampleRun = runs[0] as Record<string, unknown> | undefined;
-
-  const horizon = (sampleRun?.reward_history as number[] | undefined)?.length ?? 0;
-  
   return [
-    <TrendFigure
-      key="trend"
-      values={(sampleRun?.reward_history as number[])?.slice(0, horizon) || []}
-      figure={figureAt(page.archive, 0, "Reward History", "trend")}
-      accent={POLICY_COLORS[policyName] || "var(--ink)"}
+    <ComparisonBars
+      key="cohorts"
+      figure={figureAt(
+        page.archive,
+        0,
+        "Cohort mean reward for this policy.",
+        "comparison",
+      )}
+      items={cohortItems}
     />,
-    <HistogramFigure
-      key="hist"
-      figure={figureAt(page.archive, 1, "Distribution of Rewards", "distribution")}
-      bins={Array.from({ length: 10 }).map((_, i) => ({ label: `Bin ${i}`, count: Math.floor(Math.random() * 20) }))}
-      accent={POLICY_COLORS[policyName] || "var(--ink)"}
-    />
-  ];
+    scenarioGapItems.length ? (
+      <DumbbellChartFigure
+        key="scenario-gap"
+        figure={figureAt(
+          page.archive,
+          1,
+          "Scenario-level gap against UCB1 across the historical and stress cohorts.",
+          "comparison",
+        )}
+        items={scenarioGapItems}
+      />
+    ) : (
+      <StatsTable
+        key="cohort-bars"
+        title="Cohort status"
+        rows={[
+          {
+            label: "Tracked scenarios",
+            value: Number(summary.scenario_count ?? 0),
+            format: "number",
+          },
+        ]}
+      />
+    ),
+    rewardBins.length ? (
+      <HistogramFigure
+        key="histogram"
+        figure={figureAt(
+          page.archive,
+          2,
+          "Distribution of checked-in scenario rewards for this policy.",
+          "distribution",
+        )}
+        bins={rewardBins}
+        accent={POLICY_COLORS[page.dossier.policy] ?? "var(--ink)"}
+      />
+    ) : null,
+    heatmap.data.length ? (
+      <HeatmapFigure
+        key="heatmap"
+        figure={figureAt(
+          page.archive,
+          3,
+          "Condensed policy profile across reward, gap, extraction, concentration, and Zipf response.",
+          "comparison",
+        )}
+        labelsX={heatmap.labelsX}
+        labelsY={heatmap.labelsY}
+        data={heatmap.data}
+      />
+    ) : null,
+    <StatsTable
+      key="policy-stats"
+      title="Policy dossier"
+      rows={[
+        {
+          label: "Mean reward",
+          value: Number(summary.mean_cumulative_reward ?? 0),
+          format: "number",
+        },
+        {
+          label: "Mean oracle regret",
+          value: Number(summary.mean_oracle_regret ?? 0),
+          format: "number",
+        },
+        {
+          label: "Tracked cohorts",
+          value: cohortItems.length,
+          format: "number",
+        },
+        {
+          label: "Scenario count",
+          value: Number(summary.scenario_count ?? 0),
+          format: "number",
+        },
+      ]}
+    />,
+  ].filter(Boolean);
 }

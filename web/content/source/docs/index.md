@@ -42,7 +42,7 @@ Per-module documentation cards.
 | Module | Purpose |
 |--------|---------|
 | [[model]] | Core data models, reward function, institutional evolution |
-| [[policies]] | 10 MAB algorithm implementations |
+| [[policies]] | 10 policies evaluated over 1,000,008 runs |
 | [[sim]] | Simulation orchestration and experiment runners |
 | [[terrain]] | Procedural terrain generation and site placement |
 | [[analysis]] | Hypothesis testing framework (H1–H7) |

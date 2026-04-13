@@ -37,7 +37,7 @@ export function ComparisonModule({
     <section className="comparison-card">
       <div className="comparison-card__header">
         <div>
-          <div className="section-kicker">Live Experiment</div>
+          <div className="section-kicker">Archive Compare</div>
           <h2>Policy Comparison</h2>
           <p className="comparison-note">{note}</p>
         </div>
@@ -84,7 +84,7 @@ export function ComparisonModule({
           </div>
         ) : (
           <div className="comparison-note">
-            Run a live simulation against the Python backend. Each policy plays the same peninsula, same seed, same institutional dynamics &mdash; only the allocation strategy differs.
+            Run a deterministic archive compare against the checked-in evidence bundle. Each policy is read from the same scenario dossier and presented without client-side randomness.
           </div>
         )}
       </div>

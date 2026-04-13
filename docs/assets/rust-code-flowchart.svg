@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1400" viewBox="0 0 1800 1400" role="img" aria-labelledby="title desc">
+  <title id="title">Rust simulation and sweep flow</title>
+  <desc id="desc">Flowchart of the actual Rust execution path from CLI parsing through terrain generation, site initialization, policy selection, reward evolution, and JSON or Parquet outputs.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#1f2937"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#6b7280"/>
+    </marker>
+    <style>
+      .bg { fill: #fbfbfa; }
+      .frame { fill: #ffffff; stroke: #111827; stroke-width: 1.5; rx: 18; ry: 18; }
+      .frame-soft { fill: #f8fafc; stroke: #4b5563; stroke-width: 1.25; stroke-dasharray: 6 5; rx: 16; ry: 16; }
+      .title { font: 700 34px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111827; }
+      .subtitle { font: 400 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #4b5563; }
+      .node-title { font: 700 22px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #111827; }
+      .node-body { font: 400 16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #374151; }
+      .node-note { font: 400 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #6b7280; }
+      .edge { fill: none; stroke: #1f2937; stroke-width: 2.25; marker-end: url(#arrow); }
+      .edge-soft { fill: none; stroke: #6b7280; stroke-width: 1.75; stroke-dasharray: 7 6; marker-end: url(#arrow-soft); }
+      .label { font: 600 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #4b5563; }
+      .foot { font: 400 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #6b7280; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="1400"/>
+
+  <text class="title" x="70" y="58">Insulindian Miracle: Rust execution path</text>
+  <text class="subtitle" x="70" y="84">Grounded in rust/src/main.rs, runner.rs, terrain.rs, core.rs, policies.rs, whittle.rs, and math_utils.rs</text>
+
+  <!-- Main vertical flow -->
+  <rect class="frame" x="220" y="120" width="1360" height="86"/>
+  <text class="node-title" x="260" y="154">1. CLI entry</text>
+  <text class="node-body" x="260" y="180">rust/src/main.rs::main()  -  clap dispatches run / sweep / benchmark / compare / experiment</text>
+
+  <rect class="frame" x="220" y="240" width="1360" height="104"/>
+  <text class="node-title" x="260" y="274">2. Config + scenario loading</text>
+  <text class="node-body" x="260" y="300">load_base_config()  +  apply_scenario_rust()</text>
+  <text class="node-note" x="260" y="324">SimulationConfig::default() or JSON override file merged before policy selection</text>
+
+  <rect class="frame" x="220" y="378" width="1360" height="110"/>
+  <text class="node-title" x="260" y="412">3. Terrain generation</text>
+  <text class="node-body" x="260" y="438">generate_terrain_rust()  ->  fractal Perlin field, coastline, river path, suitability</text>
+  <text class="node-note" x="260" y="462">terrain_shares() records land_share and river_share for the final RunResult</text>
+
+  <rect class="frame" x="220" y="522" width="1360" height="128"/>
+  <text class="node-title" x="260" y="556">4. Candidate sites and initial state</text>
+  <text class="node-body" x="260" y="582">select_candidate_sites_rust()  ->  apply_trade_cluster_shape_rust()  ->  apply_boomtown_shape_rust()</text>
+  <text class="node-body" x="260" y="606">initialize_site_states_rust() seeds extraction, openness, adaptability, capital, population, readiness</text>
+  <text class="node-note" x="260" y="630">Site / Institution / SiteState are the state carriers used by the loop</text>
+
+  <rect class="frame" x="220" y="684" width="1360" height="118"/>
+  <text class="node-title" x="260" y="718">5. Decay matrix + cache</text>
+  <text class="node-body" x="260" y="744">site_distance() builds decay_matrix[i,j] = exp(-d_ij / network_scale)</text>
+  <text class="node-body" x="260" y="768">SimulationCache stores partner_scale, network_bonuses, rewards, populations, capitals</text>
+  <text class="node-note" x="260" y="792">base_geography() is precomputed for contextual and Whittle policies</text>
+
+  <rect class="frame" x="220" y="836" width="1360" height="126"/>
+  <text class="node-title" x="260" y="870">6. Policy construction and selection</text>
+  <text class="node-body" x="260" y="896">build_policy_enum() returns epsilon-greedy, UCB, Thompson, Whittle, LinUCB, or linear Thompson</text>
+  <text class="node-body" x="260" y="920">If wants_snapshots() is true, runner materializes SiteStateSnapshot[] before select_site()</text>
+  <text class="node-note" x="260" y="944">Contextual policies use x = [1, geography, resource, extraction, openness, adaptability, capital, ln(1+p), network, boomtown, trade_cluster]</text>
+
+  <rect class="frame" x="220" y="996" width="1360" height="170"/>
+  <text class="node-title" x="260" y="1030">7. Reward / evolution loop</text>
+  <text class="node-body" x="260" y="1056">for step in 0..horizon: select_site()  ->  states[chosen].population += 1  ->  evolve_sites()</text>
+  <text class="node-body" x="260" y="1080">calculate_all_network_bonuses()  +  compute_all_rewards()  ->  reward = cache.rewards[chosen]</text>
+  <text class="node-note" x="260" y="1104">policy.update(chosen, reward, snapshots); cumulative_reward += reward</text>
+  <text class="node-note" x="260" y="1128">evolve_sites() applies institutional drift, shocks, reforms, capital, openness, extraction, and resource depletion</text>
+
+  <rect class="frame" x="220" y="1200" width="1360" height="138"/>
+  <text class="node-title" x="260" y="1234">8. Outputs</text>
+  <text class="node-body" x="260" y="1260">Single run: RunResult -> JSON / stdout / optional output file; PyO3 wrapper returns compact JSON</text>
+  <text class="node-body" x="260" y="1284">Sweep: run_sweep_rust_core() -> RecordBatch -> ArrowWriter -> Parquet, with oracle and empirical baselines</text>
+  <text class="node-note" x="260" y="1308">High LOD includes site_outcomes; low LOD suppresses histories to reduce payload size</text>
+
+  <!-- Connectors -->
+  <path class="edge" d="M900 206 L900 240"/>
+  <path class="edge" d="M900 344 L900 378"/>
+  <path class="edge" d="M900 488 L900 522"/>
+  <path class="edge" d="M900 650 L900 684"/>
+  <path class="edge" d="M900 802 L900 836"/>
+  <path class="edge" d="M900 962 L900 996"/>
+  <path class="edge" d="M900 1170 L900 1200"/>
+
+  <!-- Loopback cue from evolution to policy selection -->
+  <path class="edge-soft" d="M1500 1078 C1660 1078 1660 900 1500 900"/>
+  <text class="label" x="1540" y="970">repeat each horizon step</text>
+
+  <!-- Math / implementation callouts -->
+  <rect class="frame-soft" x="74" y="238" width="104" height="152"/>
+  <text class="node-title" x="92" y="270">Code</text>
+  <text class="node-body" x="92" y="296">main.rs</text>
+  <text class="node-body" x="92" y="320">runner.rs</text>
+  <text class="node-body" x="92" y="344">terrain.rs</text>
+  <text class="node-body" x="92" y="368">core.rs</text>
+
+  <rect class="frame-soft" x="1550" y="238" width="176" height="236"/>
+  <text class="node-title" x="1570" y="270">Math anchors</text>
+  <text class="node-body" x="1570" y="298">d_ij = ||x_i - x_j||_2</text>
+  <text class="node-body" x="1570" y="324">W_ij = exp(-d_ij / s)</text>
+  <text class="node-body" x="1570" y="350">UCB = mu + c sqrt(log t / n)</text>
+  <text class="node-body" x="1570" y="376">LinUCB = x^T theta + alpha sqrt(x^T A^-1 x)</text>
+  <text class="node-body" x="1570" y="402">Whittle = finite-depth surrogate</text>
+
+  <text class="foot" x="70" y="1018">This asset is intentionally code-true, not a generic architecture poster.</text>
+</svg>

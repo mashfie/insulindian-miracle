@@ -1,0 +1,18 @@
+{
+  "name": "megacity-trap",
+  "description": "One dominant metropolis absorbs activity early, then system-wide overstretch and weak secondary cities drag on long-run performance.",
+  "overrides": {
+    "horizon": 360,
+    "network_scale": 0.42,
+    "network_population_gain": 0.14,
+    "network_capital_gain": 0.3,
+    "network_density_gain": 0.38,
+    "secondary_city_bonus": 0.18,
+    "secondary_city_target": 24.0,
+    "secondary_city_spread": 0.38,
+    "metropolitan_overstretch_threshold": 15.0,
+    "metropolitan_overstretch_penalty": 0.13,
+    "congestion": 0.0022,
+    "resource_curse_strength": 0.05
+  }
+}

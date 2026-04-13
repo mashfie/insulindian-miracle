@@ -1,136 +1,84 @@
 # Insulindian Miracle
 
+**High-Performance Pure-Rust Monte Carlo Laboratory for Evolutionary Urban Economics**
+
 Computational political-economy sandbox for city formation on procedurally generated peninsulas. The core question is whether a learning policy can distinguish short-run resource rents from long-run institutional viability before a boomtown turns into a trap.
 
-The current repository is the backend and research layer: a Python simulation engine, scenario library, hypothesis-analysis pipeline, paper-manifest workflow, and a small comparison API. The frontend is intentionally not shipped yet. There are design notes for it in `docs/system/frontend.md`, but the actual web app is still TBD.
+## Project Status: Rust Migration (Pre-Merge Recovery)
 
-## Status
+The project is currently undergoing a refactor from a hybrid Python/Rust prototype into a **Pure Rust** high-performance simulation engine. This branch is a **pre-merge recovery branch**.
 
-- Implemented: terrain generation, settlement-site selection, institutional dynamics, policy comparison, scenario experiments, hypothesis analysis, paper fetching/synthesis, compare API
-- Not implemented in this repo: production frontend/dashboard
+While the Rust execution core is materially faster and parallel sweep infrastructure exists, we are actively working on:
+- Restoring mathematical and semantic parity with the canonical Python model.
+- Repairing policy benchmark definitions.
+- Restoring robust data output, regression testing, and research tooling.
+- (Future) Re-integrating the visual Next.js dashboard once engine semantics are stabilized.
 
-## What The Model Tries To Test
+## Core Architecture
 
-The simulation treats settlement allocation as a non-stationary bandit problem over candidate sites on a seeded peninsula. Each site combines:
+### 1. The Miracle Engine (Rust)
+The entire simulation logic resides in `rust/src/`. It implements:
+- **Terrain Generation:** Fractal Perlin noise peninsula generation.
+- **Site Selection:** Suitability-based candidate settlement selection.
+- **Evolution Physics:** Multi-agent site evolution with endogenous institutional drift, shocks, and reforms.
+- **Bandit Policies:** Full suite of RMAB policies (UCB1, Thompson Sampling, LinUCB, etc.).
 
-- geography and accessibility
-- resource rents
-- institutional state: extraction, openness, adaptability
-- endogenous dynamics such as reform, drift, shocks, congestion, and network spillovers
+### 2. Standalone CLI
+The Rust engine provides a high-performance CLI for running simulations and sweeps without any Python dependency.
 
-This lets the project test whether resource-rich sites attract too much early allocation, whether inclusive institutions compound, and which policies adapt best when arms change even when they are not selected.
+### 3. Data Backbone
+Simulation outputs are written directly to **Parquet** files using the Rust `parquet` and `arrow` crates, ensuring high-speed data ingestion for statistical analysis.
 
-## What Is In Scope
-
-- Procedural terrain generation with derived layers and site suitability
-- Nine named scenarios including `resource-curse`, `botswana`, `open-cluster`, `shock-reform`, and `ucb-bait`
-- Policy baselines and comparisons across epsilon-greedy, UCB variants, Thompson variants, contextual policies, and a Whittle-style policy
-- Experiment runners that emit JSON results for single runs, sweeps, benchmarks, and multi-scenario hypothesis suites
-- Research tooling around `research/index.json` and cached paper downloads
-
-## What This Is Not
-
-- Not an agent-based model of individual households or firms
-- Not a general-equilibrium trade model
-- Not a finished interactive product
+### 4. Next.js Frontend
+A modern dashboard built with **Next.js 16** and **React 19** located in `web/`.
 
 ## Repository Layout
 
 ```text
-api/                       FastAPI comparison endpoint for deployment targets
-configs/                   Default simulation configuration
-docs/                      Theory, system design, and module notes
-research/                  Paper manifest, reading order, theory notes
-results/                   Example JSON outputs from runs and experiments
-src/insulindian_miracle/   Simulation engine, policies, CLI, analysis
-tests/                     Pytest suite
+rust/src/          Pure Rust simulation engine & CLI
+configs/           JSON-based scenario and parameter definitions
+web/               Next.js 16 / React 19 visual dashboard
+docs/              Theoretical foundation and module documentation
+research/          Paper manifest and theoretical synthesis
+results/           Parquet storage for sweep artifacts
 ```
 
-## Installation
+## Installation & Usage
 
-The package metadata currently targets Python 3.14+.
+Requires a Rust toolchain (stable).
 
+### Build the CLI
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-pip install -e .
+cargo build --release
 ```
 
-If you are on Windows PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
-
-## CLI
-
-List scenarios:
-
+### Run a Single Simulation
 ```bash
-insulindian-miracle sim scenarios
+./target/release/insulindian-miracle run --policy ucb1 --output result.json
 ```
 
-Run one seeded simulation:
-
+### Run a High-Performance Sweep
 ```bash
-insulindian-miracle sim run --policy gaussian-thompson --scenario baseline
+./target/release/insulindian-miracle sweep --input configs/sweep_configs.jsonl --policies ucb1 ts linucb --output results/sweep_1m.parquet
 ```
 
-Run a multi-policy experiment:
-
+### Start the Visual Dashboard
 ```bash
-insulindian-miracle sim experiment \
-  --scenario resource-curse \
-  --runs 12 \
-  --output results/resource-curse.json
+cd web
+pnpm install
+pnpm dev
 ```
 
-Run the hypothesis suite:
+## Core Theoretical Scope
 
-```bash
-insulindian-miracle sim hypotheses \
-  --runs 12 \
-  --include-experiments \
-  --output results/hypotheses.json
-```
-
-Fetch the paper corpus declared in `research/index.json`:
-
-```bash
-insulindian-miracle research fetch \
-  --manifest research/index.json \
-  --cache insulindian-miracle-paper-cache
-```
-
-Regenerate the theory synthesis:
-
-```bash
-insulindian-miracle research synthesize
-```
-
-## Outputs
-
-Simulation and experiment runners emit JSON. Typical outputs include:
-
-- cumulative reward and reward history
-- site-level initial/final institutional state
-- selection shares and population distribution
-- aggregate metrics such as Gini, HHI, Zipf slope, regret, and resource-population correlations
-
-Example artifacts already checked into the repo live under `results/`.
-
-## API
-
-`api/compare.py` exposes a small FastAPI endpoint for policy comparison over a shared seed, scenario, and set of terrain/config overrides. It is useful as a thin backend surface for a future frontend, but it is not a full application layer.
-
-The Vercel config in `vercel.json` targets this API with Python 3.14.
+The simulation treats settlement allocation as a **Restless Multi-Armed Bandit (RMAB)** problem. Each site combines:
+- Geography and accessibility
+- Resource rents
+- Institutional state: Extraction, Openness, Adaptability
+- Endogenous dynamics: Reform, Drift, Shocks, Congestion, and Network Spillovers
 
 ## Documentation
 
-Start with:
-
-- `docs/index.md` for the documentation map
-- `docs/theory/hypotheses.md` for the research questions
-- `docs/system/architecture-overview.md` for the intended subsystem split and data flow
-- `research/theory/peninsula-framework.md` for the current conceptual framing
-
-## Frontend
-
-Frontend work is consciously deferred. The repo contains a frontend design/spec document, not a shipped frontend implementation. Any README language that reads like a live dashboard should be treated as roadmap, not current state.
+- `docs/theory/hypotheses.md`: Research questions and formal conjectures.
+- `docs/system/architecture-overview.md`: Subsystem split and data flow.
+- `research/theory/peninsula-framework.md`: Conceptual framing of the Insulindian Miracle.

@@ -1,35 +1,18 @@
 ---
-tags: [module, python, research]
+tags: [module, research]
 type: module
 related:
-  - "[[cli]]"
-  - "[[resource-curse]]"
-  - "[[multi-armed-bandits]]"
+  - "[[methodology]]"
+  - "[[hypotheses]]"
 ---
 
-# research.py
+# Research
 
-`src/insulindian_miracle/research.py` — 113 lines. Academic paper index management and theory synthesis.
+The research layer is file-based:
 
-## Key Exports
+- `research/index.json`: bibliography manifest,
+- `research/theory/peninsula-framework.md`: project-specific literature bridge,
+- `research/theory/corpus-synthesis.md`: grouped reading map,
+- `insulindian-miracle-paper-cache/`: downloaded papers where available.
 
-| Export | Purpose |
-|--------|---------|
-| `fetch_papers(manifest, cache_dir)` | Download papers listed in `research/index.json` |
-| `synthesize_theory(manifest, output)` | Generate theory synthesis from paper metadata |
-
-## Research Manifest
-
-`research/index.json` contains ~20 academic paper entries with metadata (title, authors, year, URL, tags). Papers span:
-
-- Multi-armed bandit theory (Lattimore & Szepesvári, Russo et al.)
-- Resource curse economics (Sachs & Warner, Ross)
-- Institutional economics (Acemoglu & Robinson)
-- Urban economics (Krugman, Henderson)
-- Restless bandits (Akbarzadeh et al., Whittle)
-
-## Supporting Files
-
-- `research/reading-order.md` — curated reading order (first pass, second pass, deferred)
-- `research/theory/corpus-synthesis.md` — synthesised theory document
-- `research/theory/peninsula-framework.md` — model-specific theoretical framework
+The docs in `/docs` should cite primary sources from this corpus or explicit new additions.

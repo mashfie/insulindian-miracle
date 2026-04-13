@@ -44,7 +44,7 @@ export function ScenarioView({
             items={navItems}
             caption={
               page.result?.scenario.description ??
-              "This route pairs archive prose with the experiment record and a live compare hook."
+              "This route pairs archive prose with the stratified cohort record and a deterministic comparison overlay."
             }
           />
         </section>
@@ -105,7 +105,7 @@ export function ScenarioView({
           <ComparisonModule
             scenario={page.result?.scenario.name ?? "baseline"}
             policies={["ucb1", "gaussian-thompson", "whittle-index"]}
-            note="The core route is statically generated from checked-in results. This module is the only client-side bridge to the Python compare API."
+            note="The core route is statically generated from the checked-in cohort synthesis. This module replays that archive comparison in compact form."
           />
         </section>
       </article>

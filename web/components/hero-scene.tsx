@@ -61,8 +61,13 @@ const SCENE_BUILDERS: Record<string, SceneBuilder> = {
       position: [0, 2, 0],
       size: [7, 10, 5],
       style: {
-        default: { fill: p.base, stroke: p.shadow, strokeWidth: 0.4 },
-        top: { fill: p.top, stroke: p.accent, strokeWidth: 0.3 },
+        default: { 
+          fill: p.base, stroke: p.shadow, strokeWidth: 0.4,
+          hatch: { angle: 45, period: 4, stroke: p.shadow, strokeWidth: 0.3 }
+        },
+        top: { fill: p.top, stroke: p.accent, strokeWidth: 0.3, decal: "grid-decal" },
+        front: { fill: p.base, stroke: p.shadow, strokeWidth: 0.4, decal: "arch-decal" },
+        right: { fill: p.base, stroke: p.shadow, strokeWidth: 0.4, decal: "grid-decal" }
       },
     });
     h.removeGeometry({ type: "sphere", center: [3, 7, 0], radius: 2.5, style: { default: { fill: p.shadow, stroke: "#0d0d0d", strokeWidth: 0.3 } } });
@@ -73,7 +78,10 @@ const SCENE_BUILDERS: Record<string, SceneBuilder> = {
       size: [3, 2, 2],
       style: {
         default: { fill: p.accent, stroke: p.shadow, strokeWidth: 0.4 },
-        top: { fill: p.top, stroke: p.accent, strokeWidth: 0.3 },
+        top: { 
+          fill: p.top, stroke: p.accent, strokeWidth: 0.3,
+          hatch: { angle: -45, period: 5, stroke: p.accent, strokeWidth: 0.4 }
+        },
       },
     });
     h.applyGeometry({
@@ -81,8 +89,11 @@ const SCENE_BUILDERS: Record<string, SceneBuilder> = {
       position: [6, 6, 4],
       size: [1, 6, 1],
       style: {
-        default: { fill: p.accent, stroke: p.shadow, strokeWidth: 0.5 },
-        top: { fill: "#fef5f0", stroke: p.accent, strokeWidth: 0.5 },
+        default: { 
+          fill: p.accent, stroke: p.shadow, strokeWidth: 0.5,
+          hatch: { angle: 90, period: 3, stroke: p.shadow, strokeWidth: 0.5 }
+        },
+        top: { fill: "#fef5f0", stroke: p.accent, strokeWidth: 0.5, decal: "cross-decal" },
       },
     });
   },
@@ -649,6 +660,11 @@ export function HeroScene({ title, variant, slug }: HeroSceneProps) {
 
   return (
     <section className="site-hero" aria-hidden="true" style={{ background: "var(--paper)" }}>
+      <div ref={containerRef} className="site-hero__inner" style={{ width: "100%", height: "100%" }} />
+    </section>
+  );
+}
+" }}>
       <div ref={containerRef} className="site-hero__inner" style={{ width: "100%", height: "100%" }} />
     </section>
   );

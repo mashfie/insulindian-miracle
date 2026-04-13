@@ -1,0 +1,25 @@
+{
+  "name": "open-cluster",
+  "description": "Trade-oriented sites begin more open and get stronger spatial spillovers from nearby peers.",
+  "overrides": {
+    "horizon": 360,
+    "initial_openness_alpha": 3.4,
+    "initial_openness_beta": 1.7,
+    "network_scale": 0.58,
+    "network_population_gain": 0.18,
+    "network_capital_gain": 0.75,
+    "network_density_gain": 1.1,
+    "inclusive_investment_gain": 0.15,
+    "inclusive_productivity_gain": 0.72,
+    "congestion": 0.0014,
+    "resource_curse_strength": 0.03,
+    "active_extraction_pressure": 0.015,
+    "active_resource_depletion": 0.004,
+    "active_decay_onset": 8,
+    "trade_cluster_count": 5,
+    "trade_cluster_radius": 0.28,
+    "trade_cluster_openness_bonus": 0.34,
+    "trade_cluster_capital_bonus": 0.38,
+    "trade_cluster_accessibility_bonus": 0.16
+  }
+}

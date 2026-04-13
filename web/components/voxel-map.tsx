@@ -35,6 +35,15 @@ export function VoxelMap({
       camera: { type: "oblique", angle: 45, distance: 18 },
     });
 
+    // Define decals for sites
+    h.defineDecal("boomtown-mark", {
+      content: '<path d="M 0.2 0.2 L 0.8 0.8 M 0.8 0.2 L 0.2 0.8" stroke="#fef5f0" stroke-width="0.1" fill="none" vector-effect="non-scaling-stroke"/>'
+    });
+    
+    h.defineDecal("trade-mark", {
+      content: '<circle cx="0.5" cy="0.5" r="0.3" stroke="#fef5f0" stroke-width="0.1" fill="none" vector-effect="non-scaling-stroke"/>'
+    });
+
     const maxStack = 6;
 
     h.applyGeometry({
@@ -73,6 +82,12 @@ export function VoxelMap({
             stroke,
             strokeWidth: 0.2,
             opacity: 0.8,
+            hatch: {
+              angle: 45,
+              period: 3,
+              stroke: `color-mix(in lab, ${baseColor}, #000 40%)`,
+              strokeWidth: 0.5
+            }
           };
         },
         top: (x: number, y: number, z: number) => {
@@ -101,7 +116,7 @@ export function VoxelMap({
           size: [1, 4, 1],
           style: {
             default: { fill: "#8a3824", stroke: "rgba(13,13,13,0.2)", strokeWidth: 0.4 },
-            top: { fill: "#c44d32", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4 },
+            top: { fill: "#c44d32", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4, decal: "boomtown-mark" },
           },
         });
       } else if (site.trade_cluster) {
@@ -111,7 +126,7 @@ export function VoxelMap({
           size: [3, 2, 3],
           style: {
             default: { fill: "#3f5c52", stroke: "rgba(13,13,13,0.2)", strokeWidth: 0.4 },
-            top: { fill: "#5a8a78", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4 },
+            top: { fill: "#5a8a78", stroke: "rgba(13,13,13,0.3)", strokeWidth: 0.4, decal: "trade-mark" },
           },
         });
       } else {
