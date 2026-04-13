@@ -1,34 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Insulindian Miracle: Frontend Dashboard & Archive
 
-## Getting Started
+This repository component houses the **Insulindian Miracle Archive**, an interactive web exhibition designed to render, synthesize, and interrogate the results of our computational multi-armed bandit (MAB) simulations. 
 
-First, run the development server:
+## Academic Context
+
+The simulation explores institutional drift, city formation, and the resource curse across procedurally generated peninsulas. It models candidate settlement sites as arms in a Restless Multi-Armed Bandit (RMAB).
+
+This frontend was built to render the output of the **1,000,008-run high-performance Pure Rust sweep**. The scale of this data (over 1 million traces) provides robust empirical validation of our six canonical hypotheses, highlighting phenomena such as the **UCB-Bait Trap**, the mathematical emergence of **Zipf's Law primacy**, and the persistence of the **Resource Curse**.
+
+## Architecture & Technology
+
+- **Framework:** Next.js 16 / React 19 (App Router)
+- **Styling:** Vanilla CSS 
+- **Content:** The data layer is driven by statically generated JSON artifacts (`content/generated/exemplars.json`) and rigorous Markdown documentation (`content/source/docs/`).
+- **Rendering:** Uses custom MDX components and `rehype`/`remark` pipelines for academic-grade mathematics (KaTeX) and prose formatting.
+
+## Running the Archive
+
+To run the local server and explore the latest 1-million run synthesis data:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The archive is available at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentation
 
-## Learn More
+The primary findings and policy dossiers are accessible within the application's routing structure:
+- `/` - The Archive (Landing Page & Synthesized Results)
+- `/atlas/` - Cartographic Ledgers and Terrain Generation
+- `/scenarios/` - Economic Scenario Outlines (e.g., Resource Curse, Megacity Trap)
+- `/policies/` - Algorithm Formulations (e.g., Whittle Index, Thompson Sampling)
+- `/references/` - Academic Bibliography
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*The writing and presentation within this dashboard enforce a strict, structurally analytical tone, avoiding generic visualization tropes in favor of restrained, rigorous exposition.*

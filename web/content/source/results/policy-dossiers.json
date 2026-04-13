@@ -1,0 +1,873 @@
+{
+  "epsilon-greedy": {
+    "policy": "epsilon-greedy",
+    "summary": {
+      "mean_cumulative_reward": 1301.4470815865743,
+      "mean_oracle_regret": 922.482123514859,
+      "mean_population_hhi": 0.17916227874410975,
+      "mean_final_extraction": 0.13274239172651078,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 1710.8557457095492
+      },
+      {
+        "label": "stress_500k",
+        "value": 994.3905834943434
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "527.5-708.7",
+        "count": 3
+      },
+      {
+        "label": "708.7-889.9",
+        "count": 7
+      },
+      {
+        "label": "889.9-1071.1",
+        "count": 4
+      },
+      {
+        "label": "1071.1-1252.3",
+        "count": 6
+      },
+      {
+        "label": "1252.3-1433.5",
+        "count": 3
+      },
+      {
+        "label": "1433.5-1614.7",
+        "count": 6
+      },
+      {
+        "label": "1614.7-1795.9",
+        "count": 8
+      },
+      {
+        "label": "1795.9-1977.1",
+        "count": 5
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "Eps"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 141.92650181484078,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": -178.73139467926288
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "epsilon-greedy",
+        "baseline": "myopic-oracle",
+        "mean_gap": -922.4821235148593,
+        "ci_low": -1016.8466187871429,
+        "ci_high": -827.5603635054415,
+        "win_rate": 0.0,
+        "matches": 42
+      }
+    ]
+  },
+  "ucb1": {
+    "policy": "ucb1",
+    "summary": {
+      "mean_cumulative_reward": 1342.7536634826502,
+      "mean_oracle_regret": 881.1755416187837,
+      "mean_population_hhi": 0.17864971083798786,
+      "mean_final_extraction": 0.1414482948601894,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 1568.9292438947082
+      },
+      {
+        "label": "stress_500k",
+        "value": 1173.1219781736063
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "881.6-987.4",
+        "count": 3
+      },
+      {
+        "label": "987.4-1093.1",
+        "count": 6
+      },
+      {
+        "label": "1093.1-1198.9",
+        "count": 5
+      },
+      {
+        "label": "1198.9-1304.7",
+        "count": 6
+      },
+      {
+        "label": "1304.7-1410.4",
+        "count": 2
+      },
+      {
+        "label": "1410.4-1516.2",
+        "count": 7
+      },
+      {
+        "label": "1516.2-1622.0",
+        "count": 7
+      },
+      {
+        "label": "1622.0-1727.7",
+        "count": 6
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "UCB1"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [],
+    "paired_vs_oracle": [
+      {
+        "policy": "ucb1",
+        "baseline": "myopic-oracle",
+        "mean_gap": -881.1755416187834,
+        "ci_low": -1030.9658294916562,
+        "ci_high": -734.6346434900997,
+        "win_rate": 0.047619047619047616,
+        "matches": 42
+      }
+    ]
+  },
+  "discounted-ucb": {
+    "policy": "discounted-ucb",
+    "summary": {
+      "mean_cumulative_reward": 2311.5636575662447,
+      "mean_oracle_regret": -87.6344524648109,
+      "mean_population_hhi": 0.11316651574358944,
+      "mean_final_extraction": 0.1348967759001345,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 2837.052027296589
+      },
+      {
+        "label": "stress_500k",
+        "value": 1917.447380268486
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "1273.6-1480.7",
+        "count": 4
+      },
+      {
+        "label": "1480.7-1687.7",
+        "count": 4
+      },
+      {
+        "label": "1687.7-1894.8",
+        "count": 3
+      },
+      {
+        "label": "1894.8-2101.8",
+        "count": 5
+      },
+      {
+        "label": "2101.8-2308.9",
+        "count": 4
+      },
+      {
+        "label": "2308.9-2515.9",
+        "count": 2
+      },
+      {
+        "label": "2515.9-2723.0",
+        "count": 2
+      },
+      {
+        "label": "2723.0-2930.0",
+        "count": 18
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "D-UCB"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 1268.1227834018805,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 744.3254020948799
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "discounted-ucb",
+        "baseline": "myopic-oracle",
+        "mean_gap": 87.6344524648109,
+        "ci_low": 39.04901558514185,
+        "ci_high": 139.92392332918018,
+        "win_rate": 0.5476190476190477,
+        "matches": 42
+      }
+    ]
+  },
+  "sliding-window-ucb": {
+    "policy": "sliding-window-ucb",
+    "summary": {
+      "mean_cumulative_reward": 2347.4402789876763,
+      "mean_oracle_regret": -123.51107388624293,
+      "mean_population_hhi": 0.09969958413115662,
+      "mean_final_extraction": 0.1352967429724816,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 2932.3774415898934
+      },
+      {
+        "label": "stress_500k",
+        "value": 1908.737407036014
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "1112.7-1349.6",
+        "count": 1
+      },
+      {
+        "label": "1349.6-1586.6",
+        "count": 5
+      },
+      {
+        "label": "1586.6-1823.6",
+        "count": 4
+      },
+      {
+        "label": "1823.6-2060.6",
+        "count": 5
+      },
+      {
+        "label": "2060.6-2297.6",
+        "count": 5
+      },
+      {
+        "label": "2297.6-2534.6",
+        "count": 2
+      },
+      {
+        "label": "2534.6-2771.6",
+        "count": 2
+      },
+      {
+        "label": "2771.6-3008.5",
+        "count": 18
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "SW-UCB"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 1363.448197695185,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 735.6154288624078
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "sliding-window-ucb",
+        "baseline": "myopic-oracle",
+        "mean_gap": 123.51107388624293,
+        "ci_low": 82.08478200892883,
+        "ci_high": 167.67066729309175,
+        "win_rate": 0.8571428571428571,
+        "matches": 42
+      }
+    ]
+  },
+  "gaussian-thompson": {
+    "policy": "gaussian-thompson",
+    "summary": {
+      "mean_cumulative_reward": 1493.9857085619117,
+      "mean_oracle_regret": 729.943496539522,
+      "mean_population_hhi": 0.17405005245971528,
+      "mean_final_extraction": 0.13881633148896577,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 1745.5521717176039
+      },
+      {
+        "label": "stress_500k",
+        "value": 1305.3108611951425
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "1052.9-1192.7",
+        "count": 9
+      },
+      {
+        "label": "1192.7-1332.4",
+        "count": 4
+      },
+      {
+        "label": "1332.4-1472.2",
+        "count": 7
+      },
+      {
+        "label": "1472.2-1612.0",
+        "count": 9
+      },
+      {
+        "label": "1612.0-1751.7",
+        "count": 4
+      },
+      {
+        "label": "1751.7-1891.5",
+        "count": 4
+      },
+      {
+        "label": "1891.5-2031.3",
+        "count": 4
+      },
+      {
+        "label": "2031.3-2171.1",
+        "count": 1
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "Gauss TS"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 176.62292782289543,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 132.18888302153618
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "gaussian-thompson",
+        "baseline": "myopic-oracle",
+        "mean_gap": -729.9434965395221,
+        "ci_low": -866.6774170011872,
+        "ci_high": -588.2817442720353,
+        "win_rate": 0.047619047619047616,
+        "matches": 42
+      }
+    ]
+  },
+  "discounted-gaussian-thompson": {
+    "policy": "discounted-gaussian-thompson",
+    "summary": {
+      "mean_cumulative_reward": 2183.9445009380174,
+      "mean_oracle_regret": 39.984704163416026,
+      "mean_population_hhi": 0.12329586786894058,
+      "mean_final_extraction": 0.1369277529646261,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 2693.534282173741
+      },
+      {
+        "label": "stress_500k",
+        "value": 1801.752165011225
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "1099.5-1320.5",
+        "count": 1
+      },
+      {
+        "label": "1320.5-1541.6",
+        "count": 5
+      },
+      {
+        "label": "1541.6-1762.6",
+        "count": 5
+      },
+      {
+        "label": "1762.6-1983.6",
+        "count": 6
+      },
+      {
+        "label": "1983.6-2204.7",
+        "count": 4
+      },
+      {
+        "label": "2204.7-2425.7",
+        "count": 2
+      },
+      {
+        "label": "2425.7-2646.8",
+        "count": 6
+      },
+      {
+        "label": "2646.8-2867.8",
+        "count": 13
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "D-TS"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 1124.6050382790324,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 628.6301868376189
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "discounted-gaussian-thompson",
+        "baseline": "myopic-oracle",
+        "mean_gap": -39.984704163416026,
+        "ci_low": -95.80673890358554,
+        "ci_high": 20.50674620009157,
+        "win_rate": 0.40476190476190477,
+        "matches": 42
+      }
+    ]
+  },
+  "linucb": {
+    "policy": "linucb",
+    "summary": {
+      "mean_cumulative_reward": 1960.2653293630904,
+      "mean_oracle_regret": 263.6638757383432,
+      "mean_population_hhi": 0.15140042777387325,
+      "mean_final_extraction": 0.13382657459670677,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 2221.446859715458
+      },
+      {
+        "label": "stress_500k",
+        "value": 1764.379181598815
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "753.6-1012.8",
+        "count": 1
+      },
+      {
+        "label": "1012.8-1271.9",
+        "count": 2
+      },
+      {
+        "label": "1271.9-1531.1",
+        "count": 2
+      },
+      {
+        "label": "1531.1-1790.3",
+        "count": 10
+      },
+      {
+        "label": "1790.3-2049.4",
+        "count": 7
+      },
+      {
+        "label": "2049.4-2308.6",
+        "count": 12
+      },
+      {
+        "label": "2308.6-2567.8",
+        "count": 6
+      },
+      {
+        "label": "2567.8-2826.9",
+        "count": 2
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "LinUCB"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 652.5176158207497,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 591.2572034252086
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "linucb",
+        "baseline": "myopic-oracle",
+        "mean_gap": -263.66387573834317,
+        "ci_low": -399.4584019749872,
+        "ci_high": -151.34572971692018,
+        "win_rate": 0.30952380952380953,
+        "matches": 42
+      }
+    ]
+  },
+  "linear-thompson": {
+    "policy": "linear-thompson",
+    "summary": {
+      "mean_cumulative_reward": 1995.8178160914506,
+      "mean_oracle_regret": 228.11138900998344,
+      "mean_population_hhi": 0.12343286232656515,
+      "mean_final_extraction": 0.1296895888208446,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 2373.959909702363
+      },
+      {
+        "label": "stress_500k",
+        "value": 1712.2112458832653
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "907.1-1138.5",
+        "count": 2
+      },
+      {
+        "label": "1138.5-1369.8",
+        "count": 6
+      },
+      {
+        "label": "1369.8-1601.2",
+        "count": 2
+      },
+      {
+        "label": "1601.2-1832.6",
+        "count": 4
+      },
+      {
+        "label": "1832.6-2064.0",
+        "count": 5
+      },
+      {
+        "label": "2064.0-2295.3",
+        "count": 8
+      },
+      {
+        "label": "2295.3-2526.7",
+        "count": 8
+      },
+      {
+        "label": "2526.7-2758.1",
+        "count": 7
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "LinTS"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 805.0306658076549,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 539.0892677096591
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "linear-thompson",
+        "baseline": "myopic-oracle",
+        "mean_gap": -228.11138900998347,
+        "ci_low": -353.7073917453283,
+        "ci_high": -134.62582610483358,
+        "win_rate": 0.30952380952380953,
+        "matches": 42
+      }
+    ]
+  },
+  "whittle-index": {
+    "policy": "whittle-index",
+    "summary": {
+      "mean_cumulative_reward": 2370.695270773658,
+      "mean_oracle_regret": -146.76606567222433,
+      "mean_population_hhi": 0.07159219412340827,
+      "mean_final_extraction": 0.1494524929936651,
+      "scenario_count": 2
+    },
+    "cohort_reward_items": [
+      {
+        "label": "historical_90k",
+        "value": 3033.942810827006
+      },
+      {
+        "label": "stress_500k",
+        "value": 1873.2596157336473
+      }
+    ],
+    "distribution_bins": [
+      {
+        "label": "1175.1-1419.9",
+        "count": 3
+      },
+      {
+        "label": "1419.9-1664.7",
+        "count": 7
+      },
+      {
+        "label": "1664.7-1909.6",
+        "count": 4
+      },
+      {
+        "label": "1909.6-2154.4",
+        "count": 3
+      },
+      {
+        "label": "2154.4-2399.3",
+        "count": 5
+      },
+      {
+        "label": "2399.3-2644.1",
+        "count": 1
+      },
+      {
+        "label": "2644.1-2889.0",
+        "count": 2
+      },
+      {
+        "label": "2889.0-3133.8",
+        "count": 17
+      }
+    ],
+    "heatmap": {
+      "labelsX": [
+        "Reward",
+        "Gap",
+        "Extraction",
+        "HHI",
+        "Zipf"
+      ],
+      "labelsY": [
+        "Whittle"
+      ],
+      "data": [
+        [
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          50.0
+        ]
+      ]
+    },
+    "scenario_gap_items": [
+      {
+        "label": "baseline",
+        "start": 1465.0135669322979,
+        "end": 0.0
+      },
+      {
+        "label": "ucb-bait",
+        "start": 0.0,
+        "end": 700.1376375600406
+      }
+    ],
+    "paired_vs_oracle": [
+      {
+        "policy": "whittle-index",
+        "baseline": "myopic-oracle",
+        "mean_gap": 146.76606567222436,
+        "ci_low": 106.23429526365106,
+        "ci_high": 185.62664774505456,
+        "win_rate": 0.8809523809523809,
+        "matches": 42
+      }
+    ]
+  }
+}

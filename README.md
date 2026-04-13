@@ -4,14 +4,15 @@
 
 Computational political-economy sandbox for city formation on procedurally generated peninsulas. The core question is whether a learning policy can distinguish short-run resource rents from long-run institutional viability before a boomtown turns into a trap.
 
-## Project Status: Pure Rust Migration Complete
+## Project Status: Rust Migration (Pre-Merge Recovery)
 
-The project has been fully refactored from a hybrid Python/Rust prototype into a **Pure Rust** high-performance simulation engine.
+The project is currently undergoing a refactor from a hybrid Python/Rust prototype into a **Pure Rust** high-performance simulation engine. This branch is a **pre-merge recovery branch**.
 
-- **Engine:** Pure Rust implementation of terrain generation, institutional dynamics, and bandit policies.
-- **Performance:** Sub-millisecond simulation steps, optimized for 1,000,000+ run Monte Carlo sweeps.
-- **Data:** Direct streaming to **Apache Parquet** for analysis in R or Python (Phase 5).
-- **Frontend:** Modern Next.js 16 dashboard for visual interaction with the simulation.
+While the Rust execution core is materially faster and parallel sweep infrastructure exists, we are actively working on:
+- Restoring mathematical and semantic parity with the canonical Python model.
+- Repairing policy benchmark definitions.
+- Restoring robust data output, regression testing, and research tooling.
+- (Future) Re-integrating the visual Next.js dashboard once engine semantics are stabilized.
 
 ## Core Architecture
 

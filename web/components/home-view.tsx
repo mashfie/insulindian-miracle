@@ -39,7 +39,7 @@ export function HomeView({
               id: section.id,
               title: section.title,
             }))}
-            caption="The archive proceeds through five chapters: the peninsula as political economy, the intelligence of forgetting, the urban morphology of algorithms, the institutional divergence theorem, and the case against fatalism."
+            caption="The archive now proceeds as an evidence program: cohort accounting, model structure, estimands, policy morphology, and the refusal of false totality."
           />
         </section>
 

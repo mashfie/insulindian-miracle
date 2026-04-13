@@ -2,7 +2,11 @@
 
 use crate::types::{SimulationConfig, SiteStateSnapshot};
 
-pub fn network_bonus_snapshot(index: usize, states: &[SiteStateSnapshot], config: &SimulationConfig) -> f64 {
+pub fn network_bonus_snapshot(
+    index: usize,
+    states: &[SiteStateSnapshot],
+    config: &SimulationConfig,
+) -> f64 {
     if states.len() <= 1 {
         return 0.0;
     }
@@ -44,8 +48,8 @@ pub fn compute_reward_snapshot(
     let active_steps = (population - 1).max(0);
 
     let network = network_bonus_snapshot(index, states, config);
-    let resource_payoff =
-        state.resource_rent * (config.resource_base_payoff + config.resource_capture_gain * state.extraction);
+    let resource_payoff = state.resource_rent
+        * (config.resource_base_payoff + config.resource_capture_gain * state.extraction);
     let extractive_cashflow = config.extractive_cashflow_premium
         * state.resource_rent
         * state.extraction

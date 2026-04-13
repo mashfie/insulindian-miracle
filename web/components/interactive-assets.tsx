@@ -445,6 +445,10 @@ export function HeerichBarChart3D({
       tile,
       camera,
     });
+
+    hr.defineDecal("data-decal", {
+      content: '<path d="M 0.2 0.2 L 0.8 0.2 M 0.5 0.2 L 0.5 0.8 M 0.2 0.8 L 0.8 0.8" stroke="var(--ink)" stroke-opacity="0.3" stroke-width="0.05" fill="none" vector-effect="non-scaling-stroke"/>'
+    });
     
     data.forEach((row, z) => {
       row.forEach((val, x) => {
@@ -459,14 +463,21 @@ export function HeerichBarChart3D({
                 return { 
                   fill: `color-mix(in lab, rgb(${color.join(",")}), #000 ${20 - y * 3}%)`,
                   stroke: `#2B2821`,
-                  strokeWidth: 0.3 
+                  strokeWidth: 0.3,
+                  hatch: {
+                    angle: 45,
+                    period: 3,
+                    stroke: `color-mix(in lab, rgb(${color.join(",")}), #000 40%)`,
+                    strokeWidth: 0.5
+                  }
                 };
               },
               top: (x, y) => {
                 return { 
                   fill: `color-mix(in lab, rgb(${color.join(",")}), #fff ${10 + y * 4}%)`,
                   stroke: `#2B2821`,
-                  strokeWidth: 0.4 
+                  strokeWidth: 0.4,
+                  decal: "data-decal"
                 };
               }
             }
@@ -523,6 +534,10 @@ export function HeerichSurface3D({
       tile,
       camera,
     });
+
+    hr.defineDecal("surface-decal", {
+      content: '<path d="M 0.1 0.1 L 0.9 0.9 M 0.9 0.1 L 0.1 0.9" stroke="rgba(255,255,255,0.4)" stroke-width="0.05" fill="none" vector-effect="non-scaling-stroke"/>'
+    });
     
     hr.applyGeometry({
       type: "fill",
@@ -545,14 +560,21 @@ export function HeerichSurface3D({
             fill: `color-mix(in lab, rgb(${color.join(",")}), #000 25%)`, 
             stroke: '#2B2821', 
             strokeWidth: 0.2,
-            opacity: 0.8
+            opacity: 0.8,
+            hatch: {
+              angle: 90,
+              period: 2,
+              stroke: '#2B2821',
+              strokeWidth: 0.3
+            }
           };
         },
         top: () => {
           return { 
             fill: `color-mix(in lab, rgb(${color.join(",")}), #fff 20%)`, 
             stroke: '#2B2821', 
-            strokeWidth: 0.4 
+            strokeWidth: 0.4,
+            decal: "surface-decal"
           };
         }
       }
@@ -601,6 +623,10 @@ export function HeerichScatter3D({
       camera,
     });
     
+    hr.defineDecal("scatter-decal", {
+      content: '<circle cx="0.5" cy="0.5" r="0.2" fill="rgba(255,255,255,0.8)" stroke="none" vector-effect="non-scaling-stroke"/>'
+    });
+
     // Axes sitting at visual ground (Y=12)
     hr.applyGeometry({ type: "line", from: [0,12,0], to: [10,12,0], style: { default: { stroke: '#2B2821', opacity: 0.4, strokeWidth: 1 } } });
     hr.applyGeometry({ type: "line", from: [0,12,0], to: [0,2,0], style: { default: { stroke: '#2B2821', opacity: 0.4, strokeWidth: 1 } } });
@@ -612,8 +638,13 @@ export function HeerichScatter3D({
         position: [p.x, 12 - p.y, p.z],
         size: p.size || 0.5,
         style: {
-          default: { fill: p.color || '#2B2821', stroke: 'rgba(255,255,255,0.2)', strokeWidth: 0.5 },
-          top: { fill: p.color || '#2B2821' }
+          default: { 
+            fill: p.color || '#2B2821', 
+            stroke: 'rgba(255,255,255,0.2)', 
+            strokeWidth: 0.5,
+            hatch: { angle: 135, period: 2, stroke: 'rgba(0,0,0,0.3)', strokeWidth: 0.4 }
+          },
+          top: { fill: p.color || '#2B2821', decal: "scatter-decal" }
         }
       });
       hr.applyGeometry({

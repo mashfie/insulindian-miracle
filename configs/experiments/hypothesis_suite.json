@@ -1,0 +1,104 @@
+{
+  "experiment_name": "Insulindian Miracle Canonical Hypothesis Suite",
+  "description": "Formal specification for the 6 canonical hypotheses testing the interaction between resource endowments, institutional dynamics, and bandit algorithm performance.",
+  "global_settings": {
+    "base_config": "configs/default.json",
+    "seeds": [7, 42, 1024, 9999],
+    "policies": [
+      "epsilon-greedy",
+      "ucb1",
+      "discounted-ucb",
+      "sliding-window-ucb",
+      "thompson-sampling",
+      "discounted-gaussian-thompson",
+      "linucb",
+      "linear-thompson",
+      "whittle-index"
+    ],
+    "output_mode": "HIGH"
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "name": "Resource Curse Effect",
+      "description": "Resource-rich sites attract disproportionate early investment but end up with higher extraction and lower long-run population.",
+      "scenarios": ["configs/scenarios/resource-curse.json"],
+      "metrics_of_interest": [
+        "resource_extraction_correlation",
+        "resource_population_correlation",
+        "mean_final_extraction"
+      ]
+    },
+    {
+      "id": "H2",
+      "name": "Institutional Quality Matters",
+      "description": "Sites with better initial institutions achieve higher long-run populations, even when resource-poor.",
+      "scenarios": [
+        "configs/scenarios/resource-curse.json",
+        "configs/scenarios/botswana.json"
+      ],
+      "metrics_of_interest": [
+        "mean_final_extraction",
+        "mean_final_openness",
+        "mean_reforms_triggered",
+        "cumulative_reward"
+      ]
+    },
+    {
+      "id": "H3",
+      "name": "Network Effects and Openness",
+      "description": "Open, trade-oriented city clusters outperform isolated settlements, and the cluster premium increases with network scale.",
+      "scenarios": [
+        "configs/scenarios/baseline.json",
+        "configs/scenarios/open-cluster.json"
+      ],
+      "metrics_of_interest": [
+        "population_gini",
+        "river_share",
+        "land_share"
+      ]
+    },
+    {
+      "id": "H5",
+      "name": "Algorithm Comparison",
+      "description": "Thompson Sampling and Whittle Index outperform UCB1 and epsilon-greedy in cumulative reward, especially in non-stationary scenarios.",
+      "scenarios": [
+        "configs/scenarios/baseline.json",
+        "configs/scenarios/resource-curse.json",
+        "configs/scenarios/botswana.json",
+        "configs/scenarios/open-cluster.json",
+        "configs/scenarios/ucb-bait.json"
+      ],
+      "metrics_of_interest": [
+        "cumulative_reward",
+        "oracle_regret",
+        "empirical_regret"
+      ]
+    },
+    {
+      "id": "H6",
+      "name": "Zipf's Law Emergence",
+      "description": "At least one scenario produces a rank-size distribution approximating Zipf's law (slope ≈ -1.0).",
+      "scenarios": ["configs/scenarios/baseline.json"],
+      "metrics_of_interest": [
+        "zipf_slope",
+        "population_gini"
+      ]
+    },
+    {
+      "id": "H7",
+      "name": "UCB Bait Trap",
+      "description": "UCB1 is disproportionately attracted to the boomtown during the collapse window; greedy baselines may be worse over the full horizon.",
+      "scenarios": ["configs/scenarios/ucb-bait.json"],
+      "metrics_of_interest": [
+        "boomtown_selection_share",
+        "boomtown_pre_collapse_selection_share",
+        "boomtown_collapse_selection_share",
+        "boomtown_population_share",
+        "cumulative_reward",
+        "oracle_regret",
+        "empirical_regret"
+      ]
+    }
+  ]
+}

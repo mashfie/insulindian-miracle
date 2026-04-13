@@ -66,12 +66,16 @@ fn network_reference(index: usize, states: &[SiteStateSnapshot], config: &Simula
     let denom = (state.openness
         * (1.0 + config.network_population_gain * (state.population as f64).ln_1p())
         * (1.0 + config.network_capital_gain * state.productive_capital))
-    .max(1e-6);
+        .max(1e-6);
     let nb = network_bonus_snapshot(index, states, config);
     clamp(nb / denom, 0.0, 1.6)
 }
 
-fn observed_from_snapshots(index: usize, states: &[SiteStateSnapshot], config: &SimulationConfig) -> Observed {
+fn observed_from_snapshots(
+    index: usize,
+    states: &[SiteStateSnapshot],
+    config: &SimulationConfig,
+) -> Observed {
     let s = &states[index];
     Observed {
         population: s.population as f64,
@@ -166,10 +170,6 @@ fn surrogate_reward(state: &Observed, config: &SimulationConfig, active: bool) -
     let mid_city_multiplier =
         (-(((population + 1.0).ln() - target_log).powi(2)) / (2.0 * spread * spread)).exp();
     let secondary_city_dividend = config.secondary_city_bonus * network * mid_city_multiplier;
-    let path_dep = 0.12
-        * state.geography
-        * (population.ln_1p())
-        * (0.6 + state.capital + 0.25 * state.network_reference);
     let extractive_drag = extraction * config.extraction_drag * population;
     let congestion = config.congestion * population * population;
     let overstretch = (population - config.metropolitan_overstretch_threshold).max(0.0);
@@ -180,17 +180,15 @@ fn surrogate_reward(state: &Observed, config: &SimulationConfig, active: bool) -
         + inclusive
         + reinvestment_dividend
         + secondary_city_dividend
-        + path_dep
         - extractive_drag
         - congestion
         - metropolitan_drag
         + network;
-    if state.trade_cluster > 0.5 {
-        reward += 0.18 * network;
-    }
     if state.boomtown > 0.5 && active {
         let active_steps = (population - 1.0).max(0.0);
-        if config.boomtown_bonus_duration > 0 && active_steps <= config.boomtown_bonus_duration as f64 {
+        if config.boomtown_bonus_duration > 0
+            && active_steps <= config.boomtown_bonus_duration as f64
+        {
             let rem = 1.0 - active_steps / config.boomtown_bonus_duration.max(1) as f64;
             reward += config.boomtown_early_reward_bonus * rem.max(0.25);
         }
@@ -204,14 +202,17 @@ fn surrogate_reward(state: &Observed, config: &SimulationConfig, active: bool) -
 
 fn activity_load(population: f64, config: &SimulationConfig) -> f64 {
     let active_steps = (population - 1.0).max(0.0);
-    ((active_steps - config.active_decay_onset as f64) / config.active_decay_onset.max(1) as f64).max(0.0)
+    ((active_steps - config.active_decay_onset as f64) / config.active_decay_onset.max(1) as f64)
+        .max(0.0)
 }
 
 fn transition(state: &Observed, config: &SimulationConfig, active: bool) -> Vec<usize> {
     let mut next = state.clone();
     next.population = clamp(state.population + if active { 1.0 } else { 0.0 }, 1.0, 42.0);
     let reform_signal = sigmoid(
-        1.35 * state.adaptability + 2.1 * state.legacy + 0.35 * (1.0 - state.resource)
+        1.35 * state.adaptability
+            + 2.1 * state.legacy
+            + 0.35 * (1.0 - state.resource)
             + 0.25 * state.capital
             - 1.15 * state.extraction,
     );
@@ -233,11 +234,7 @@ fn transition(state: &Observed, config: &SimulationConfig, active: bool) -> Vec<
         );
         next.adaptability = clamp(state.adaptability + 0.03 * state.legacy, 0.0, 1.0);
         if state.legacy > 0.0 {
-            next.legacy = clamp(
-                state.legacy.max(0.25 + 0.45 * reform_signal),
-                0.0,
-                1.0,
-            );
+            next.legacy = clamp(state.legacy.max(0.25 + 0.45 * reform_signal), 0.0, 1.0);
         }
     } else {
         let curse_modifier = (1.0
@@ -360,7 +357,6 @@ fn action_values(
     depth: i32,
     config: &SimulationConfig,
     cache: &mut HashMap<ValueCacheKey, f64>,
-    visited_stack: &mut Vec<ValueCacheKey>,
 ) -> (f64, f64) {
     let state = decode_state_key(state_key);
     let active_reward = surrogate_reward(&state, config, true);
@@ -370,8 +366,8 @@ fn action_values(
     }
     let active_next = transition(&state, config, true);
     let passive_next = transition(&state, config, false);
-    let active_tail = surrogate_value(&active_next, depth - 1, subsidy, config, cache, visited_stack);
-    let passive_tail = surrogate_value(&passive_next, depth - 1, subsidy, config, cache, visited_stack);
+    let active_tail = surrogate_value(&active_next, depth - 1, subsidy, config, cache);
+    let passive_tail = surrogate_value(&passive_next, depth - 1, subsidy, config, cache);
     (
         active_reward + WHITTLE_DISCOUNT * active_tail,
         passive_reward + WHITTLE_DISCOUNT * passive_tail,
@@ -384,25 +380,15 @@ fn surrogate_value(
     subsidy: f64,
     config: &SimulationConfig,
     cache: &mut HashMap<ValueCacheKey, f64>,
-    visited_stack: &mut Vec<ValueCacheKey>,
 ) -> f64 {
     if depth <= 0 {
         return 0.0;
     }
-    let sk = (
-        state_key.to_vec(),
-        depth,
-        quantize_subsidy(subsidy),
-    );
+    let sk = (state_key.to_vec(), depth, quantize_subsidy(subsidy));
     if let Some(v) = cache.get(&sk) {
         return *v;
     }
-    if visited_stack.contains(&sk) {
-        return 0.0;
-    }
-    visited_stack.push(sk.clone());
-    let (av, pv) = action_values(state_key, subsidy, depth, config, cache, visited_stack);
-    visited_stack.pop();
+    let (av, pv) = action_values(state_key, subsidy, depth, config, cache);
     let v = av.max(pv);
     cache.insert(sk, v);
     v
@@ -420,25 +406,9 @@ fn root_action_values(
     let active_reward = compute_reward_snapshot(index, states, config, 1);
     let active_next = transition(exact, config, true);
     let passive_next = transition(exact, config, false);
-    let mut visited = Vec::new();
     let rollout = 5;
-    let active_tail = surrogate_value(
-        &active_next,
-        rollout - 1,
-        subsidy,
-        config,
-        cache,
-        &mut visited,
-    );
-    let mut visited2 = Vec::new();
-    let passive_tail = surrogate_value(
-        &passive_next,
-        rollout - 1,
-        subsidy,
-        config,
-        cache,
-        &mut visited2,
-    );
+    let active_tail = surrogate_value(&active_next, rollout - 1, subsidy, config, cache);
+    let passive_tail = surrogate_value(&passive_next, rollout - 1, subsidy, config, cache);
     (
         active_reward + WHITTLE_DISCOUNT * active_tail,
         current_reward + subsidy + WHITTLE_DISCOUNT * passive_tail,
@@ -477,18 +447,7 @@ impl WhittleIndexPolicy {
                 low = mid;
             }
         }
-        let network_anchor = local_network(&exact, exact.population, &self.config);
-        let core_premium = (exact.geography - 0.38).max(0.0);
-        let spatial_anchor = 5.5 * exact.geography.powi(2)
-            + 24.0 * core_premium * core_premium
-            + 0.35 * network_anchor
-            + 2.4 * exact.geography.powi(2) * exact.population.ln_1p()
-            + 0.04 * exact.population.ln_1p().powi(2)
-            - 0.04
-                * (exact.population - self.config.metropolitan_overstretch_threshold)
-                    .max(0.0)
-                    .powf(1.2);
-        let index_value = 0.5 * (low + high) + spatial_anchor;
+        let index_value = 0.5 * (low + high);
         self.index_cache.insert(key, index_value);
         index_value
     }

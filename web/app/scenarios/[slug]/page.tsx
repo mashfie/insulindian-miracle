@@ -6,6 +6,7 @@ import {
   getRawResultFile,
   getScenarioPage,
   getScenarioPages,
+  getScenarioSampleResultFile,
 } from "@/lib/content/repository";
 import type { ScenarioPage } from "@/lib/content/types";
 
@@ -26,7 +27,8 @@ export default async function ScenarioDetailPage({
     notFound();
   }
 
-  const raw = page.result ? getRawResultFile(page.result.fileSlug) : null;
+  const sampleFile = getScenarioSampleResultFile(page.result?.scenario.name ?? slug);
+  const raw = sampleFile ? getRawResultFile(sampleFile) : null;
   const visuals = buildScenarioVisuals({ page, rawResult: raw });
 
   return <ScenarioView page={page} visuals={visuals} />;

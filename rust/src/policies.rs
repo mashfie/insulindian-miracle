@@ -2,13 +2,18 @@ use crate::snapshot_physics::network_bonus_snapshot;
 use crate::types::{SimulationConfig, SiteStateSnapshot};
 use ndarray::Array1;
 use rand::Rng;
-use rand_distr::{Normal, Distribution};
+use rand_distr::{Distribution, Normal};
 use std::collections::VecDeque;
 
 pub trait Policy {
     fn select_site(&mut self, states: &[SiteStateSnapshot]) -> usize;
     fn update(&mut self, chosen_arm: usize, reward: f64, states: &[SiteStateSnapshot]);
-    fn wants_snapshots(&self) -> bool { false }
+    fn uses_bounded_learning_reward(&self) -> bool {
+        false
+    }
+    fn wants_snapshots(&self) -> bool {
+        false
+    }
 }
 
 pub struct EpsilonGreedyPolicy<R: Rng> {
@@ -32,6 +37,10 @@ impl<R: Rng> EpsilonGreedyPolicy<R> {
 }
 
 impl<R: Rng> Policy for EpsilonGreedyPolicy<R> {
+    fn uses_bounded_learning_reward(&self) -> bool {
+        true
+    }
+
     fn select_site(&mut self, _states: &[SiteStateSnapshot]) -> usize {
         for i in 0..self.arm_count {
             if self.counts[i] == 0 {
@@ -81,17 +90,21 @@ impl UCB1Policy {
 }
 
 impl Policy for UCB1Policy {
+    fn uses_bounded_learning_reward(&self) -> bool {
+        true
+    }
+
     fn select_site(&mut self, _states: &[SiteStateSnapshot]) -> usize {
         for i in 0..self.arm_count {
             if self.counts[i] == 0 {
                 return i;
             }
         }
-        
+
         let mut best_arm = 0;
         let mut best_val = f64::NEG_INFINITY;
         let log_steps = (self.steps.max(1) as f64).ln();
-        
+
         for i in 0..self.arm_count {
             let bonus = (self.exploration * log_steps / self.counts[i] as f64).sqrt();
             let score = self.values[i] + bonus;
@@ -127,6 +140,7 @@ pub struct GaussianThompsonPolicy<R: Rng> {
 }
 
 impl<R: Rng> GaussianThompsonPolicy<R> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         arm_count: usize,
         rng: R,
@@ -139,7 +153,7 @@ impl<R: Rng> GaussianThompsonPolicy<R> {
     ) -> Self {
         let prior_precision = 1.0 / prior_variance;
         let prior_mean_precision = prior_mean / prior_variance;
-        
+
         Self {
             arm_count,
             rng,
@@ -155,17 +169,17 @@ impl<R: Rng> GaussianThompsonPolicy<R> {
             discounted,
         }
     }
-    
+
     fn sample_arm(&mut self) -> usize {
         let mut best_arm = 0;
         let mut best_val = f64::NEG_INFINITY;
-        
+
         for i in 0..self.arm_count {
             let var1 = 1.0 / self.precisions[i];
             let var2 = self.minimum_exploration_variance / (self.counts[i] + 1.0).sqrt();
             let variance = var1.max(var2);
             let mean = self.mean_precision[i] / self.precisions[i];
-            
+
             let normal = Normal::new(mean, variance.sqrt()).unwrap();
             let draw = normal.sample(&mut self.rng);
             if draw > best_val {
@@ -197,17 +211,21 @@ impl<R: Rng> Policy for GaussianThompsonPolicy<R> {
 
     fn update(&mut self, chosen_arm: usize, reward: f64, _states: &[SiteStateSnapshot]) {
         let obs_precision = 1.0 / self.observation_variance;
-        
-        for i in 0..self.arm_count {
-            self.counts[i] *= self.posterior_decay;
-            self.precisions[i] = self.prior_precision + self.posterior_decay * (self.precisions[i] - self.prior_precision);
-            self.mean_precision[i] = self.prior_mean_precision + self.posterior_decay * (self.mean_precision[i] - self.prior_mean_precision);
+
+        if self.discounted {
+            for i in 0..self.arm_count {
+                self.counts[i] *= self.posterior_decay;
+                self.precisions[i] = self.prior_precision
+                    + self.posterior_decay * (self.precisions[i] - self.prior_precision);
+                self.mean_precision[i] = self.prior_mean_precision
+                    + self.posterior_decay * (self.mean_precision[i] - self.prior_mean_precision);
+            }
         }
-        
+
         self.counts[chosen_arm] += 1.0;
         self.precisions[chosen_arm] += obs_precision;
         self.mean_precision[chosen_arm] += reward * obs_precision;
-        
+
         if self.discounted {
             self.observed[chosen_arm] = true;
         }
@@ -237,17 +255,21 @@ impl DiscountedUCBPolicy {
 }
 
 impl Policy for DiscountedUCBPolicy {
+    fn uses_bounded_learning_reward(&self) -> bool {
+        true
+    }
+
     fn select_site(&mut self, _states: &[SiteStateSnapshot]) -> usize {
         for i in 0..self.arm_count {
             if self.counts[i] <= 1e-9 {
                 return i;
             }
         }
-        
+
         let mut best_arm = 0;
         let mut best_val = f64::NEG_INFINITY;
         let log_mass = (self.total_mass + 1.0).ln();
-        
+
         for i in 0..self.arm_count {
             let mean = self.reward_sums[i] / self.counts[i].max(1e-9);
             let bonus = (self.exploration * log_mass / self.counts[i].max(1e-9)).sqrt();
@@ -266,7 +288,7 @@ impl Policy for DiscountedUCBPolicy {
             self.reward_sums[i] *= self.gamma;
         }
         self.total_mass = self.total_mass * self.gamma + 1.0;
-        
+
         self.counts[chosen_arm] += 1.0;
         self.reward_sums[chosen_arm] += reward;
     }
@@ -295,18 +317,22 @@ impl SlidingWindowUCBPolicy {
 }
 
 impl Policy for SlidingWindowUCBPolicy {
+    fn uses_bounded_learning_reward(&self) -> bool {
+        true
+    }
+
     fn select_site(&mut self, _states: &[SiteStateSnapshot]) -> usize {
         for i in 0..self.arm_count {
             if self.counts[i] <= 1e-9 {
                 return i;
             }
         }
-        
+
         let mut best_arm = 0;
         let mut best_val = f64::NEG_INFINITY;
         let total_mass = (self.observation_window.len() as f64).max(1.0);
         let log_mass = (total_mass + 1.0).ln();
-        
+
         for i in 0..self.arm_count {
             let mean = self.reward_sums[i] / self.counts[i].max(1.0);
             let bonus = (self.exploration * log_mass / self.counts[i].max(1.0)).sqrt();
@@ -330,30 +356,36 @@ impl Policy for SlidingWindowUCBPolicy {
                 }
             }
         }
-        
+
         self.observation_window.push_back((chosen_arm, reward));
         self.counts[chosen_arm] += 1.0;
         self.reward_sums[chosen_arm] += reward;
     }
 }
 
+use crate::snapshot_physics::compute_reward_snapshot;
+
 pub struct MyopicOraclePolicy {
+    config: SimulationConfig,
 }
 
 impl MyopicOraclePolicy {
-    pub fn new(_arm_count: usize) -> Self {
-        Self { }
+    pub fn new(_arm_count: usize, config: SimulationConfig) -> Self {
+        Self { config }
     }
 }
 
 impl Policy for MyopicOraclePolicy {
-    fn wants_snapshots(&self) -> bool { true }
+    fn wants_snapshots(&self) -> bool {
+        true
+    }
     fn select_site(&mut self, states: &[SiteStateSnapshot]) -> usize {
         let mut best_arm = 0;
-        let mut best_rent = f64::NEG_INFINITY;
-        for (i, state) in states.iter().enumerate() {
-            if state.resource_rent > best_rent {
-                best_rent = state.resource_rent;
+        let mut best_reward = f64::NEG_INFINITY;
+        for i in 0..states.len() {
+            let r = compute_reward_snapshot(i, states, &self.config, 1);
+            if r > best_reward {
+                best_reward = r;
                 best_arm = i;
             }
         }
@@ -386,7 +418,7 @@ fn get_contextual_feature_vector(
     ]
 }
 
-use crate::math_utils::{invert_matrix, cholesky_decomposition};
+use crate::math_utils::{cholesky_decomposition, invert_matrix};
 use ndarray::Array2;
 
 pub struct LinUCBPolicy {
@@ -414,22 +446,24 @@ impl LinUCBPolicy {
 }
 
 impl Policy for LinUCBPolicy {
-    fn wants_snapshots(&self) -> bool { true }
+    fn wants_snapshots(&self) -> bool {
+        true
+    }
     fn select_site(&mut self, states: &[SiteStateSnapshot]) -> usize {
         let theta = self.inv_covariance.dot(&self.reward_vector);
-        
+
         let mut best_arm = 0;
         let mut best_val = f64::NEG_INFINITY;
-        
+
         for i in 0..self.arm_count {
             let feat = get_contextual_feature_vector(i, states, &self.config);
             self.last_features[i] = feat.clone();
-            
+
             let temp = self.inv_covariance.dot(&feat);
             let variance = feat.dot(&temp);
             let bonus = self.alpha * variance.sqrt();
             let score = feat.dot(&theta) + bonus;
-            
+
             if score > best_val {
                 best_val = score;
                 best_arm = i;
@@ -440,13 +474,13 @@ impl Policy for LinUCBPolicy {
 
     fn update(&mut self, chosen_arm: usize, reward: f64, _states: &[SiteStateSnapshot]) {
         let x = &self.last_features[chosen_arm];
-        
+
         // Sherman-Morrison rank-1 update for inverse:
         // (A + xx^T)^{-1} = A^{-1} - (A^{-1}xx^T A^{-1}) / (1 + x^T A^{-1}x)
         let a_inv_x = self.inv_covariance.dot(x);
         let x_t_a_inv_x = x.dot(&a_inv_x);
         let denom = 1.0 + x_t_a_inv_x;
-        
+
         for i in 0..CONTEXTUAL_FEATURE_DIM {
             for j in 0..CONTEXTUAL_FEATURE_DIM {
                 self.inv_covariance[[i, j]] -= (a_inv_x[i] * a_inv_x[j]) / denom;
@@ -492,32 +526,44 @@ impl<R: Rng> LinearThompsonPolicy<R> {
 }
 
 impl<R: Rng> Policy for LinearThompsonPolicy<R> {
-    fn wants_snapshots(&self) -> bool { true }
+    fn wants_snapshots(&self) -> bool {
+        true
+    }
     fn select_site(&mut self, states: &[SiteStateSnapshot]) -> usize {
-        let mut covariance = invert_matrix(&self.precision).unwrap_or_else(|| Array2::eye(CONTEXTUAL_FEATURE_DIM));
+        let covariance = invert_matrix(&self.precision)
+            .expect("linear Thompson precision matrix became singular");
         let mean = covariance.dot(&self.reward_precision);
-        
-        for i in 0..CONTEXTUAL_FEATURE_DIM {
-            covariance[[i, i]] += 1e-9;
-        }
-        
-        let chol = cholesky_decomposition(&covariance).unwrap_or_else(|| Array2::eye(CONTEXTUAL_FEATURE_DIM));
-        
+
+        let mut jitter = 1e-9;
+        let chol = loop {
+            let mut candidate = covariance.clone();
+            for i in 0..CONTEXTUAL_FEATURE_DIM {
+                candidate[[i, i]] += jitter;
+            }
+            if let Some(chol) = cholesky_decomposition(&candidate) {
+                break chol;
+            }
+            jitter *= 10.0;
+            if jitter > 1e-3 {
+                panic!("linear Thompson covariance is not positive definite after jitter");
+            }
+        };
+
         let mut normal_sample = Array1::<f64>::zeros(CONTEXTUAL_FEATURE_DIM);
         let normal = Normal::new(0.0, 1.0).unwrap();
         for i in 0..CONTEXTUAL_FEATURE_DIM {
             normal_sample[i] = normal.sample(&mut self.rng);
         }
-        
+
         let theta = &mean + &(chol.dot(&normal_sample) * self.sampling_scale);
-        
+
         let mut best_arm = 0;
         let mut best_val = f64::NEG_INFINITY;
-        
+
         for i in 0..self.arm_count {
             let feat = get_contextual_feature_vector(i, states, &self.config);
             self.last_features[i] = feat.clone();
-            
+
             let score = feat.dot(&theta);
             if score > best_val {
                 best_val = score;
@@ -538,4 +584,3 @@ impl<R: Rng> Policy for LinearThompsonPolicy<R> {
         }
     }
 }
-

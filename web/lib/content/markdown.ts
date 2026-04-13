@@ -47,6 +47,23 @@ export async function renderMarkdown(
   return String(file);
 }
 
+export function renderMarkdownSync(
+  markdown: string,
+  routeMap: Record<string, string>,
+): string {
+  const normalized = normalizeMarkdown(markdown, routeMap);
+  const file = unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkMath)
+    .use(remarkRehype)
+    .use(rehypeKatex)
+    .use(rehypeStringify)
+    .processSync(normalized);
+
+  return String(file);
+}
+
 export function splitMarkdownSections(markdown: string) {
   const normalized = markdown.replace(/\r\n/g, "\n").trim();
   const matches = [...normalized.matchAll(/^##\s+(.+)$/gm)];

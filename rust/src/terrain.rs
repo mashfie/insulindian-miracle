@@ -1,4 +1,6 @@
-use crate::types::{TerrainConfig, Site};
+#![allow(clippy::needless_range_loop)]
+
+use crate::types::{Site, TerrainConfig};
 use rand::prelude::*;
 use rand_pcg::Pcg64;
 use std::f64::consts::PI;
@@ -74,7 +76,12 @@ fn fractal_noise(config: &TerrainConfig, rng: &mut Pcg64) -> Vec<Vec<f64>> {
     let mut amplitude_sum = 0.0;
 
     for _ in 0..config.octaves {
-        let noise = perlin_noise(config.width as usize, config.height as usize, frequency as usize, rng);
+        let noise = perlin_noise(
+            config.width as usize,
+            config.height as usize,
+            frequency as usize,
+            rng,
+        );
         for y in 0..config.height as usize {
             for x in 0..config.width as usize {
                 total[y][x] += amplitude * noise[y][x];
@@ -93,7 +100,7 @@ fn fractal_noise(config: &TerrainConfig, rng: &mut Pcg64) -> Vec<Vec<f64>> {
     total
 }
 
-fn normalize(field: &mut Vec<Vec<f64>>, mask: Option<&Vec<Vec<bool>>>) {
+fn normalize(field: &mut [Vec<f64>], mask: Option<&[Vec<bool>]>) {
     let mut min = f64::MAX;
     let mut max = f64::MIN;
     let mut found = false;
@@ -101,7 +108,9 @@ fn normalize(field: &mut Vec<Vec<f64>>, mask: Option<&Vec<Vec<bool>>>) {
     for y in 0..field.len() {
         for x in 0..field[0].len() {
             if let Some(m) = mask {
-                if !m[y][x] { continue; }
+                if !m[y][x] {
+                    continue;
+                }
             }
             min = min.min(field[y][x]);
             max = max.max(field[y][x]);
@@ -317,7 +326,7 @@ pub fn terrain_shares(terrain: &TerrainField) -> (f64, f64) {
     (land_share, river_share)
 }
 
-fn distance_transform(mask: &Vec<Vec<bool>>) -> Vec<Vec<f64>> {
+fn distance_transform(mask: &[Vec<bool>]) -> Vec<Vec<f64>> {
     let height = mask.len();
     let width = mask[0].len();
     let mut dist = vec![vec![f64::MAX; width]; height];
@@ -328,16 +337,24 @@ fn distance_transform(mask: &Vec<Vec<bool>>) -> Vec<Vec<f64>> {
             if mask[y][x] {
                 dist[y][x] = 0.0;
             } else {
-                if y > 0 { dist[y][x] = dist[y][x].min(dist[y - 1][x] + 1.0); }
-                if x > 0 { dist[y][x] = dist[y][x].min(dist[y][x - 1] + 1.0); }
+                if y > 0 {
+                    dist[y][x] = dist[y][x].min(dist[y - 1][x] + 1.0);
+                }
+                if x > 0 {
+                    dist[y][x] = dist[y][x].min(dist[y][x - 1] + 1.0);
+                }
             }
         }
     }
 
     for y in (0..height).rev() {
         for x in (0..width).rev() {
-            if y < height - 1 { dist[y][x] = dist[y][x].min(dist[y + 1][x] + 1.0); }
-            if x < width - 1 { dist[y][x] = dist[y][x].min(dist[y][x + 1] + 1.0); }
+            if y < height - 1 {
+                dist[y][x] = dist[y][x].min(dist[y + 1][x] + 1.0);
+            }
+            if x < width - 1 {
+                dist[y][x] = dist[y][x].min(dist[y][x + 1] + 1.0);
+            }
         }
     }
     dist
@@ -346,7 +363,7 @@ fn distance_transform(mask: &Vec<Vec<bool>>) -> Vec<Vec<f64>> {
 pub fn generate_terrain_rust(config: &crate::types::SimulationConfig) -> TerrainField {
     let mut rng = Pcg64::seed_from_u64(config.terrain.seed as u64);
     let base_noise = fractal_noise(&config.terrain, &mut rng);
-    
+
     let res_seed = rng.gen::<u64>();
     let mut res_rng = Pcg64::seed_from_u64(res_seed);
     let resource_noise = fractal_noise(&config.terrain, &mut res_rng);
@@ -361,9 +378,13 @@ pub fn generate_terrain_rust(config: &crate::types::SimulationConfig) -> Terrain
             let fx = (x as f64 / (width - 1).max(1) as f64) * 2.0 - 1.0;
 
             let spine = config.spine_height - config.spine_curvature * fy * fy;
-            let taper = config.taper_offset - config.taper_curvature_x * (fx + config.taper_bias_x).powi(2) - config.taper_linear_x * fx;
-            let headland = config.headland_height * (-( (fx - config.headland_x).powi(2) / 0.09 + fy.powi(2) / 0.26 )).exp();
-            let mainland_bridge = config.mainland_bridge_height * (-( (fx + 1.0).powi(2) / 0.02 + fy.powi(2) / 0.5 )).exp();
+            let taper = config.taper_offset
+                - config.taper_curvature_x * (fx + config.taper_bias_x).powi(2)
+                - config.taper_linear_x * fx;
+            let headland = config.headland_height
+                * (-((fx - config.headland_x).powi(2) / 0.09 + fy.powi(2) / 0.26)).exp();
+            let mainland_bridge = config.mainland_bridge_height
+                * (-((fx + 1.0).powi(2) / 0.02 + fy.powi(2) / 0.5)).exp();
 
             elevation[y][x] = 0.85 * base_noise[y][x] + spine + taper + headland + mainland_bridge;
         }
@@ -384,20 +405,27 @@ pub fn generate_terrain_rust(config: &crate::types::SimulationConfig) -> Terrain
 
     for y in 0..height {
         for x in 0..width {
-            if !land_mask[y][x] { continue; }
+            if !land_mask[y][x] {
+                continue;
+            }
             let mut is_coast = false;
             for dy in -1..=1 {
                 for dx in -1..=1 {
                     let ny = y as i32 + dy;
                     let nx = x as i32 + dx;
-                    if ny >= 0 && ny < height as i32 && nx >= 0 && nx < width as i32 {
-                        if !land_mask[ny as usize][nx as usize] {
-                            is_coast = true;
-                            break;
-                        }
+                    if ny >= 0
+                        && ny < height as i32
+                        && nx >= 0
+                        && nx < width as i32
+                        && !land_mask[ny as usize][nx as usize]
+                    {
+                        is_coast = true;
+                        break;
                     }
                 }
-                if is_coast { break; }
+                if is_coast {
+                    break;
+                }
             }
             coast_mask[y][x] = is_coast;
         }
@@ -425,12 +453,14 @@ pub fn generate_terrain_rust(config: &crate::types::SimulationConfig) -> Terrain
         for x in 0..width {
             let fx = (x as f64 / (width - 1).max(1) as f64) * 2.0 - 1.0;
 
-            accessibility[y][x] = (-( ((fx + 1.0).powi(2) + fy.powi(2)).sqrt() * 1.2 )).exp();
-            arability[y][x] = (-(0.18 * river_distance[y][x])).exp() * (1.0 - (elevation[y][x] - config.terrain.sea_level).clamp(0.0, 1.0));
+            accessibility[y][x] = (-(((fx + 1.0).powi(2) + fy.powi(2)).sqrt() * 1.2)).exp();
+            arability[y][x] = (-(0.18 * river_distance[y][x])).exp()
+                * (1.0 - (elevation[y][x] - config.terrain.sea_level).clamp(0.0, 1.0));
             defensibility[y][x] = coastal_distance[y][x];
             port_quality[y][x] = (-1.1 * coastal_distance[y][x]).exp();
-            
-            let geology = 0.55 * resource_noise[y][x] + 0.45 * (-( (fx - 0.1).powi(2) / 0.55 + (fy + 0.15).powi(2) / 0.3 )).exp();
+
+            let geology = 0.55 * resource_noise[y][x]
+                + 0.45 * (-((fx - 0.1).powi(2) / 0.55 + (fy + 0.15).powi(2) / 0.3)).exp();
             resource_rent[y][x] = geology;
         }
     }
@@ -469,53 +499,104 @@ pub fn generate_terrain_rust(config: &crate::types::SimulationConfig) -> Terrain
     }
 }
 
-pub fn select_candidate_sites_rust(terrain: &TerrainField, count: usize, min_spacing: f64) -> Vec<Site> {
+pub fn select_candidate_sites_rust(
+    terrain: &TerrainField,
+    count: usize,
+    min_spacing: f64,
+) -> Vec<Site> {
     let height = terrain.elevation.len();
     let width = terrain.elevation[0].len();
-    
-    let mut candidates = Vec::new();
+    let max_border_distance = 1.0_f64.max((width.min(height) as f64) / 2.0 - 1.0);
+
+    let mut cells = Vec::new();
+    let mut interior_cells = Vec::new();
+
     for y in 0..height {
         for x in 0..width {
             if terrain.land_mask[y][x] {
-                let priority = terrain.suitability[y][x];
-                candidates.push((priority, y, x));
+                let border_distance = x.min(width - 1 - x).min(y).min(height - 1 - y) as f64;
+                let border_bonus = (border_distance / max_border_distance).clamp(0.0, 1.0);
+                let inland_bonus = (terrain.coastal_distance[y][x] / 8.0).clamp(0.0, 1.0);
+                let priority =
+                    0.8 * terrain.suitability[y][x] + 0.12 * border_bonus + 0.08 * inland_bonus;
+
+                let candidate = (priority, y, x, border_distance == 0.0);
+                cells.push(candidate);
+                if border_distance > 0.0 {
+                    interior_cells.push(candidate);
+                }
             }
         }
     }
 
-    candidates.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
+    let mut ranked = if interior_cells.len() >= count {
+        interior_cells
+    } else {
+        cells
+    };
+    ranked.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
 
     let mut sites: Vec<Site> = Vec::new();
-    for (_priority, y, x) in candidates {
-        if sites.len() >= count { break; }
+    let mut selected_indices = std::collections::HashSet::new();
 
-        let fx = x as f64 / (width - 1).max(1) as f64;
-        let fy = y as f64 / (height - 1).max(1) as f64;
+    while sites.len() < count && selected_indices.len() < ranked.len() {
+        let mut best_index: i32 = -1;
+        let mut best_score = -1.0;
 
-        let mut too_close = false;
-        for site in &sites {
-            let dist = ((fx - site.x).powi(2) + (fy - site.y).powi(2)).sqrt();
-            if dist < min_spacing {
-                too_close = true;
-                break;
+        for (index, &(priority, y, x, _is_border)) in ranked.iter().enumerate() {
+            if selected_indices.contains(&index) {
+                continue;
+            }
+            let norm_x = x as f64 / (width - 1).max(1) as f64;
+            let norm_y = y as f64 / (height - 1).max(1) as f64;
+
+            let nearest = if sites.is_empty() {
+                1.0
+            } else {
+                sites
+                    .iter()
+                    .map(|site| ((norm_x - site.x).powi(2) + (norm_y - site.y).powi(2)).sqrt())
+                    .fold(f64::INFINITY, f64::min)
+            };
+
+            if !sites.is_empty() && nearest < min_spacing {
+                continue;
+            }
+
+            let spread = (nearest / min_spacing.max(1e-9)).min(1.0);
+            let score = 0.72 * priority + 0.28 * spread;
+
+            if score > best_score {
+                best_score = score;
+                best_index = index as i32;
             }
         }
 
-        if !too_close {
-            sites.push(Site {
-                id: sites.len() as i32,
-                x: fx,
-                y: fy,
-                port_access: terrain.port_quality[y][x],
-                river_access: (-0.22 * terrain.river_distance[y][x]).exp(),
-                arability: terrain.arability[y][x],
-                defensibility: terrain.defensibility[y][x],
-                accessibility: terrain.accessibility[y][x],
-                resource_rent: terrain.resource_rent[y][x],
-                suitability: terrain.suitability[y][x],
-                ..Default::default()
-            });
+        if best_index < 0 {
+            break;
         }
+
+        let best_idx = best_index as usize;
+        selected_indices.insert(best_idx);
+        let (_priority, y, x, _is_border) = ranked[best_idx];
+        let norm_x = x as f64 / (width - 1).max(1) as f64;
+        let norm_y = y as f64 / (height - 1).max(1) as f64;
+        let river_access = (-0.22 * terrain.river_distance[y][x]).exp();
+
+        sites.push(Site {
+            id: sites.len() as i32,
+            x: norm_x,
+            y: norm_y,
+            port_access: terrain.port_quality[y][x],
+            river_access,
+            arability: terrain.arability[y][x],
+            defensibility: terrain.defensibility[y][x],
+            accessibility: terrain.accessibility[y][x],
+            resource_rent: terrain.resource_rent[y][x],
+            suitability: terrain.suitability[y][x],
+            ..Default::default()
+        });
     }
+
     sites
 }

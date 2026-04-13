@@ -1,0 +1,19 @@
+{
+  "experiment_name": "Smoke Test Suite",
+  "description": "Quick validation of the experiment runner and manifest support.",
+  "global_settings": {
+    "base_config": "configs/default.json",
+    "seeds": [7],
+    "policies": ["epsilon-greedy", "ucb1"],
+    "output_mode": "LOW"
+  },
+  "hypotheses": [
+    {
+      "id": "SMOKE",
+      "name": "Smoke Hypothesis",
+      "description": "Minimal run to verify machinery.",
+      "scenarios": ["configs/scenarios/baseline.json"],
+      "metrics_of_interest": ["cumulative_reward"]
+    }
+  ]
+}

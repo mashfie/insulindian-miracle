@@ -5,76 +5,93 @@ type: moc
 
 # Insulindian Miracle
 
-A computational research testbed exploring **city formation**, **institutional dynamics**, and the **resource curse** using **multi-armed bandit algorithms** on procedurally generated peninsulas.
+Research wiki for the Rust simulation engine, the scenario library, and the academic literature behind the project.
 
-The simulation asks: given a landscape of candidate settlement sites with varying geography and natural resources, which sites should a planner invest in — and can an algorithm learn to avoid the trap where resource-rich sites offer high short-term returns but decay into extractive institutions long-term?
+## Start Here
 
----
+- [[glossary]]
+- [[architecture-overview]]
+- [[code-flow]]
+- [[methodology]]
+- [[formal-model]]
+- [[linear-algebra]]
+- [[numerical-analysis]]
+- [[2026-04-13-combined-evidence-report]]
+- [[next-steps]]
 
-## Theory
+## Current Status
 
-The academic foundations underlying the simulation.
+- The executable core is the Rust engine in `rust/src/`.
+- `configs/scenarios/*.json` and `configs/experiments/hypothesis_suite.json` define the experiment surface.
+- `python/` and `R/` are downstream analysis shells for artifacts emitted by the Rust engine.
+- Existing numeric result tables without a manifest-backed artifact should be treated as provisional. See [[RESULTS]] and [[next-steps]].
+- The cohort rewrite and the current materialization boundary are recorded in [[2026-04-13-combined-evidence-report]].
 
-- [[resource-curse]] — Dutch disease, Sachs & Warner, the institutional channel
-- [[institutional-economics]] — Extractive vs inclusive institutions, path dependence
-- [[urban-economics]] — Agglomeration, central place theory, Zipf's law
-- [[multi-armed-bandits]] — Explore/exploit, regret, stochastic bandits
-- [[restless-bandits]] — Whittle relaxation and non-stationary arms
-- [[explore-exploit-tradeoff]] — The core tension mapped to settlement decisions
-- [[hypotheses]] — H1–H7: what the simulation tests
+## Theory Spine
 
-## System Design
+- [[resource-curse]]
+- [[institutional-economics]]
+- [[urban-economics]]
+- [[multi-armed-bandits]]
+- [[restless-bandits]]
+- [[hypotheses]]
 
-How the simulation is built and how it runs.
+## Methodology
 
-- [[architecture-overview]] — Monorepo structure, data flow, tech stack
-- [[simulation-loop]] — Step-by-step walkthrough of `run_simulation()`
-- [[reward-function]] — Mathematical breakdown of `compute_reward()`
-- [[institutional-dynamics]] — Extraction drift, reform, shocks
-- [[terrain-generation]] — Perlin noise, hydrology, site selection
-- [[configuration]] — `SimulationConfig` and `configs/default.json`
-- [[frontend]] — Next.js dashboard, canvas rendering, component tree
+- [[methodology]]
+- [[formal-model]]
+- [[research-design]]
+- [[linear-algebra]]
+- [[numerical-analysis]]
 
-## Module Reference
+## System
 
-Per-module documentation cards.
-
-| Module | Purpose |
-|--------|---------|
-| [[model]] | Core data models, reward function, institutional evolution |
-| [[policies]] | 10 MAB algorithm implementations |
-| [[sim]] | Simulation orchestration and experiment runners |
-| [[terrain]] | Procedural terrain generation and site placement |
-| [[analysis]] | Hypothesis testing framework (H1–H7) |
-| [[scenarios]] | 9 pre-configured experiment variants |
-| [[cli]] | Command-line interface |
-| [[research]] | Academic paper indexing and synthesis |
+- [[architecture-overview]]
+- [[simulation-loop]]
+- [[reward-function]]
+- [[institutional-dynamics]]
+- [[terrain-generation]]
+- [[configuration]]
+- [[code-flow]]
 
 ## Policies
 
-One note per bandit algorithm — formulation, implementation, and when it excels.
-
-| Family | Policies |
-|--------|----------|
-| Baseline | [[epsilon-greedy]] |
-| Optimistic | [[ucb1]], [[discounted-ucb]], [[sliding-window-ucb]] |
-| Bayesian | [[thompson-sampling]], [[discounted-thompson]] |
-| Contextual | [[linucb]], [[linear-thompson]] |
-| Restless | [[whittle-index]] |
-| Oracle | [[myopic-oracle]] |
+- [[epsilon-greedy]]
+- [[ucb1]]
+- [[discounted-ucb]]
+- [[sliding-window-ucb]]
+- [[thompson-sampling]]
+- [[discounted-thompson]]
+- [[linucb]]
+- [[linear-thompson]]
+- [[whittle-index]]
+- [[myopic-oracle]]
 
 ## Scenarios
 
-One note per scenario — real-world analogy, parameter overrides, tested hypotheses.
+- [[baseline]]
+- [[resource-curse-scenario]]
+- [[botswana]]
+- [[open-cluster]]
+- [[merchant-republic]]
+- [[megacity-trap]]
+- [[balanced-urban]]
+- [[shock-reform]]
+- [[ucb-bait]]
 
-| Scenario | Horizon | Analogy |
-|----------|---------|---------|
-| [[baseline]] | 300 | Default dynamics |
-| [[resource-curse-scenario]] | 420 | Nigeria / Venezuela |
-| [[botswana]] | 420 | Botswana exception |
-| [[open-cluster]] | 360 | Hanseatic League |
-| [[merchant-republic]] | 360 | Venice / Genoa |
-| [[megacity-trap]] | 360 | Bangkok / Lagos |
-| [[balanced-urban]] | 360 | Germany / Netherlands |
-| [[shock-reform]] | 420 | Post-crisis reform |
-| [[ucb-bait]] | 280 | Boom-bust trap |
+## Code Map
+
+- [[model]]
+- [[terrain]]
+- [[policies]]
+- [[sim]]
+- [[scenarios]]
+- [[cli]]
+- [[analysis]]
+- [[research]]
+
+## External Corpus
+
+- `research/index.json` is the bibliography manifest.
+- `research/theory/peninsula-framework.md` is the project-specific literature bridge.
+- `insulindian-miracle-paper-cache/` stores fetched papers where available.

@@ -11,8 +11,10 @@ import {
   type ArchiveSection,
   type AtlasChapter,
   type AtlasSource,
+  type CohortSynthesis,
   type NormalizedDoc,
   type PolicyPage,
+  type PolicyDossiersPayload,
   type ReferenceEntry,
   type ScenarioPage,
   type ScenarioResultPayload,
@@ -25,6 +27,7 @@ const RESULTS_ROOT = path.join(SOURCE_ROOT, "results");
 const RESEARCH_ROOT = path.join(SOURCE_ROOT, "research");
 const EXEMPLARS_PATH = path.join(process.cwd(), "content", "generated", "exemplars.json");
 const ATLAS_SOURCE_PATH = path.join(process.cwd(), "content", "generated", "atlas-source.json");
+const REPO_DOCS_ROOT = path.join(process.cwd(), "..", "docs");
 
 const SCENARIO_ROUTE_ALIASES: Record<string, string> = {
   "resource-curse": "resource-curse-scenario",
@@ -55,6 +58,7 @@ type GeneratedExemplarPage = {
   sections?: Array<{
     id: string;
     title: string;
+    markdown?: string;
     paragraphs?: string[];
   }>;
   pull_quotes?: Array<{
@@ -86,34 +90,44 @@ const DEFAULT_FIGURE_KINDS: ArchivePage["figureRefs"][number]["kind"][] = [
   "table",
 ];
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function paragraphHtml(paragraphs: string[] = []) {
-  return paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
-}
-
 function captionTitle(caption: string, id: string) {
   const sentence = caption.split(".")[0]?.trim();
   return sentence?.length ? sentence : titleFromSlug(id);
 }
 
-function normalizeGeneratedPage(page: GeneratedExemplarPage): ArchivePage {
+function stripHtml(html: string) {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+async function renderGeneratedSection(
+  markdown: string | undefined,
+  paragraphs: string[] = [],
+  routeMap: Record<string, string>,
+) {
+  const source = markdown ?? paragraphs.join("\n\n");
+  if (!source.trim()) {
+    return "";
+  }
+  return renderMarkdown(source, routeMap);
+}
+
+async function normalizeGeneratedPage(
+  page: GeneratedExemplarPage,
+  routeMap: Record<string, string>,
+): Promise<ArchivePage> {
   return {
     slug: page.slug ?? page.title.toLowerCase().replace(/\s+/g, "-"),
     title: page.title,
     dek: page.dek,
     lede: page.lede,
-    sections: (page.sections ?? []).map((section, index) => ({
-      id: section.id,
-      title: section.title,
-      html: paragraphHtml(section.paragraphs),
-      layout: index % 2 === 0 ? "split" : "full",
-    })),
+    sections: await Promise.all(
+      (page.sections ?? []).map(async (section, index) => ({
+        id: section.id,
+        title: section.title,
+        html: await renderGeneratedSection(section.markdown, section.paragraphs, routeMap),
+        layout: index % 2 === 0 ? "split" : "full",
+      })),
+    ),
     figureRefs: (page.figure_captions ?? []).map((figure, index) => ({
       id: figure.id,
       title: captionTitle(figure.caption, figure.id),
@@ -128,7 +142,10 @@ function normalizeGeneratedPage(page: GeneratedExemplarPage): ArchivePage {
   };
 }
 
-function normalizeGeneratedExemplars(raw: GeneratedExemplarCollection): ExemplarCollection {
+async function normalizeGeneratedExemplars(
+  raw: GeneratedExemplarCollection,
+  routeMap: Record<string, string>,
+): Promise<ExemplarCollection> {
   const bibliography = Object.fromEntries(
     Object.entries(raw.bibliography_annotations ?? {}).map(([id, value]) => [
       id,
@@ -137,16 +154,21 @@ function normalizeGeneratedExemplars(raw: GeneratedExemplarCollection): Exemplar
   );
 
   return {
-    landing: raw.landing_page ? normalizeGeneratedPage(raw.landing_page) : undefined,
+    landing: raw.landing_page ? await normalizeGeneratedPage(raw.landing_page, routeMap) : undefined,
     scenarios: raw.scenario_pages
       ? Object.fromEntries(
-          Object.entries(raw.scenario_pages).map(([slug, page]) => [
-            slug,
-            normalizeGeneratedPage({
-              ...page,
-              slug: page.slug ?? slug,
-            }),
-          ]),
+          await Promise.all(
+            Object.entries(raw.scenario_pages).map(async ([slug, page]) => [
+              slug,
+              await normalizeGeneratedPage(
+                {
+                  ...page,
+                  slug: page.slug ?? slug,
+                },
+                routeMap,
+              ),
+            ]),
+          ),
         )
       : undefined,
     bibliography,
@@ -181,16 +203,38 @@ function listMarkdownFiles(dir: string): string[] {
   });
 }
 
+function listDocSources() {
+  const preferred = new Map<string, { filePath: string; sourceRoot: string }>();
+
+  for (const filePath of listMarkdownFiles(DOCS_ROOT)) {
+    const relative = path.relative(DOCS_ROOT, filePath);
+    preferred.set(relative.toLowerCase(), { filePath, sourceRoot: DOCS_ROOT });
+  }
+
+  if (existsSync(REPO_DOCS_ROOT)) {
+    for (const filePath of listMarkdownFiles(REPO_DOCS_ROOT)) {
+      const relative = path.relative(REPO_DOCS_ROOT, filePath);
+      const [group] = relative.split(path.sep);
+      if (!["policies", "scenarios"].includes(group ?? "")) {
+        continue;
+      }
+      preferred.set(relative.toLowerCase(), { filePath, sourceRoot: REPO_DOCS_ROOT });
+    }
+  }
+
+  return [...preferred.values()];
+}
+
 function docRouteMap() {
   const map: Record<string, string> = {
     "insulindian-miracle": "/",
   };
 
-  for (const file of listMarkdownFiles(DOCS_ROOT)) {
-    const relative = path.relative(DOCS_ROOT, file);
+  for (const { filePath, sourceRoot } of listDocSources()) {
+    const relative = path.relative(sourceRoot, filePath);
     const segments = relative.split(path.sep);
     const group = segments[0] ?? "archive";
-    const slug = path.basename(file, ".md");
+    const slug = path.basename(filePath, ".md");
     const route = deriveRoute(group, slug);
 
     map[slug.toLowerCase()] = route;
@@ -203,8 +247,8 @@ function docRouteMap() {
   return map;
 }
 
-async function readDoc(filePath: string, routeMap: Record<string, string>): Promise<NormalizedDoc> {
-  const relative = path.relative(DOCS_ROOT, filePath);
+async function readDoc(filePath: string, routeMap: Record<string, string>, sourceRoot: string): Promise<NormalizedDoc> {
+  const relative = path.relative(sourceRoot, filePath);
   const [rawGroup] = relative.split(path.sep);
   const sourceGroup = rawGroup ?? "archive";
   const collection =
@@ -255,7 +299,7 @@ async function readDoc(filePath: string, routeMap: Record<string, string>): Prom
 export const getDocuments = cache(async () => {
   const routeMap = docRouteMap();
   const docs = await Promise.all(
-    listMarkdownFiles(DOCS_ROOT).map((file) => readDoc(file, routeMap)),
+    listDocSources().map(({ filePath, sourceRoot }) => readDoc(filePath, routeMap, sourceRoot)),
   );
   return docs.sort((left, right) => left.title.localeCompare(right.title));
 });
@@ -294,6 +338,18 @@ export const getResultsIndex = cache(() => {
       oracleSummary,
       scenario,
       runs: Number(payload.runs ?? 0),
+      sampleFileSlug: typeof payload.sample_file_slug === "string" ? payload.sample_file_slug : null,
+      cohorts:
+        payload.cohorts && typeof payload.cohorts === "object"
+          ? (payload.cohorts as ScenarioResultPayload["cohorts"])
+          : undefined,
+      visuals:
+        payload.visuals && typeof payload.visuals === "object"
+          ? (payload.visuals as Record<string, unknown>)
+          : undefined,
+      paired_effects: Array.isArray(payload.paired_effects)
+        ? (payload.paired_effects as Array<Record<string, unknown>>)
+        : undefined,
     };
   }
 
@@ -306,6 +362,22 @@ export const getRawResultFile = cache((fileSlug: string) => {
     return null;
   }
   return JSON.parse(readFileSync(filePath, "utf8")) as Record<string, unknown>;
+});
+
+export const getCohortSynthesis = cache(() => {
+  const filePath = path.join(RESULTS_ROOT, "cohort-synthesis.json");
+  if (!existsSync(filePath)) {
+    return null;
+  }
+  return JSON.parse(readFileSync(filePath, "utf8")) as CohortSynthesis;
+});
+
+export const getPolicyDossiers = cache(() => {
+  const filePath = path.join(RESULTS_ROOT, "policy-dossiers.json");
+  if (!existsSync(filePath)) {
+    return null;
+  }
+  return JSON.parse(readFileSync(filePath, "utf8")) as PolicyDossiersPayload;
 });
 
 export const getPrimaryScenarioResult = cache((slug: string) => {
@@ -321,7 +393,23 @@ export const getPrimaryScenarioResult = cache((slug: string) => {
   return candidates[0] ?? null;
 });
 
-export const getReferenceEntries = cache(() => {
+export const getScenarioSampleResultFile = cache((slug: string) => {
+  const results = getResultsIndex();
+  const candidates = Object.values(results).filter(
+    (result) => result.scenario.name === slug && result.sampleFileSlug,
+  );
+  if (candidates.length > 0) {
+    return candidates[0]?.sampleFileSlug ?? null;
+  }
+
+  const fallback = Object.entries(results).find(([, result]) => {
+    const raw = getRawResultFile(result.fileSlug);
+    return result.scenario.name === slug && Boolean(raw?.results);
+  });
+  return fallback?.[0] ?? null;
+});
+
+export const getReferenceEntries = cache(async () => {
   const payload = JSON.parse(
     readFileSync(path.join(RESEARCH_ROOT, "index.json"), "utf8"),
   ) as {
@@ -340,7 +428,7 @@ export const getReferenceEntries = cache(() => {
     }>;
   };
 
-  const annotations = getExemplars().bibliography ?? {};
+  const annotations = (await getExemplars()).bibliography ?? {};
 
   return payload.entries.map<ReferenceEntry>((entry) => ({
     id: entry.id,
@@ -358,10 +446,11 @@ export const getReferenceEntries = cache(() => {
   }));
 });
 
-export const getExemplars = cache((): ExemplarCollection => {
+export const getExemplars = cache(async (): Promise<ExemplarCollection> => {
   if (!existsSync(EXEMPLARS_PATH)) {
     return {};
   }
+  const routeMap = docRouteMap();
   const parsed = JSON.parse(readFileSync(EXEMPLARS_PATH, "utf8")) as
     | ExemplarCollection
     | GeneratedExemplarCollection;
@@ -370,7 +459,7 @@ export const getExemplars = cache((): ExemplarCollection => {
     return parsed as ExemplarCollection;
   }
 
-  return normalizeGeneratedExemplars(parsed as GeneratedExemplarCollection);
+  return normalizeGeneratedExemplars(parsed as GeneratedExemplarCollection, routeMap);
 });
 
 function fallbackArchive(slug: string, title: string, dek: string): ArchivePage {
@@ -387,7 +476,7 @@ function fallbackArchive(slug: string, title: string, dek: string): ArchivePage 
 }
 
 export async function getLandingArchivePage() {
-  const landing = getExemplars().landing;
+  const landing = (await getExemplars()).landing;
   return (
     landing ??
     fallbackArchive(
@@ -403,30 +492,57 @@ function formatScenarioStats(result: ScenarioResultPayload | null) {
     return [];
   }
 
-  const ts = result.summary["gaussian-thompson"];
-  const whittle = result.summary["whittle-index"];
-  const ucb1 = result.summary["ucb1"];
   const oracle = result.oracleSummary;
+  const historicalRuns = Number(result.cohorts?.historical_90k ?? 0);
+  const stressRuns = Number(result.cohorts?.stress_500k ?? 0);
+  const topPolicy = Object.values(result.summary)
+    .map((entry) => Number(entry.mean_cumulative_reward ?? 0))
+    .sort((left, right) => right - left)[0] ?? 0;
+
+  if (historicalRuns > 0 || stressRuns > 0) {
+    return [
+      {
+        label: "Historical Runs",
+        value: historicalRuns,
+        format: "number" as const,
+      },
+      {
+        label: "Stress Runs",
+        value: stressRuns,
+        format: "number" as const,
+      },
+      {
+        label: "Oracle Reward",
+        value: Number(oracle.mean_cumulative_reward ?? 0),
+        format: "number" as const,
+      },
+      {
+        label: "Top Policy Reward",
+        value: topPolicy,
+        format: "number" as const,
+      },
+    ];
+  }
 
   return [
     {
-      label: "Mean Oracle Reward",
+      label: "Archive Runs",
+      value: result.runs,
+      format: "number" as const,
+    },
+    {
+      label: "Tracked Policies",
+      value: result.policyKeys.length,
+      format: "number" as const,
+    },
+    {
+      label: "Oracle Reward",
       value: Number(oracle.mean_cumulative_reward ?? 0),
       format: "number" as const,
     },
     {
-      label: "Gaussian Thompson Reward",
-      value: Number(ts?.mean_cumulative_reward ?? 0),
-      format: "number" as const,
-    },
-    {
-      label: "Whittle Concentration",
-      value: Number(whittle?.mean_selection_hhi ?? 0),
-      format: "percent" as const,
-    },
-    {
-      label: "UCB1 Regret",
-      value: Number(ucb1?.mean_oracle_regret ?? 0),
+      label: "Top Policy Reward",
+      value: topPolicy,
       format: "number" as const,
     },
   ];
@@ -437,17 +553,33 @@ export async function getScenarioPage(slug: string): Promise<ScenarioPage> {
   const docSlug = SCENARIO_ROUTE_ALIASES[canonicalSlug] ?? slug;
   const document = await getDocumentByRoute("scenarios", docSlug);
   const result = getPrimaryScenarioResult(canonicalSlug);
-  const exemplar = getExemplars().scenarios?.[canonicalSlug] ?? getExemplars().scenarios?.[slug];
+  const exemplars = await getExemplars();
+  const exemplar = exemplars.scenarios?.[canonicalSlug] ?? exemplars.scenarios?.[slug];
+  const documentSections = document?.sections ?? [];
+  const summaryText = document ? stripHtml(document.summaryHtml) : "";
 
   return {
     slug,
-    archive:
-      exemplar ??
-      fallbackArchive(
-        slug,
-        document?.title ?? titleFromSlug(slug),
-        result?.scenario.description ?? document?.title ?? titleFromSlug(slug),
-      ),
+    archive: {
+      ...(exemplar ??
+        fallbackArchive(
+          slug,
+          document?.title ?? titleFromSlug(slug),
+          result?.scenario.description ?? document?.title ?? titleFromSlug(slug),
+        )),
+      title: exemplar?.title ?? document?.title ?? titleFromSlug(slug),
+      dek:
+        result?.scenario.description ??
+        summaryText.split(".")[0] ??
+        document?.title ??
+        titleFromSlug(slug),
+      lede:
+        summaryText || result?.scenario.description || document?.title || titleFromSlug(slug),
+      sections: documentSections.length ? documentSections : (exemplar?.sections ?? []),
+      references: exemplar?.references ?? [],
+      pullQuotes: [],
+      figureRefs: exemplar?.figureRefs ?? [],
+    },
     document,
     result,
     stats: formatScenarioStats(result),
@@ -470,18 +602,23 @@ export async function getPolicyPage(slug: string): Promise<PolicyPage | null> {
   }
 
   const mappedPolicy = POLICY_RESULT_ALIASES[slug] ?? slug;
-  const ucbBait = getPrimaryScenarioResult("ucb-bait");
-  const evidenceScenario = ucbBait?.summary[mappedPolicy] ? "ucb-bait" : null;
+  const dossiers = getPolicyDossiers();
+  const dossier = dossiers?.[mappedPolicy] ?? null;
+  const evidenceScenario =
+    dossier?.scenario_gap_items[0]?.label
+      ? (SCENARIO_ROUTE_ALIASES[dossier.scenario_gap_items[0].label] ?? dossier.scenario_gap_items[0].label)
+      : null;
 
   return {
     slug,
     archive: fallbackArchive(
       slug,
       document.title,
-      "Algorithmic policy notes, implementation posture, and scenario evidence.",
+      "Cross-scenario policy dossiers grounded in cohort manifests, checked-in suites, and static evidence.",
     ),
     document,
     evidenceScenario,
+    dossier,
   };
 }
 

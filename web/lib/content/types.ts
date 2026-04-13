@@ -73,6 +73,17 @@ export type ScenarioResultPayload = {
     overrides: Record<string, number>;
   };
   runs: number;
+  sampleFileSlug?: string | null;
+  cohorts?: Record<
+    string,
+    {
+      runs: number;
+      summary: Record<string, Record<string, number>>;
+      oracle_summary?: Record<string, number>;
+    }
+  >;
+  visuals?: Record<string, unknown>;
+  paired_effects?: Array<Record<string, unknown>>;
 };
 
 export type ScenarioPage = {
@@ -88,6 +99,54 @@ export type PolicyPage = {
   archive: ArchivePage;
   document: NormalizedDoc;
   evidenceScenario: string | null;
+  dossier: PolicyDossier | null;
+};
+
+export type CohortEvidenceStatus = {
+  status: string;
+  rows: number;
+  input_path: string;
+  output_path: string;
+};
+
+export type CohortSynthesis = {
+  generated_at: string;
+  headline_totals: Record<string, number>;
+  cohort_breakdown: Array<{
+    cohort: string;
+    label: string;
+    executions: number;
+    config_count: number;
+    policy_count: number;
+  }>;
+  legacy_ranking: Array<{ label: string; value: number; policy: string }>;
+  combined_ranking: Array<{ label: string; value: number; policy: string }>;
+  scenario_heatmap: {
+    labelsX: string[];
+    labelsY: string[];
+    data: number[][];
+  };
+  scenario_winners: Array<{ label: string; value: number; color: string }>;
+  paired_vs_ucb1: Array<Record<string, unknown>>;
+  paired_vs_oracle: Array<Record<string, unknown>>;
+};
+
+export type PolicyDossier = {
+  policy: string;
+  summary: Record<string, number | null>;
+  cohort_reward_items: Array<{ label: string; value: number }>;
+  distribution_bins: Array<{ label: string; count: number }>;
+  heatmap: {
+    labelsX: string[];
+    labelsY: string[];
+    data: number[][];
+  };
+  scenario_gap_items: Array<{ label: string; start: number; end: number }>;
+  paired_vs_oracle: Array<Record<string, unknown>>;
+};
+
+export type PolicyDossiersPayload = {
+  [policy: string]: PolicyDossier;
 };
 
 export type AtlasSite = {

@@ -1,54 +1,103 @@
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import path from "node:path";
+
 import { NextResponse } from "next/server";
 
-/**
- * A fallback mock API for comparison data.
- * Used when the real Python backend is not active or accessible.
- * To activate the real backend, set NEXT_PUBLIC_COMPARE_API_URL to point to /api/compare (Vercel)
- * or a local FastAPI server.
- */
+const RESULTS_ROOT = path.join(process.cwd(), "content", "source", "results");
+const SCENARIO_ALIASES: Record<string, string> = {
+  "resource-curse-scenario": "resource-curse",
+  "balanced-urban": "balanced-urban-system",
+};
+
+type ScenarioSummaryFile = {
+  scenario?: {
+    name: string;
+    description: string;
+    overrides: Record<string, number>;
+  };
+  summary?: Record<string, Record<string, number>>;
+  oracle_summary?: Record<string, number>;
+  cohorts?: Record<string, { runs: number }>;
+};
+
+function scenarioCandidates(name: string) {
+  const canonical = SCENARIO_ALIASES[name] ?? name;
+  return [canonical, name];
+}
+
+function loadScenarioSummary(scenarioName: string): ScenarioSummaryFile | null {
+  if (!existsSync(RESULTS_ROOT)) {
+    return null;
+  }
+
+  const files = readdirSync(RESULTS_ROOT).filter((file) => file.endsWith(".json"));
+  const candidates = scenarioCandidates(scenarioName);
+  const matches = files
+    .map((file) => {
+      const payload = JSON.parse(
+        readFileSync(path.join(RESULTS_ROOT, file), "utf8"),
+      ) as ScenarioSummaryFile;
+      return { file, payload };
+    })
+    .filter(({ payload }) => candidates.includes(payload.scenario?.name ?? ""))
+    .sort((left, right) => {
+      const leftRuns = Number(Object.values(left.payload.cohorts ?? {}).reduce((total, cohort) => total + Number(cohort.runs ?? 0), 0));
+      const rightRuns = Number(Object.values(right.payload.cohorts ?? {}).reduce((total, cohort) => total + Number(cohort.runs ?? 0), 0));
+      return rightRuns - leftRuns;
+    });
+
+  return matches[0]?.payload ?? null;
+}
+
 export async function POST(request: Request) {
   try {
     const payload = await request.json();
-    const { scenario = "baseline", policies = ["gaussian-thompson"] } = payload;
+    const scenarioName = String(payload.scenario ?? "baseline");
+    const policies = Array.isArray(payload.policies)
+      ? payload.policies.map((value) => String(value))
+      : ["gaussian-thompson"];
 
-    // Generate some interesting mock data that changes slightly with the scenario
-    const isBaseline = scenario === "baseline";
-    
-    const results = policies.map((policy: string) => {
-      const basePerformance = isBaseline ? 0.8 : 0.6;
-      const randomness = Math.random() * 0.1;
-      const performance = basePerformance + (policy.includes("thompson") ? 0.05 : 0) + randomness;
-      
-      return {
-        policy,
-        cumulative_reward: performance * 100,
-        oracle_regret: (1 - performance) * 50,
-        // Mock timeseries data for charts
-        reward_history: Array.from({ length: 10 }, (_, i) => ({
-          step: i * 10,
-          reward: performance + Math.sin(i) * 0.05,
-        })),
-      };
-    });
+    const summaryFile = loadScenarioSummary(scenarioName);
+    if (!summaryFile?.scenario || !summaryFile.summary) {
+      return NextResponse.json(
+        { error: `No checked-in summary available for scenario ${scenarioName}.` },
+        { status: 404 },
+      );
+    }
+
+    const results = policies
+      .map((policy) => {
+        const metrics = summaryFile.summary?.[policy];
+        if (!metrics) return null;
+        return {
+          policy,
+          cumulative_reward: Number(metrics.mean_cumulative_reward ?? 0),
+          oracle_regret: Number(metrics.mean_oracle_regret ?? 0),
+          cohort_runs: Number(
+            Object.values(summaryFile.cohorts ?? {}).reduce(
+              (total, cohort) => total + Number(cohort.runs ?? 0),
+              0,
+            ),
+          ),
+          reward_history: [],
+        };
+      })
+      .filter(Boolean);
 
     return NextResponse.json({
-      scenario: {
-        name: scenario.toUpperCase(),
-        description: `Simulated comparison results for the ${scenario} environment.`,
-        overrides: {},
+      scenario: summaryFile.scenario,
+      config: {
+        source: "checked-in cohort synthesis",
+        requested_policies: policies,
       },
-      config: { seed: 7, horizon: 100 },
-      terrain_summary: { land_mass: 0.42, resource_density: 0.18 },
-      sites: [
-        { id: 1, x: 12, y: 15, suitability: 0.8, boomtown: false },
-        { id: 2, x: 45, y: 32, suitability: 0.6, boomtown: true },
-      ],
+      terrain_summary: {},
+      sites: [],
       results,
     });
   } catch {
     return NextResponse.json(
       { error: "Invalid request payload" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }

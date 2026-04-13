@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 pub struct TerrainConfig {
     pub width: i32,
     pub height: i32,
@@ -29,7 +29,7 @@ impl Default for TerrainConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 pub struct SimulationConfig {
     pub terrain: TerrainConfig,
     pub horizon: i32,
@@ -88,6 +88,8 @@ pub struct SimulationConfig {
     pub thompson_posterior_decay: f64,
     pub discounted_ucb_gamma: f64,
     pub sliding_window_ucb_window: i32,
+    pub bandit_reward_min: f64,
+    pub bandit_reward_max: f64,
     pub discounted_thompson_posterior_decay: f64,
     pub linucb_alpha: f64,
     pub linear_bandit_ridge: f64,
@@ -141,6 +143,47 @@ pub struct SimulationConfig {
     pub migration_threshold: f64,
     pub lod: String,
     pub run_id: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GlobalSettings {
+    pub base_config: String,
+    pub seeds: Vec<i64>,
+    pub policies: Vec<String>,
+    pub output_mode: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Hypothesis {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub scenarios: Vec<String>,
+    pub metrics_of_interest: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExperimentSuite {
+    pub experiment_name: String,
+    pub description: String,
+    pub global_settings: GlobalSettings,
+    pub hypotheses: Vec<Hypothesis>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RunManifest {
+    pub experiment_name: String,
+    pub engine_version: String,
+    pub model_version: String,
+    pub timestamp: String,
+    pub hypothesis_id: String,
+    pub scenario: String,
+    pub policies: Vec<String>,
+    pub seeds: Vec<i64>,
+    pub output_mode: String,
+    pub metrics_of_interest: Vec<String>,
+    pub output_file: String,
+    pub metrics_file: String,
 }
 
 impl Default for SimulationConfig {
@@ -203,6 +246,8 @@ impl Default for SimulationConfig {
             thompson_posterior_decay: 0.995f64,
             discounted_ucb_gamma: 0.97f64,
             sliding_window_ucb_window: 40,
+            bandit_reward_min: -100.0f64,
+            bandit_reward_max: 25.0f64,
             discounted_thompson_posterior_decay: 0.94f64,
             linucb_alpha: 1.15f64,
             linear_bandit_ridge: 1.0f64,
@@ -312,24 +357,13 @@ impl Default for Site {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(default)]
 pub struct InstitutionState {
     pub extraction: f64,
     pub openness: f64,
     pub adaptability: f64,
     pub reform_timer: i32,
-}
-
-impl Default for InstitutionState {
-    fn default() -> Self {
-        Self {
-            extraction: Default::default(),
-            openness: Default::default(),
-            adaptability: Default::default(),
-            reform_timer: 0,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -438,4 +472,3 @@ impl Default for SiteStateSnapshot {
         }
     }
 }
-

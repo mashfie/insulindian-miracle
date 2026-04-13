@@ -2,131 +2,122 @@
 tags: [system, institutions, dynamics]
 type: system
 related:
-  - "[[model]]"
-  - "[[institutional-economics]]"
-  - "[[resource-curse]]"
   - "[[reward-function]]"
   - "[[shock-reform]]"
+  - "[[restless-bandits]]"
 ---
 
 # Institutional Dynamics
 
-How institutional state evolves each timestep in `evolve_sites()` (`model.py:394–632`). Every site evolves every step, whether or not it was selected — this is what makes the problem a [[restless-bandits|restless bandit]].
+Every site evolves every step. That is the mechanism that makes the problem restless.
 
-## Reform vs Drift
+## Readiness
 
-Each site, each step, faces a binary outcome:
+The readiness score is
 
-### Reform Path (extraction decrease)
+$$
+\text{readiness}_i
+=
+0.28(1-e_i)+0.28o_i+0.26a_i+0.18\min(k_i/1.5,1).
+$$
 
-Triggers when `rng.random() < reform_probability`, where:
+It is computed at initialization and reused in shock handling as stored `shock_readiness`.
 
-```
-crisis_pressure = sigmoid(
-    −delta · reform_sensitivity     # reward decline → pressure
-    + shock_reform_bonus · shock_factor  # recent shock memory
-    + 2.0 · transition_factor       # post-shock window
-    + legacy_factor                  # accumulated reform stock
-)
-reform_probability = min(1.0, effective_adaptability · crisis_pressure)
-```
+## Reform vs curse drift
 
-**On reform:**
-- `extraction -= reform_step` (default 0.18)
-- `openness += 0.08 + shock_openness_bonus`
-- `reform_timer = reform_duration` (default 5 steps)
-- `reforms_triggered += 1`
-- Capital rebuilt if shock-related
-- Reform stock accumulated
+If `reform_timer == 0`, the code computes
 
-### Drift Path (extraction increase — resource curse)
+$$
+\text{crisis}_i =
+\sigma\!\left(
+-\Delta R_i \cdot \gamma_r
+ + \beta_s \text{shock memory}_i
+ + 2 \cdot \text{transition}_i
+ + \ell_i
+\right),
+$$
 
-When reform does not trigger:
+then
 
-```
-curse_modifier = max(0.1,
-    1.0
-    − openness_buffer · openness       # openness protects
-    − capital_buffer · capital          # capital protects
-    − transition_curse_buffer · transition  # post-shock protection
-    − legacy_curse_buffer · legacy      # reform stock protection
-)
-extraction += curse_strength · resource_rent · curse_modifier · (1 − extraction)
-```
+$$
+P(\text{reform}_i) = \min(1, a^{\text{eff}}_i \cdot \text{crisis}_i).
+$$
 
-The curse is strongest for resource-rich sites with low openness and low capital. It asymptotically approaches extraction = 1.0 but never reaches it (scaled by `(1 − extraction)`).
+If reform occurs:
 
-## Active-Site Effects
+- `e_i` falls,
+- `o_i` rises,
+- `k_i` can be rebuilt,
+- `reform_timer` is set,
+- `reforms_triggered` increments.
 
-The site chosen by the policy this step receives additional pressures:
+Otherwise extraction drifts upward:
 
-```
-activity_load = max(0, (active_steps − decay_onset) / decay_onset)
+$$
+e_i'
+=
+e_i +
+\kappa_{\text{curse}}
+\rho_i
+\left[
+1-\beta_o o_i-\beta_k k_i-\beta_t \text{transition}_i-\beta_\ell \ell_i
+\right]_+
+(1-e_i).
+$$
 
-extraction += active_extraction_pressure · load · resource · max(extraction, 0.1) · (1 − extraction)
-resource_rent *= (1 − active_resource_depletion · load · resource · (0.35 + extraction))
-openness -= active_openness_drag · load · extraction
-```
+## Active-site degradation
 
-This models the idea that *using* a resource-rich site accelerates institutional decay and resource depletion. The `decay_onset` parameter controls when active effects kick in (default varies by scenario).
+If site `i` is chosen this step, active use increases extraction and depletes resources:
 
-## Capital Dynamics
+$$
+e_i' \leftarrow e_i' + \kappa_A L_i \rho_i \max(e_i', 0.1)(1-e_i'),
+$$
 
-Each step:
+$$
+\rho_i' \leftarrow \rho_i \left(1 - \delta_A L_i \rho_i (0.35 + e_i')\right),
+$$
 
-```
-investment = 0.25 · inclusive_investment · rent · (1 − extraction) · (0.4 + openness + 0.25 · network)
-erosion = extractive_capital_erosion · extraction · (0.35 + rent)
-capital += passive_scale · investment + 0.015 · network − erosion
-```
+$$
+o_i' \leftarrow o_i' - \chi_A L_i e_i'.
+$$
 
-- `passive_scale` is 1.0 for the active site, 0.45 for passive sites
-- Capital is clamped to [0, 1.5]
-- Inclusive institutions invest; extractive institutions erode
+Here `L_i` is the activity-load term based on post-selection population and `active_decay_onset`.
 
-## Shock System
+## Capital law of motion
 
-With probability `shock_probability` per step:
+Capital follows
 
-1. **Target selection** — weighted by `resource_rent^(1 + target_bias)`, so resource-rich sites are hit more often
-2. **Immediate effects:**
-   - `resource_rent *= (1 − depletion_rate)` (default 0.18)
-   - `capital -= 0.3 · depletion_rate`
-   - `shock_memory` set to `shock_reform_memory`
-   - `post_shock_timer` set to `shock_transition_duration`
-3. **Readiness-scaled reform:**
-   - High-readiness sites get immediate extraction reduction, openness boost, capital rebuild
-   - `shock_reform_stock` accumulated for legacy effects
-4. **Post-shock transition** (while `post_shock_timer > 0`):
-   - Extraction decayed and capped
-   - Openness and capital boosted
-   - Curse buffers active
-5. **Legacy effects** (while `shock_reform_stock > 0`):
-   - Ongoing extraction decay and openness gain
-   - Fade rate: `shock_legacy_fade` per step
+$$
+k_i' =
+\text{clip}\left(
+k_i + s_i I_i + 0.015 N_i - E_i,
+0, 1.5
+\right),
+$$
 
-> [!note] Institutional readiness
-> `readiness = 0.28·(1−extraction) + 0.28·openness + 0.26·adaptability + 0.18·capital_scale`
->
-> This determines how well a site responds to shocks. High-readiness sites reform immediately; low-readiness sites absorb the damage but don't change institutions. Computed at initialisation and frozen.
+where
 
-## Population Dynamics
+$$
+I_i = 0.25 \beta_I \rho_i (1-e_i)(0.4 + o_i + 0.25 N_i),
+\qquad
+E_i = \beta_E e_i(0.35+\rho_i).
+$$
 
-Each step, structural signals drive **population momentum**:
+`s_i = 1` on the active site and `passive_investment_scale` otherwise.
 
-```
-growth_signal = reward_signal + 0.9·(structural_signal − 0.75) + 0.45·(mid_city_signal − 0.35)
-momentum = decay · prev_momentum + growth_rate · growth_signal − decline_rate · overstretch
-```
+## Shocks
 
-When the best-momentum site exceeds +0.75 and the worst-momentum site with pop > 1 falls below −0.75, one person migrates from worst to best. This creates endogenous urbanisation dynamics beyond the policy's direct allocation.
+With probability `shock_probability`:
 
-## Openness Convergence
+1. a site is chosen, optionally resource-biased,
+2. resource rent and capital are reduced immediately,
+3. shock memory, transition timer, and legacy channels are activated,
+4. readiness-scaled reform support may fire instantly.
 
-A small convergence term ties openness to network participation:
+This is a reduced-form crisis-and-reform channel, not a structural political model.
 
-```
-openness += 0.035 · (network − openness)
-```
+## Migration
 
-Cities that benefit from trade networks become more open over time; isolated cities drift toward closure.
+After local updates the engine compares population momentum across sites and can move one resident from the lowest-momentum populated site to the highest-momentum site when both exceed threshold conditions.
+
+That makes the dynamics globally coupled even if the policy activates only one site.
