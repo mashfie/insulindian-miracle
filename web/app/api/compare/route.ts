@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     const results = policies
-      .map((policy) => {
+      .map((policy: string) => {
         const metrics = summaryFile.summary?.[policy];
         if (!metrics) return null;
         return {
