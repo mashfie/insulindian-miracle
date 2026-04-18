@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     const payload = await request.json();
     const scenarioName = String(payload.scenario ?? "baseline");
     const policies = Array.isArray(payload.policies)
-      ? payload.policies.map((value) => String(value))
+      ? payload.policies.map((value: unknown) => String(value))
       : ["gaussian-thompson"];
 
     const summaryFile = loadScenarioSummary(scenarioName);
