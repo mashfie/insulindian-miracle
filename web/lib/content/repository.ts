@@ -493,8 +493,8 @@ function formatScenarioStats(result: ScenarioResultPayload | null) {
   }
 
   const oracle = result.oracleSummary;
-  const historicalRuns = Number(result.cohorts?.historical_90k ?? 0);
-  const stressRuns = Number(result.cohorts?.stress_500k ?? 0);
+  const historicalRuns = Number(result.cohorts?.historical_90k?.runs ?? 0);
+  const stressRuns = Number(result.cohorts?.stress_500k?.runs ?? 0);
   const topPolicy = Object.values(result.summary)
     .map((entry) => Number(entry.mean_cumulative_reward ?? 0))
     .sort((left, right) => right - left)[0] ?? 0;
@@ -557,6 +557,7 @@ export async function getScenarioPage(slug: string): Promise<ScenarioPage> {
   const exemplar = exemplars.scenarios?.[canonicalSlug] ?? exemplars.scenarios?.[slug];
   const documentSections = document?.sections ?? [];
   const summaryText = document ? stripHtml(document.summaryHtml) : "";
+  const archiveSections = exemplar?.sections.length ? exemplar.sections : documentSections;
 
   return {
     slug,
@@ -569,15 +570,19 @@ export async function getScenarioPage(slug: string): Promise<ScenarioPage> {
         )),
       title: exemplar?.title ?? document?.title ?? titleFromSlug(slug),
       dek:
+        exemplar?.dek ??
         result?.scenario.description ??
         summaryText.split(".")[0] ??
         document?.title ??
         titleFromSlug(slug),
       lede:
-        summaryText || result?.scenario.description || document?.title || titleFromSlug(slug),
-      sections: documentSections.length ? documentSections : (exemplar?.sections ?? []),
+        (exemplar?.lede ?? summaryText) ||
+        result?.scenario.description ||
+        document?.title ||
+        titleFromSlug(slug),
+      sections: archiveSections,
       references: exemplar?.references ?? [],
-      pullQuotes: [],
+      pullQuotes: exemplar?.pullQuotes ?? [],
       figureRefs: exemplar?.figureRefs ?? [],
     },
     document,

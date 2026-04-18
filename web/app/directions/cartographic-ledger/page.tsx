@@ -1,21 +1,22 @@
 import { HomeView } from "@/components/home-view";
 import { buildLandingVisuals } from "@/lib/data/archive-figures";
 import {
+  getCohortSynthesis,
   getLandingArchivePage,
   getRawResultFile,
 } from "@/lib/content/repository";
 
 export default async function CartographicLedgerPage() {
-  const [archive, whittleRun, ucbBaitSummary] = await Promise.all([
+  const [archive, cohortSynthesis, whittleRun] = await Promise.all([
     getLandingArchivePage(),
+    getCohortSynthesis(),
     getRawResultFile("whittle-run"),
-    getRawResultFile("ucb-bait-boomtown-v4"),
   ]);
 
   const visuals = buildLandingVisuals({
     archive,
     whittleRun,
-    ucbBaitSummary,
+    cohortSynthesis,
   });
 
   return (

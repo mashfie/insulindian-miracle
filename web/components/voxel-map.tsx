@@ -36,11 +36,11 @@ export function VoxelMap({
     });
 
     // Define decals for sites
-    h.defineDecal("boomtown-mark", {
+    (h as any).defineDecal("boomtown-mark", {
       content: '<path d="M 0.2 0.2 L 0.8 0.8 M 0.8 0.2 L 0.2 0.8" stroke="#fef5f0" stroke-width="0.1" fill="none" vector-effect="non-scaling-stroke"/>'
     });
     
-    h.defineDecal("trade-mark", {
+    (h as any).defineDecal("trade-mark", {
       content: '<circle cx="0.5" cy="0.5" r="0.3" stroke="#fef5f0" stroke-width="0.1" fill="none" vector-effect="non-scaling-stroke"/>'
     });
 

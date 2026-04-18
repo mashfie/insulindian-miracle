@@ -446,7 +446,7 @@ export function HeerichBarChart3D({
       camera,
     });
 
-    hr.defineDecal("data-decal", {
+    (hr as any).defineDecal("data-decal", {
       content: '<path d="M 0.2 0.2 L 0.8 0.2 M 0.5 0.2 L 0.5 0.8 M 0.2 0.8 L 0.8 0.8" stroke="var(--ink)" stroke-opacity="0.3" stroke-width="0.05" fill="none" vector-effect="non-scaling-stroke"/>'
     });
     
@@ -535,7 +535,7 @@ export function HeerichSurface3D({
       camera,
     });
 
-    hr.defineDecal("surface-decal", {
+    (hr as any).defineDecal("surface-decal", {
       content: '<path d="M 0.1 0.1 L 0.9 0.9 M 0.9 0.1 L 0.1 0.9" stroke="rgba(255,255,255,0.4)" stroke-width="0.05" fill="none" vector-effect="non-scaling-stroke"/>'
     });
     
@@ -623,7 +623,7 @@ export function HeerichScatter3D({
       camera,
     });
     
-    hr.defineDecal("scatter-decal", {
+    (hr as any).defineDecal("scatter-decal", {
       content: '<circle cx="0.5" cy="0.5" r="0.2" fill="rgba(255,255,255,0.8)" stroke="none" vector-effect="non-scaling-stroke"/>'
     });
 
