@@ -8,7 +8,7 @@ use crate::types::{InstitutionState, SimulationConfig, Site, SiteState, SiteStat
 use crate::whittle::WhittleIndexPolicy;
 
 use ndarray::{Array1, Array2};
-use pyo3::prelude::*;
+
 use rand::distributions::Distribution;
 use rand::SeedableRng;
 use rand_distr::Beta;
@@ -724,43 +724,7 @@ pub fn _run_simulation_rust(
     run_simulation_with_options(config, policy_name, "default")
 }
 
-#[pyfunction]
-pub fn run_simulation_rust(
-    py: Python<'_>,
-    config_json: String,
-    policy_name: String,
-) -> PyResult<String> {
-    py.allow_threads(|| {
-        let config: SimulationConfig = serde_json::from_str(&config_json).map_err(|e| {
-            PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("invalid config JSON: {e}"))
-        })?;
-        let result = _run_simulation_rust(&config, &policy_name)
-            .map_err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>)?;
 
-        let res_json = serde_json::json!({
-            "cumulative_reward": result.cumulative_reward,
-            "mean_final_extraction": result.mean_final_extraction,
-            "mean_final_openness": result.mean_final_openness,
-            "mean_final_adaptability": result.mean_final_adaptability,
-            "mean_final_resource_rent": result.mean_final_resource_rent,
-            "mean_productive_capital": result.mean_productive_capital,
-            "mean_reforms_triggered": result.mean_reforms_triggered,
-            "mean_shock_hits": result.mean_shock_hits,
-            "population_hhi": result.population_hhi,
-            "population_gini": result.population_gini,
-            "zipf_slope": result.zipf_slope,
-            "resource_extraction_correlation": result.resource_extraction_correlation,
-            "resource_population_correlation": result.resource_population_correlation,
-            "boomtown_population_share": result.boomtown_population_share,
-            "boomtown_selection_share": result.boomtown_selection_share,
-            "boomtown_pre_collapse_selection_share": result.boomtown_pre_collapse_selection_share,
-            "boomtown_collapse_selection_share": result.boomtown_collapse_selection_share,
-            "land_share": result.land_share,
-            "river_share": result.river_share,
-        });
-        Ok(res_json.to_string())
-    })
-}
 
 pub fn run_sweep_rust_core(
     input_jsonl: &str,
@@ -1119,17 +1083,5 @@ pub fn run_sweep_rust_core(
     Ok(())
 }
 
-#[pyfunction]
-#[pyo3(signature = (input_jsonl, policies, output_parquet, batch_limit=None))]
-pub fn run_sweep_from_file_rust(
-    py: Python<'_>,
-    input_jsonl: String,
-    policies: Vec<String>,
-    output_parquet: String,
-    batch_limit: Option<usize>,
-) -> PyResult<()> {
-    py.allow_threads(|| {
-        run_sweep_rust_core(&input_jsonl, &policies, &output_parquet, batch_limit)
-            .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))
-    })
-}
+
+
