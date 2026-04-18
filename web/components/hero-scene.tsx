@@ -664,8 +664,4 @@ export function HeroScene({ title, variant, slug }: HeroSceneProps) {
     </section>
   );
 }
-" }}>
-      <div ref={containerRef} className="site-hero__inner" style={{ width: "100%", height: "100%" }} />
-    </section>
-  );
-}
+
