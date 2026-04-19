@@ -1,109 +1,65 @@
-# Combined Evidence Report (April 13, 2026)
+---
+tags: [report, evidence, synthesis]
+type: report
+date: 2026-04-13
+---
 
-## Summary
+# Combined Evidence Report
 
-This report reorganizes the archive around a **three-cohort evidence program** rather than a single undifferentiated sweep. The intended execution budget is
-
-$$
-N_{\mathrm{total}}
-=
-N_{\mathrm{legacy}}
-+
-N_{\mathrm{historical}}
-+
-N_{\mathrm{stress}}
-=
-1{,}000{,}008
-+
-90{,}000
-+
-500{,}000
-=
-1{,}590{,}008.
-$$
-
-The substantive point is not merely arithmetic. The cohorts answer different questions:
-
-1. `legacy_1m` is a broad baseline sweep inferred from the checked-in `configs/sweep_configs.jsonl` generator. It supports large-scale ranking statements within that baseline design.
-2. `historical_90k` is the canonical nine-scenario suite reconstructed as $9 \times 1{,}000 \times 10$ executions. It is the first cohort designed to support scenario-resolved and oracle-resolved comparisons at serious scale.
-3. `stress_500k` is the adversarial extension. It overweights trap, curse, and shock regimes and perturbs the initial conditions and dynamic coefficients, so that the model is evaluated where it is most likely to break.
-
-The frontend rewrite now encodes this distinction explicitly. Provenance is part of the result.
-
-## Estimands
-
-For cohorts with matched configuration draws and oracle support, the primary comparison object is the paired policy gap
+This report reorganizes the archive around a three-cohort evidence program rather than a single undifferentiated sweep. The execution contract is
 
 $$
-\Delta_{\pi,\pi'} = \mathbb{E}[R_{\pi} - R_{\pi'} \mid c],
+N_{\mathrm{total}}=1{,}000{,}008+90{,}000+500{,}000=1,590,008.
 $$
 
-where $c$ indexes the common configuration draw. We report $95\%$ paired bootstrap intervals rather than $p$-values. The aim is to estimate effect magnitude and uncertainty, not to manufacture a theatrical binary of significance.
+The arithmetic is not the result. It is the indexing scheme that prevents one cohort from impersonating another.
 
-The principal scalar diagnostics remain:
+## Cohort Logic
+
+`legacy_1m` is the broad non-oracle baseline sweep. It supports policy ranking under the legacy design, but it is not scenario-resolved evidence. `historical_90k` is the canonical nine-scenario suite, reconstructed as $9 \times 1{,}000 \times 10$ executions. `stress_500k` is the adversarial extension: a trap-heavy, perturbed scenario program designed to push the model toward boomtown collapse, resource capture, primacy, and shock/reform edge cases.
+
+The combined frontend synthesis is therefore stratified. It can compare rankings across cohorts, but it should not pool incompatible estimands as if they were one experiment.
+
+## Materialization
+
+- `legacy_1m`: 1,000,008 materialized rows, 111,112 configs, 9 policies
+- `historical_90k`: 90,000 materialized rows, 9,000 configs, 10 policies
+- `stress_500k`: 500,000 materialized rows, 50,000 configs, 10 policies
+
+The materialized rows above are read directly from the Rust Parquet outputs in `results/cohorts`. The headline count remains the planned and reproducible cohort contract; the materialization table records what is actually present on disk when the R synthesizer is run.
+
+## Estimand
+
+For matched comparisons the pipeline reports
 
 $$
-\mathrm{regret}_{\pi} = R_{\mathrm{oracle}} - R_{\pi},
-\qquad
-\mathrm{HHI} = \sum_i s_i^2,
-\qquad
-\hat{\zeta} = \text{Zipf slope}.
+\widehat{\Delta}_{\pi,\pi'}=\frac{1}{n}\sum_{i=1}^{n}(R_{i,\pi}-R_{i,\pi'}),
 $$
 
-These quantities are only narrated at the scope their cohort supports. A legacy baseline sweep is not allowed to impersonate a scenario-specific estimand.
+with a paired nonparametric bootstrap interval over the matched configuration index. No p-value is produced because the question is effect magnitude under a simulator design, not ritual rejection of a null whose assumptions would be false by construction.
 
-## Current Materialization State
+The scalar diagnostics remain
 
-The repository currently contains a checked-in scenario suite with full raw JSON trajectories and site-level outcomes. That suite remains useful because it carries the mechanism-rich layer the frontend can render directly: reward histories, site outcomes, boomtown traces, and scenario-wise summaries.
+$$
+\mathrm{regret}_{\pi}=R_{\mathrm{oracle}}-R_{\pi},\qquad \mathrm{HHI}=\sum_i s_i^2,\qquad \hat\zeta=\text{Zipf slope}.
+$$
 
-What it does **not** yet do is replace the large cohorts. The large cohorts require either regenerated Parquet artifacts or imported historical outputs with manifests. The new pipeline therefore separates:
+Oracle-gap claims are emitted only for the scenario-backed cohorts. The legacy cohort may still carry an internally computed oracle baseline in the Rust runner, but the report treats it as baseline ranking evidence, not as scenario mechanism evidence.
 
-- planned cohort totals,
-- manifest-ready cohort inputs,
-- materialized cohort Parquet rows,
-- checked-in frontend evidence.
+## Policy Reading
 
-This is deliberate. The archive should not confuse *planned scale* with *materialized evidence*.
+The current scenario-backed leader is `sliding-window-ucb` with mean cumulative reward 3603.18. This statement is scoped to the historical and stress cohorts. The legacy million-row cohort remains baseline context rather than scenario evidence.
 
-## Methodological Consequences
+The main methodological pattern is temporal memory. Stationary optimism is useful as a diagnostic control, but the pathologies of the model are nonstationary: arms rot under extraction, shocks change institutional state, and agglomeration can turn a local advantage into a primacy trap. Forgetting, discounting, posterior variance, and spatial structure become different ways of refusing the fiction that yesterday's mean is still the environment.
 
-The rewrite changes four things materially.
+## Frontend Contract
 
-### 1. Cohort Scope Is First-Class
+The frontend uses `web/content/source/results/cohort-synthesis.json` for the landing synthesis, `policy-dossiers.json` for policy pages, and `*-cohort.json` scenario files for route-level evidence. The comparison API no longer samples mock data. It reads checked-in cohort summaries and returns deterministic results.
 
-Claims are now indexed by cohort. If a statement depends on scenario-level matching and oracle baselines, it belongs to `historical_90k` or `stress_500k`, not to the legacy sweep.
+## Remaining Gap
 
-### 2. Frontend Evidence Is Deterministic
+The simulator is still a reduced-form political economy, not a structural econometric estimate. Its academic contact points are explicit: resource curse and institutional economics for rent capture, urban economics for concentration and Zipf signatures, and bandit theory for regret and nonstationarity. The implementation matches that reality only where the cohort design gives it the right estimand. Where it does not, the frontend now says less.
 
-The prior frontend still contained random or mock paths. Those are removed. Comparison modules now replay checked-in summaries. Policy pages use cross-scenario dossiers instead of a single `ucb-bait` anecdote. Landing claims reference the full program and the currently materialized subset separately.
+## Reading Order
 
-### 3. Editorial Prose No Longer Floats Free Of Data
-
-The archive keeps an editorial register, but the prose is now downstream of explicit result contracts. The landing page may interpret; it may no longer improvise numbers.
-
-### 4. Mathematical Rendering Is Part Of The Content Path
-
-The exemplar sections are rendered through the markdown/KaTeX pipeline. This matters because the model is mathematical and should be allowed to say so in-line, rather than hiding the formal parts in captions or code comments.
-
-## Where Implementation And Academic Reality Still Diverge
-
-Two gaps remain visible even after the rewrite.
-
-### Historical Artifact Recovery
-
-The million-run and ninety-thousand-run cohorts are specified and supported in the pipeline, but their artifact recovery still depends on execution time and hardware budget. Until those cohorts are materialized, the checked-in scenario suite remains the visible empirical stratum.
-
-### Raw-Trajectory Versus Sweep-Tensor Asymmetry
-
-The checked-in JSON scenario files preserve rich within-run traces. The Parquet sweeps preserve wide aggregate tensors. These are not interchangeable. The frontend now treats them as complementary layers rather than forcing one to pretend to be the other.
-
-## Practical Reading
-
-The archive should now be read in the following order:
-
-1. Landing page for the cohort contract and current materialization state.
-2. Scenario pages for mechanism-rich explanations grounded in the updated wiki.
-3. Policy pages for cross-scenario dossiers rather than single-scenario folklore.
-4. `[[next-steps]]` for the remaining parity and evidence gaps.
-
-The result is slower, less euphoric, and more defensible. That is an improvement.
+Read the landing page for cohort accounting, scenario pages for mechanism-rich institutional and spatial explanations, policy pages for cross-scenario dossiers, and `docs/next-steps.md` for the places where academic reality still outruns the implementation.

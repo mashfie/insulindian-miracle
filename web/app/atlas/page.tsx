@@ -4,7 +4,6 @@ import {
   getAtlasChapters,
   getAtlasSource,
 } from "@/lib/content/repository";
-import { SITE_ROUTES } from "@/lib/navigation";
 
 export default async function AtlasPage() {
   const source = getAtlasSource();

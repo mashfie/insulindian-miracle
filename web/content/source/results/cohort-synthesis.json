@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-13T12:01:22.357267+00:00",
+  "generated_at": "2026-04-19T11:50:23Z",
   "headline_totals": {
     "legacy_1m": 1000008,
     "historical_90k": 90000,
@@ -10,86 +10,86 @@
     {
       "cohort": "legacy_1m",
       "label": "legacy 1m",
-      "executions": 216,
-      "config_count": 24,
+      "executions": 1000008,
+      "config_count": 111112,
       "policy_count": 9
     },
     {
       "cohort": "historical_90k",
       "label": "historical 90k",
-      "executions": 180,
-      "config_count": 18,
+      "executions": 90000,
+      "config_count": 9000,
       "policy_count": 10
     },
     {
       "cohort": "stress_500k",
       "label": "stress 500k",
-      "executions": 240,
-      "config_count": 24,
+      "executions": 500000,
+      "config_count": 50000,
       "policy_count": 10
     }
   ],
   "legacy_ranking": [
     {
       "label": "Whittle",
-      "value": 3043.812172129818,
+      "value": 3049.40311690425,
       "policy": "whittle-index"
     },
     {
       "label": "SW-UCB",
-      "value": 2943.316284603052,
+      "value": 2944.73522538086,
       "policy": "sliding-window-ucb"
     },
     {
       "label": "D-UCB",
-      "value": 2851.815915994141,
+      "value": 2866.00853796582,
       "policy": "discounted-ucb"
     },
     {
       "label": "D-TS",
-      "value": 2713.2622694652014,
+      "value": 2721.70235178684,
       "policy": "discounted-gaussian-thompson"
     },
     {
       "label": "LinTS",
-      "value": 2322.4278444427314,
+      "value": 2408.63358022867,
       "policy": "linear-thompson"
     },
     {
       "label": "LinUCB",
-      "value": 2167.1080803432,
+      "value": 2161.63750482873,
       "policy": "linucb"
     }
   ],
   "combined_ranking": [
     {
-      "label": "Whittle",
-      "value": 2370.695270773658,
-      "policy": "whittle-index"
-    },
-    {
       "label": "SW-UCB",
-      "value": 2347.4402789876763,
+      "value": 3603.1826178282,
       "policy": "sliding-window-ucb"
     },
     {
       "label": "D-UCB",
-      "value": 2311.5636575662447,
+      "value": 3536.24305876071,
       "policy": "discounted-ucb"
     },
     {
+      "label": "Whittle",
+      "value": 3375.63158793225,
+      "policy": "whittle-index"
+    },
+    {
       "label": "D-TS",
-      "value": 2183.9445009380174,
+      "value": 3277.56175213103,
       "policy": "discounted-gaussian-thompson"
     },
     {
       "label": "LinTS",
-      "value": 1995.8178160914506,
+      "value": 3163.29790117631,
       "policy": "linear-thompson"
     },
     {
       "label": "LinUCB",
-      "value": 1960.2653293630904,
+      "value": 3027.32666168542,
       "policy": "linucb"
     }
   ],
@@ -102,67 +102,66 @@
       "Zipf"
     ],
     "labelsY": [
-      "Whittle",
       "SW-UCB",
       "D-UCB",
+      "Whittle",
       "D-TS",
       "LinTS",
       "LinUCB"
     ],
     "data": [
-      [
-        100.0,
-        100.0,
-        0.0,
-        100.0,
-        100.0
-      ],
-      [
-        94.33,
-        94.33,
-        71.63,
-        64.78,
-        53.76
-      ],
-      [
-        85.59,
-        85.59,
-        73.65,
-        47.91,
-        48.85
-      ],
-      [
-        54.5,
-        54.5,
-        63.37,
-        35.22,
-        38.09
-      ],
-      [
-        8.66,
-        8.66,
-        100.0,
-        35.04,
-        0.0
-      ],
-      [
-        0.0,
-        0.0,
-        79.07,
-        0.0,
-        31.29
-      ]
+      [100, 100, 100, 70.86, 81.82],
+      [88.38, 88.38, 71.24, 49.85, 72.89],
+      [60.48, 60.48, 17.6, 100, 100],
+      [43.45, 43.45, 89.13, 18.46, 48.12],
+      [23.61, 23.61, 85.87, 21.9, 0],
+      [0, 0, 0, 0, 22.22]
     ]
   },
   "scenario_winners": [
     {
+      "label": "balanced-urban-system",
+      "value": 5275.72213822842,
+      "color": "sliding-window-ucb"
+    },
+    {
       "label": "baseline",
-      "value": 3033.942810827006,
+      "value": 3056.73446311886,
       "color": "whittle-index"
     },
     {
+      "label": "botswana",
+      "value": 5557.55002582032,
+      "color": "sliding-window-ucb"
+    },
+    {
+      "label": "megacity-trap",
+      "value": 2971.50034691042,
+      "color": "whittle-index"
+    },
+    {
+      "label": "merchant-republic",
+      "value": 6145.15768883331,
+      "color": "whittle-index"
+    },
+    {
+      "label": "open-cluster",
+      "value": 5460.87291224522,
+      "color": "whittle-index"
+    },
+    {
+      "label": "resource-curse",
+      "value": 2415.28023600013,
+      "color": "sliding-window-ucb"
+    },
+    {
+      "label": "shock-reform",
+      "value": 3535.07051207636,
+      "color": "sliding-window-ucb"
+    },
+    {
       "label": "ucb-bait",
-      "value": 1917.4473802684863,
+      "value": 1909.29049113512,
       "color": "discounted-ucb"
     }
   ],
@@ -170,157 +169,157 @@
     {
       "policy": "epsilon-greedy",
       "baseline": "ucb1",
-      "mean_gap": -41.30658189607563,
-      "ci_low": -112.20017324381176,
-      "ci_high": 19.519420050545527,
-      "win_rate": 0.4523809523809524,
-      "matches": 42
+      "mean_gap": 76.547150442835,
+      "ci_low": 73.6061337013446,
+      "ci_high": 79.5778344225625,
+      "win_rate": 0.484949152542373,
+      "matches": 59000
     },
     {
       "policy": "discounted-ucb",
       "baseline": "ucb1",
-      "mean_gap": 968.8099940835947,
-      "ci_low": 863.3478786670306,
-      "ci_high": 1071.0308646032224,
-      "win_rate": 1.0,
-      "matches": 42
+      "mean_gap": 1556.04835578649,
+      "ci_low": 1549.38272214654,
+      "ci_high": 1562.36683686739,
+      "win_rate": 0.999762711864407,
+      "matches": 59000
     },
     {
       "policy": "sliding-window-ucb",
       "baseline": "ucb1",
-      "mean_gap": 1004.6866155050263,
-      "ci_low": 882.6295794333153,
-      "ci_high": 1120.39956550095,
-      "win_rate": 1.0,
-      "matches": 42
+      "mean_gap": 1622.98791485399,
+      "ci_low": 1615.9276429397,
+      "ci_high": 1629.84405775822,
+      "win_rate": 0.999152542372881,
+      "matches": 59000
     },
     {
       "policy": "gaussian-thompson",
       "baseline": "ucb1",
-      "mean_gap": 151.23204507926158,
-      "ci_low": 95.87459066056134,
-      "ci_high": 198.66953590420175,
-      "win_rate": 0.7857142857142857,
-      "matches": 42
+      "mean_gap": 221.288844971988,
+      "ci_low": 219.865991230176,
+      "ci_high": 222.811397144514,
+      "win_rate": 0.87993220338983,
+      "matches": 59000
     },
     {
       "policy": "discounted-gaussian-thompson",
       "baseline": "ucb1",
-      "mean_gap": 841.1908374553677,
-      "ci_low": 739.9667452738034,
-      "ci_high": 935.5832773664399,
-      "win_rate": 1.0,
-      "matches": 42
+      "mean_gap": 1297.36704915682,
+      "ci_low": 1292.34399974064,
+      "ci_high": 1302.77394502435,
+      "win_rate": 0.995677966101695,
+      "matches": 59000
     },
     {
       "policy": "linucb",
       "baseline": "ucb1",
-      "mean_gap": 617.5116658804404,
-      "ci_low": 529.5908087906795,
-      "ci_high": 703.5153347449091,
-      "win_rate": 0.9761904761904762,
-      "matches": 42
+      "mean_gap": 1047.13195871121,
+      "ci_low": 1041.06141795879,
+      "ci_high": 1052.89943145515,
+      "win_rate": 0.949237288135593,
+      "matches": 59000
     },
     {
       "policy": "linear-thompson",
       "baseline": "ucb1",
-      "mean_gap": 653.0641526088002,
-      "ci_low": 544.2988433102835,
-      "ci_high": 742.504736853397,
-      "win_rate": 0.9285714285714286,
-      "matches": 42
+      "mean_gap": 1183.1031982021,
+      "ci_low": 1177.45827995594,
+      "ci_high": 1189.03205723761,
+      "win_rate": 0.961101694915254,
+      "matches": 59000
     },
     {
       "policy": "whittle-index",
       "baseline": "ucb1",
-      "mean_gap": 1027.941607291008,
-      "ci_low": 893.0984848868509,
-      "ci_high": 1168.8851410355844,
-      "win_rate": 1.0,
-      "matches": 42
+      "mean_gap": 1395.43688495804,
+      "ci_low": 1385.79225039952,
+      "ci_high": 1405.30674099877,
+      "win_rate": 0.921423728813559,
+      "matches": 59000
     }
   ],
   "paired_vs_oracle": [
     {
       "policy": "epsilon-greedy",
       "baseline": "myopic-oracle",
-      "mean_gap": -922.4821235148593,
-      "ci_low": -1016.8466187871429,
-      "ci_high": -827.5603635054415,
-      "win_rate": 0.0,
-      "matches": 42
+      "mean_gap": -1292.33474703855,
+      "ci_low": -1297.5332556494,
+      "ci_high": -1287.14693347604,
+      "win_rate": 0.00301694915254237,
+      "matches": 59000
     },
     {
       "policy": "ucb1",
       "baseline": "myopic-oracle",
-      "mean_gap": -881.1755416187834,
-      "ci_low": -1030.9658294916562,
-      "ci_high": -734.6346434900997,
-      "win_rate": 0.047619047619047616,
-      "matches": 42
+      "mean_gap": -1368.88189748138,
+      "ci_low": -1376.37652175379,
+      "ci_high": -1361.59182101471,
+      "win_rate": 0.0550508474576271,
+      "matches": 59000
     },
     {
       "policy": "discounted-ucb",
       "baseline": "myopic-oracle",
-      "mean_gap": 87.6344524648109,
-      "ci_low": 39.04901558514185,
-      "ci_high": 139.92392332918018,
-      "win_rate": 0.5476190476190477,
-      "matches": 42
+      "mean_gap": 187.166458305112,
+      "ci_low": 184.043763863392,
+      "ci_high": 190.048563869241,
+      "win_rate": 0.769305084745763,
+      "matches": 59000
     },
     {
       "policy": "sliding-window-ucb",
       "baseline": "myopic-oracle",
-      "mean_gap": 123.51107388624293,
-      "ci_low": 82.08478200892883,
-      "ci_high": 167.67066729309175,
-      "win_rate": 0.8571428571428571,
-      "matches": 42
+      "mean_gap": 254.106017372609,
+      "ci_low": 251.015885195939,
+      "ci_high": 256.987338474792,
+      "win_rate": 0.909186440677966,
+      "matches": 59000
     },
     {
       "policy": "gaussian-thompson",
       "baseline": "myopic-oracle",
-      "mean_gap": -729.9434965395221,
-      "ci_low": -866.6774170011872,
-      "ci_high": -588.2817442720353,
-      "win_rate": 0.047619047619047616,
-      "matches": 42
+      "mean_gap": -1147.59305250939,
+      "ci_low": -1155.18610108964,
+      "ci_high": -1140.35934917059,
+      "win_rate": 0.0704745762711864,
+      "matches": 59000
     },
     {
       "policy": "discounted-gaussian-thompson",
       "baseline": "myopic-oracle",
-      "mean_gap": -39.984704163416026,
-      "ci_low": -95.80673890358554,
-      "ci_high": 20.50674620009157,
-      "win_rate": 0.40476190476190477,
-      "matches": 42
+      "mean_gap": -71.5148483245631,
+      "ci_low": -75.6062788169298,
+      "ci_high": -67.530361651558,
+      "win_rate": 0.426559322033898,
+      "matches": 59000
     },
     {
       "policy": "linucb",
       "baseline": "myopic-oracle",
-      "mean_gap": -263.66387573834317,
-      "ci_low": -399.4584019749872,
-      "ci_high": -151.34572971692018,
-      "win_rate": 0.30952380952380953,
-      "matches": 42
+      "mean_gap": -321.749938770169,
+      "ci_low": -325.626336831359,
+      "ci_high": -317.863342549164,
+      "win_rate": 0.235271186440678,
+      "matches": 59000
     },
     {
       "policy": "linear-thompson",
       "baseline": "myopic-oracle",
-      "mean_gap": -228.11138900998347,
-      "ci_low": -353.7073917453283,
-      "ci_high": -134.62582610483358,
-      "win_rate": 0.30952380952380953,
-      "matches": 42
+      "mean_gap": -185.778699279281,
+      "ci_low": -189.197946599365,
+      "ci_high": -182.485074927345,
+      "win_rate": 0.244491525423729,
+      "matches": 59000
     },
     {
       "policy": "whittle-index",
       "baseline": "myopic-oracle",
-      "mean_gap": 146.76606567222436,
-      "ci_low": 106.23429526365106,
-      "ci_high": 185.62664774505456,
-      "win_rate": 0.8809523809523809,
-      "matches": 42
+      "mean_gap": 26.5549874766602,
+      "ci_low": 21.9846642873292,
+      "ci_high": 31.6361194528896,
+      "win_rate": 0.700237288135593,
+      "matches": 59000
     }
   ]
 }

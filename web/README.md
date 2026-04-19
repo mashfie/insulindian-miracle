@@ -6,7 +6,13 @@ This repository component houses the **Insulindian Miracle Archive**, an interac
 
 The simulation explores institutional drift, city formation, and the resource curse across procedurally generated peninsulas. It models candidate settlement sites as arms in a Restless Multi-Armed Bandit (RMAB).
 
-This frontend was built to render the output of the **1,000,008-run high-performance Pure Rust sweep**. The scale of this data (over 1 million traces) provides robust empirical validation of our six canonical hypotheses, highlighting phenomena such as the **UCB-Bait Trap**, the mathematical emergence of **Zipf's Law primacy**, and the persistence of the **Resource Curse**.
+This frontend now renders a **stratified 1,590,008-execution evidence program** rather than one undifferentiated million-run story:
+
+- `legacy_1m`: 1,000,008 non-oracle policy executions from the legacy baseline sweep.
+- `historical_90k`: 90,000 scenario-resolved executions across 9 canonical scenarios.
+- `stress_500k`: 500,000 stress executions with perturbed initial conditions and trap-heavy scenario weights.
+
+The distinction matters. The million-run cohort supports broad baseline ranking; the historical and stress cohorts support scenario-level and oracle-gap claims.
 
 ## Architecture & Technology
 
@@ -17,7 +23,7 @@ This frontend was built to render the output of the **1,000,008-run high-perform
 
 ## Running the Archive
 
-To run the local server and explore the latest 1-million run synthesis data:
+To run the local server and explore the latest cohort synthesis data:
 
 ```bash
 pnpm install

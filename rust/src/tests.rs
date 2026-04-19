@@ -11,7 +11,7 @@ mod tests {
     use crate::snapshot_physics::{compute_reward_snapshot, network_bonus_snapshot};
     use crate::types::{SimulationConfig, SiteStateSnapshot};
     use crate::whittle::WhittleIndexPolicy;
-    use ndarray::{array, Array2};
+    use ndarray::array;
 
     #[test]
     fn test_scenario_validation() {

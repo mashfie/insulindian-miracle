@@ -17,6 +17,7 @@ use rayon::prelude::*;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -731,6 +732,7 @@ pub fn run_sweep_rust_core(
     policies: &[String],
     output_parquet: &str,
     batch_limit: Option<usize>,
+    batch_offset: Option<usize>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let (tx, rx) = mpsc::sync_channel::<RunResult>(5000);
 
@@ -740,6 +742,7 @@ pub fn run_sweep_rust_core(
     let _ = fs::remove_file(&temp_output_path);
     let policies_vec = policies.to_vec();
     let errors = Arc::new(Mutex::new(Vec::<String>::new()));
+    let completed_configs = Arc::new(AtomicUsize::new(0));
 
     let writer_thread = thread::spawn(move || {
         let file = File::create(Path::new(&writer_output_path)).unwrap();
@@ -953,9 +956,19 @@ pub fn run_sweep_rust_core(
         }
     }
 
+    let offset = batch_offset.unwrap_or(0).min(lines.len());
+    let available_configs = lines.len().saturating_sub(offset);
+    let total_configs = batch_limit.map_or(available_configs, |limit| available_configs.min(limit));
+    eprintln!(
+        "Loaded {} configs; executing {total_configs} configs from offset {offset} with {} requested policies",
+        lines.len(),
+        policies_vec.len()
+    );
+
     if let Some(limit) = batch_limit {
-        let batch: Vec<String> = lines.into_iter().take(limit).collect();
+        let batch: Vec<String> = lines.into_iter().skip(offset).take(limit).collect();
         let errors = Arc::clone(&errors);
+        let completed_configs = Arc::clone(&completed_configs);
         batch.into_par_iter().for_each(|line| {
             let (config, scenario_name) = match parse_sweep_input_line(&line) {
                 Ok(parsed) => parsed,
@@ -1007,10 +1020,15 @@ pub fn run_sweep_rust_core(
                     return;
                 }
             }
+            let done = completed_configs.fetch_add(1, Ordering::Relaxed) + 1;
+            if done % 1000 == 0 || done == total_configs {
+                eprintln!("sweep progress: {done}/{total_configs} configs");
+            }
         });
     } else {
         let errors = Arc::clone(&errors);
-        lines.into_par_iter().for_each(|line| {
+        let completed_configs = Arc::clone(&completed_configs);
+        lines.into_par_iter().skip(offset).for_each(|line| {
             let (config, scenario_name) = match parse_sweep_input_line(&line) {
                 Ok(parsed) => parsed,
                 Err(e) => {
@@ -1060,6 +1078,10 @@ pub fn run_sweep_rust_core(
                 if tx.send(result).is_err() {
                     return;
                 }
+            }
+            let done = completed_configs.fetch_add(1, Ordering::Relaxed) + 1;
+            if done % 1000 == 0 || done == total_configs {
+                eprintln!("sweep progress: {done}/{total_configs} configs");
             }
         });
     }

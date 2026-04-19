@@ -4,6 +4,10 @@ import { useEffect, useMemo, useRef } from "react";
 import { Heerich } from "heerich";
 import type { AtlasSite } from "@/lib/content/types";
 
+type HeerichWithDecals = Heerich & {
+  defineDecal: (name: string, decal: { content: string }) => void;
+};
+
 type VoxelMapProps = {
   data: number[][];
   width: number;
@@ -22,7 +26,6 @@ export function VoxelMap({
   data,
   width,
   height,
-  color = [100, 110, 120],
   overlayData,
   sites = [],
   landMask,
@@ -33,14 +36,14 @@ export function VoxelMap({
     const h = new Heerich({
       tile: 12,
       camera: { type: "oblique", angle: 45, distance: 18 },
-    });
+    }) as HeerichWithDecals;
 
     // Define decals for sites
-    (h as any).defineDecal("boomtown-mark", {
+    h.defineDecal("boomtown-mark", {
       content: '<path d="M 0.2 0.2 L 0.8 0.8 M 0.8 0.2 L 0.2 0.8" stroke="#fef5f0" stroke-width="0.1" fill="none" vector-effect="non-scaling-stroke"/>'
     });
     
-    (h as any).defineDecal("trade-mark", {
+    h.defineDecal("trade-mark", {
       content: '<circle cx="0.5" cy="0.5" r="0.3" stroke="#fef5f0" stroke-width="0.1" fill="none" vector-effect="non-scaling-stroke"/>'
     });
 
@@ -151,7 +154,7 @@ export function VoxelMap({
     }
 
     return h.toSVG({ padding: 20 });
-  }, [data, width, height, color, overlayData, sites, landMask]);
+  }, [data, width, height, overlayData, sites, landMask]);
 
   useEffect(() => {
     if (!containerRef.current) return;

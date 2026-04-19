@@ -2,54 +2,70 @@
   "epsilon-greedy": {
     "policy": "epsilon-greedy",
     "summary": {
-      "mean_cumulative_reward": 1301.4470815865743,
-      "mean_oracle_regret": 922.482123514859,
-      "mean_population_hhi": 0.17916227874410975,
-      "mean_final_extraction": 0.13274239172651078,
-      "scenario_count": 2
+      "mean_cumulative_reward": 2056.74185341705,
+      "mean_oracle_regret": 1292.33474703855,
+      "mean_population_hhi": 0.180610041523374,
+      "mean_final_extraction": 0.075256276487559,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 1710.8557457095492
+        "value": 2208.88998064844
       },
       {
         "label": "stress_500k",
-        "value": 994.3905834943434
+        "value": 2029.3551905154
       }
     ],
     "distribution_bins": [
       {
-        "label": "527.5-708.7",
-        "count": 3
+        "label": "0.0-500.0",
+        "count": 377
       },
       {
-        "label": "708.7-889.9",
-        "count": 7
+        "label": "500.0-1000.0",
+        "count": 10626
       },
       {
-        "label": "889.9-1071.1",
-        "count": 4
+        "label": "1000.0-1500.0",
+        "count": 12772
       },
       {
-        "label": "1071.1-1252.3",
-        "count": 6
+        "label": "1500.0-2000.0",
+        "count": 12611
       },
       {
-        "label": "1252.3-1433.5",
-        "count": 3
+        "label": "2000.0-2500.0",
+        "count": 2897
       },
       {
-        "label": "1433.5-1614.7",
-        "count": 6
+        "label": "2500.0-3000.0",
+        "count": 3866
       },
       {
-        "label": "1614.7-1795.9",
-        "count": 8
+        "label": "3000.0-3500.0",
+        "count": 8859
       },
       {
-        "label": "1795.9-1977.1",
-        "count": 5
+        "label": "3500.0-4000.0",
+        "count": 3739
+      },
+      {
+        "label": "4000.0-4500.0",
+        "count": 1192
+      },
+      {
+        "label": "4500.0-5000.0",
+        "count": 1107
+      },
+      {
+        "label": "5000.0-5500.0",
+        "count": 881
+      },
+      {
+        "label": "5500.0-6000.0",
+        "count": 73
       }
     ],
     "heatmap": {
@@ -64,90 +80,122 @@
         "Eps"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 141.92650181484078,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 648.102309622989,
+        "end": 762.490453042722
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": -178.73139467926288
+        "label": "baseline",
+        "start": 120.837565546345,
+        "end": 201.554171144644
+      },
+      {
+        "label": "botswana",
+        "start": 254.849850510137,
+        "end": 350.087629699466
+      },
+      {
+        "label": "megacity-trap",
+        "start": -62.456852091803,
+        "end": -39.689698671375
+      },
+      {
+        "label": "merchant-republic",
+        "start": 572.521960421561,
+        "end": 445.84101931561
+      },
+      {
+        "label": "open-cluster",
+        "start": 414.284203385642,
+        "end": 348.306142548339
+      },
+      {
+        "label": "resource-curse",
+        "start": -362.639309821483,
+        "end": -254.46144034329
+      },
+      {
+        "label": "shock-reform",
+        "start": -97.8648740896875,
+        "end": -138.751732688927
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "epsilon-greedy",
         "baseline": "myopic-oracle",
-        "mean_gap": -922.4821235148593,
-        "ci_low": -1016.8466187871429,
-        "ci_high": -827.5603635054415,
-        "win_rate": 0.0,
-        "matches": 42
+        "mean_gap": -1292.33474703855,
+        "ci_low": -1297.5332556494,
+        "ci_high": -1287.14693347604,
+        "win_rate": 0.00301694915254237,
+        "matches": 59000
       }
     ]
   },
   "ucb1": {
     "policy": "ucb1",
     "summary": {
-      "mean_cumulative_reward": 1342.7536634826502,
-      "mean_oracle_regret": 881.1755416187837,
-      "mean_population_hhi": 0.17864971083798786,
-      "mean_final_extraction": 0.1414482948601894,
-      "scenario_count": 2
+      "mean_cumulative_reward": 1980.19470297421,
+      "mean_oracle_regret": 1368.88189748138,
+      "mean_population_hhi": 0.192809631634129,
+      "mean_final_extraction": 0.078947962187409,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 1568.9292438947082
+        "value": 2061.55512000484
       },
       {
         "label": "stress_500k",
-        "value": 1173.1219781736063
+        "value": 1965.5498279087
       }
     ],
     "distribution_bins": [
       {
-        "label": "881.6-987.4",
+        "label": "0.0-500.0",
         "count": 3
       },
       {
-        "label": "987.4-1093.1",
-        "count": 6
+        "label": "500.0-1000.0",
+        "count": 3287
       },
       {
-        "label": "1093.1-1198.9",
-        "count": 5
+        "label": "1000.0-1500.0",
+        "count": 18864
       },
       {
-        "label": "1198.9-1304.7",
-        "count": 6
+        "label": "1500.0-2000.0",
+        "count": 13045
       },
       {
-        "label": "1304.7-1410.4",
-        "count": 2
+        "label": "2000.0-2500.0",
+        "count": 5891
       },
       {
-        "label": "1410.4-1516.2",
-        "count": 7
+        "label": "2500.0-3000.0",
+        "count": 10653
       },
       {
-        "label": "1516.2-1622.0",
-        "count": 7
+        "label": "3000.0-3500.0",
+        "count": 4456
       },
       {
-        "label": "1622.0-1727.7",
-        "count": 6
+        "label": "3500.0-4000.0",
+        "count": 1515
+      },
+      {
+        "label": "4000.0-4500.0",
+        "count": 330
+      },
+      {
+        "label": "4500.0-5000.0",
+        "count": 956
       }
     ],
     "heatmap": {
@@ -162,13 +210,7 @@
         "UCB1"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [],
@@ -176,65 +218,65 @@
       {
         "policy": "ucb1",
         "baseline": "myopic-oracle",
-        "mean_gap": -881.1755416187834,
-        "ci_low": -1030.9658294916562,
-        "ci_high": -734.6346434900997,
-        "win_rate": 0.047619047619047616,
-        "matches": 42
+        "mean_gap": -1368.88189748138,
+        "ci_low": -1376.37652175379,
+        "ci_high": -1361.59182101471,
+        "win_rate": 0.0550508474576271,
+        "matches": 59000
       }
     ]
   },
   "discounted-ucb": {
     "policy": "discounted-ucb",
     "summary": {
-      "mean_cumulative_reward": 2311.5636575662447,
-      "mean_oracle_regret": -87.6344524648109,
-      "mean_population_hhi": 0.11316651574358944,
-      "mean_final_extraction": 0.1348967759001345,
-      "scenario_count": 2
+      "mean_cumulative_reward": 3536.24305876071,
+      "mean_oracle_regret": -187.166458305112,
+      "mean_population_hhi": 0.112660483646959,
+      "mean_final_extraction": 0.073012762397905,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 2837.052027296589
+        "value": 3817.23297004457
       },
       {
         "label": "stress_500k",
-        "value": 1917.447380268486
+        "value": 3485.66487472961
       }
     ],
     "distribution_bins": [
       {
-        "label": "1273.6-1480.7",
-        "count": 4
+        "label": "0.0-1000.0",
+        "count": 1110
       },
       {
-        "label": "1480.7-1687.7",
-        "count": 4
+        "label": "1000.0-2000.0",
+        "count": 8704
       },
       {
-        "label": "1687.7-1894.8",
-        "count": 3
+        "label": "2000.0-3000.0",
+        "count": 15982
       },
       {
-        "label": "1894.8-2101.8",
-        "count": 5
+        "label": "3000.0-4000.0",
+        "count": 12161
       },
       {
-        "label": "2101.8-2308.9",
-        "count": 4
+        "label": "4000.0-5000.0",
+        "count": 8292
       },
       {
-        "label": "2308.9-2515.9",
-        "count": 2
+        "label": "5000.0-6000.0",
+        "count": 9552
       },
       {
-        "label": "2515.9-2723.0",
-        "count": 2
+        "label": "6000.0-7000.0",
+        "count": 1532
       },
       {
-        "label": "2723.0-2930.0",
-        "count": 18
+        "label": "7000.0-8000.0",
+        "count": 1667
       }
     ],
     "heatmap": {
@@ -249,90 +291,114 @@
         "D-UCB"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 1268.1227834018805,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 2237.94308356307,
+        "end": 2496.47767698029
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 744.3254020948799
+        "label": "baseline",
+        "start": 1273.02129698835,
+        "end": 1459.75201268101
+      },
+      {
+        "label": "botswana",
+        "start": 2388.78159692599,
+        "end": 2461.83361722055
+      },
+      {
+        "label": "megacity-trap",
+        "start": 1269.802829403,
+        "end": 1273.06163752902
+      },
+      {
+        "label": "merchant-republic",
+        "start": 2688.41060476704,
+        "end": 2309.01921248355
+      },
+      {
+        "label": "open-cluster",
+        "start": 2349.95508641621,
+        "end": 2090.79335540981
+      },
+      {
+        "label": "resource-curse",
+        "start": 1293.14838519657,
+        "end": 1132.41118539307
+      },
+      {
+        "label": "shock-reform",
+        "start": 1521.94838761714,
+        "end": 1473.8336159252
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "discounted-ucb",
         "baseline": "myopic-oracle",
-        "mean_gap": 87.6344524648109,
-        "ci_low": 39.04901558514185,
-        "ci_high": 139.92392332918018,
-        "win_rate": 0.5476190476190477,
-        "matches": 42
+        "mean_gap": 187.166458305112,
+        "ci_low": 184.043763863392,
+        "ci_high": 190.048563869241,
+        "win_rate": 0.769305084745763,
+        "matches": 59000
       }
     ]
   },
   "sliding-window-ucb": {
     "policy": "sliding-window-ucb",
     "summary": {
-      "mean_cumulative_reward": 2347.4402789876763,
-      "mean_oracle_regret": -123.51107388624293,
-      "mean_population_hhi": 0.09969958413115662,
-      "mean_final_extraction": 0.1352967429724816,
-      "scenario_count": 2
+      "mean_cumulative_reward": 3603.1826178282,
+      "mean_oracle_regret": -254.106017372609,
+      "mean_population_hhi": 0.0975213115093286,
+      "mean_final_extraction": 0.0716251108711991,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 2932.3774415898934
+        "value": 3902.65870556233
       },
       {
         "label": "stress_500k",
-        "value": 1908.737407036014
+        "value": 3549.27692203606
       }
     ],
     "distribution_bins": [
       {
-        "label": "1112.7-1349.6",
-        "count": 1
+        "label": "0.0-1000.0",
+        "count": 1200
       },
       {
-        "label": "1349.6-1586.6",
-        "count": 5
+        "label": "1000.0-2000.0",
+        "count": 8765
       },
       {
-        "label": "1586.6-1823.6",
-        "count": 4
+        "label": "2000.0-3000.0",
+        "count": 15139
       },
       {
-        "label": "1823.6-2060.6",
-        "count": 5
+        "label": "3000.0-4000.0",
+        "count": 12401
       },
       {
-        "label": "2060.6-2297.6",
-        "count": 5
+        "label": "4000.0-5000.0",
+        "count": 5513
       },
       {
-        "label": "2297.6-2534.6",
-        "count": 2
+        "label": "5000.0-6000.0",
+        "count": 12761
       },
       {
-        "label": "2534.6-2771.6",
-        "count": 2
+        "label": "6000.0-7000.0",
+        "count": 1124
       },
       {
-        "label": "2771.6-3008.5",
-        "count": 18
+        "label": "7000.0-8000.0",
+        "count": 2097
       }
     ],
     "heatmap": {
@@ -347,90 +413,130 @@
         "SW-UCB"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 1363.448197695185,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 2424.04116967444,
+        "end": 2618.5893109971
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 735.6154288624078
+        "label": "baseline",
+        "start": 1347.47089702683,
+        "end": 1525.90579171781
+      },
+      {
+        "label": "botswana",
+        "start": 2540.22445049091,
+        "end": 2598.7808340546
+      },
+      {
+        "label": "megacity-trap",
+        "start": 1302.44757765565,
+        "end": 1297.77205666773
+      },
+      {
+        "label": "merchant-republic",
+        "start": 2875.60177133218,
+        "end": 2490.02559731929
+      },
+      {
+        "label": "open-cluster",
+        "start": 2492.06984136437,
+        "end": 2218.50193219382
+      },
+      {
+        "label": "resource-curse",
+        "start": 1271.16197329716,
+        "end": 1173.3415489478
+      },
+      {
+        "label": "shock-reform",
+        "start": 1555.47188403888,
+        "end": 1513.46145776546
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "sliding-window-ucb",
         "baseline": "myopic-oracle",
-        "mean_gap": 123.51107388624293,
-        "ci_low": 82.08478200892883,
-        "ci_high": 167.67066729309175,
-        "win_rate": 0.8571428571428571,
-        "matches": 42
+        "mean_gap": 254.106017372609,
+        "ci_low": 251.015885195939,
+        "ci_high": 256.987338474792,
+        "win_rate": 0.909186440677966,
+        "matches": 59000
       }
     ]
   },
   "gaussian-thompson": {
     "policy": "gaussian-thompson",
     "summary": {
-      "mean_cumulative_reward": 1493.9857085619117,
-      "mean_oracle_regret": 729.943496539522,
-      "mean_population_hhi": 0.17405005245971528,
-      "mean_final_extraction": 0.13881633148896577,
-      "scenario_count": 2
+      "mean_cumulative_reward": 2201.4835479462,
+      "mean_oracle_regret": 1147.59305250939,
+      "mean_population_hhi": 0.185560593073904,
+      "mean_final_extraction": 0.0798207907470396,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 1745.5521717176039
+        "value": 2302.77503794859
       },
       {
         "label": "stress_500k",
-        "value": 1305.3108611951425
+        "value": 2183.25107974577
       }
     ],
     "distribution_bins": [
       {
-        "label": "1052.9-1192.7",
-        "count": 9
+        "label": "0.0-500.0",
+        "count": 3
       },
       {
-        "label": "1192.7-1332.4",
-        "count": 4
+        "label": "500.0-1000.0",
+        "count": 1856
       },
       {
-        "label": "1332.4-1472.2",
-        "count": 7
+        "label": "1000.0-1500.0",
+        "count": 11890
       },
       {
-        "label": "1472.2-1612.0",
-        "count": 9
+        "label": "1500.0-2000.0",
+        "count": 15988
       },
       {
-        "label": "1612.0-1751.7",
-        "count": 4
+        "label": "2000.0-2500.0",
+        "count": 8758
       },
       {
-        "label": "1751.7-1891.5",
-        "count": 4
+        "label": "2500.0-3000.0",
+        "count": 8660
       },
       {
-        "label": "1891.5-2031.3",
-        "count": 4
+        "label": "3000.0-3500.0",
+        "count": 8208
       },
       {
-        "label": "2031.3-2171.1",
-        "count": 1
+        "label": "3500.0-4000.0",
+        "count": 1682
+      },
+      {
+        "label": "4000.0-4500.0",
+        "count": 1125
+      },
+      {
+        "label": "4500.0-5000.0",
+        "count": 722
+      },
+      {
+        "label": "5000.0-5500.0",
+        "count": 106
+      },
+      {
+        "label": "5500.0-6000.0",
+        "count": 2
       }
     ],
     "heatmap": {
@@ -445,90 +551,114 @@
         "Gauss TS"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 176.62292782289543,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 298.180707156768,
+        "end": 274.371094183006
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 132.18888302153618
+        "label": "baseline",
+        "start": 160.669548835256,
+        "end": 297.001652766136
+      },
+      {
+        "label": "botswana",
+        "start": 282.423584599307,
+        "end": 265.434843409124
+      },
+      {
+        "label": "megacity-trap",
+        "start": 236.839874475335,
+        "end": 237.720098531937
+      },
+      {
+        "label": "merchant-republic",
+        "start": 187.620985190767,
+        "end": 122.207569602202
+      },
+      {
+        "label": "open-cluster",
+        "start": 227.169070714505,
+        "end": 203.486816892306
+      },
+      {
+        "label": "resource-curse",
+        "start": 300.147004966702,
+        "end": 255.544015871172
+      },
+      {
+        "label": "shock-reform",
+        "start": 315.669878429213,
+        "end": 244.109839056498
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "gaussian-thompson",
         "baseline": "myopic-oracle",
-        "mean_gap": -729.9434965395221,
-        "ci_low": -866.6774170011872,
-        "ci_high": -588.2817442720353,
-        "win_rate": 0.047619047619047616,
-        "matches": 42
+        "mean_gap": -1147.59305250939,
+        "ci_low": -1155.18610108964,
+        "ci_high": -1140.35934917059,
+        "win_rate": 0.0704745762711864,
+        "matches": 59000
       }
     ]
   },
   "discounted-gaussian-thompson": {
     "policy": "discounted-gaussian-thompson",
     "summary": {
-      "mean_cumulative_reward": 2183.9445009380174,
-      "mean_oracle_regret": 39.984704163416026,
-      "mean_population_hhi": 0.12329586786894058,
-      "mean_final_extraction": 0.1369277529646261,
-      "scenario_count": 2
+      "mean_cumulative_reward": 3277.56175213103,
+      "mean_oracle_regret": 71.5148483245631,
+      "mean_population_hhi": 0.135286621446518,
+      "mean_final_extraction": 0.0721495151371955,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 2693.534282173741
+        "value": 3478.50449167599
       },
       {
         "label": "stress_500k",
-        "value": 1801.752165011225
+        "value": 3241.39205901294
       }
     ],
     "distribution_bins": [
       {
-        "label": "1099.5-1320.5",
-        "count": 1
+        "label": "0.0-1000.0",
+        "count": 1235
       },
       {
-        "label": "1320.5-1541.6",
-        "count": 5
+        "label": "1000.0-2000.0",
+        "count": 10147
       },
       {
-        "label": "1541.6-1762.6",
-        "count": 5
+        "label": "2000.0-3000.0",
+        "count": 16775
       },
       {
-        "label": "1762.6-1983.6",
-        "count": 6
+        "label": "3000.0-4000.0",
+        "count": 12595
       },
       {
-        "label": "1983.6-2204.7",
-        "count": 4
+        "label": "4000.0-5000.0",
+        "count": 14615
       },
       {
-        "label": "2204.7-2425.7",
-        "count": 2
+        "label": "5000.0-6000.0",
+        "count": 539
       },
       {
-        "label": "2425.7-2646.8",
-        "count": 6
+        "label": "6000.0-7000.0",
+        "count": 2880
       },
       {
-        "label": "2646.8-2867.8",
-        "count": 13
+        "label": "7000.0-8000.0",
+        "count": 214
       }
     ],
     "heatmap": {
@@ -543,90 +673,110 @@
         "D-TS"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 1124.6050382790324,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 1879.92533723469,
+        "end": 2183.35208615597
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 628.6301868376189
+        "label": "baseline",
+        "start": 1129.22459746992,
+        "end": 1341.55161638419
+      },
+      {
+        "label": "botswana",
+        "start": 1807.530298431,
+        "end": 1970.54189127504
+      },
+      {
+        "label": "megacity-trap",
+        "start": 1104.19659211397,
+        "end": 1088.31139601163
+      },
+      {
+        "label": "merchant-republic",
+        "start": 1942.14405235997,
+        "end": 1698.93445409358
+      },
+      {
+        "label": "open-cluster",
+        "start": 1764.19037861838,
+        "end": 1606.99396401804
+      },
+      {
+        "label": "resource-curse",
+        "start": 1048.16527058151,
+        "end": 983.22199183049
+      },
+      {
+        "label": "shock-reform",
+        "start": 1376.56482966032,
+        "end": 1340.46662016919
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "discounted-gaussian-thompson",
         "baseline": "myopic-oracle",
-        "mean_gap": -39.984704163416026,
-        "ci_low": -95.80673890358554,
-        "ci_high": 20.50674620009157,
-        "win_rate": 0.40476190476190477,
-        "matches": 42
+        "mean_gap": -71.5148483245631,
+        "ci_low": -75.6062788169298,
+        "ci_high": -67.530361651558,
+        "win_rate": 0.426559322033898,
+        "matches": 59000
       }
     ]
   },
   "linucb": {
     "policy": "linucb",
     "summary": {
-      "mean_cumulative_reward": 1960.2653293630904,
-      "mean_oracle_regret": 263.6638757383432,
-      "mean_population_hhi": 0.15140042777387325,
-      "mean_final_extraction": 0.13382657459670677,
-      "scenario_count": 2
+      "mean_cumulative_reward": 3027.32666168542,
+      "mean_oracle_regret": 321.749938770169,
+      "mean_population_hhi": 0.148590302146376,
+      "mean_final_extraction": 0.0764496194176428,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 2221.446859715458
+        "value": 3199.83201305922
       },
       {
         "label": "stress_500k",
-        "value": 1764.379181598815
+        "value": 2996.27569843814
       }
     ],
     "distribution_bins": [
       {
-        "label": "753.6-1012.8",
+        "label": "-6000.0--4000.0",
         "count": 1
       },
       {
-        "label": "1012.8-1271.9",
-        "count": 2
+        "label": "-4000.0--2000.0",
+        "count": 1
       },
       {
-        "label": "1271.9-1531.1",
-        "count": 2
+        "label": "-2000.0-0.0",
+        "count": 35
       },
       {
-        "label": "1531.1-1790.3",
-        "count": 10
+        "label": "0.0-2000.0",
+        "count": 16496
       },
       {
-        "label": "1790.3-2049.4",
-        "count": 7
+        "label": "2000.0-4000.0",
+        "count": 25412
       },
       {
-        "label": "2049.4-2308.6",
-        "count": 12
+        "label": "4000.0-6000.0",
+        "count": 13979
       },
       {
-        "label": "2308.6-2567.8",
-        "count": 6
-      },
-      {
-        "label": "2567.8-2826.9",
-        "count": 2
+        "label": "6000.0-8000.0",
+        "count": 3076
       }
     ],
     "heatmap": {
@@ -641,90 +791,118 @@
         "LinUCB"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 652.5176158207497,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 1594.30144699851,
+        "end": 1830.32464222213
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 591.2572034252086
+        "label": "baseline",
+        "start": 528.224910675183,
+        "end": 807.524467967422
+      },
+      {
+        "label": "botswana",
+        "start": 1909.96301321764,
+        "end": 2074.88527461732
+      },
+      {
+        "label": "megacity-trap",
+        "start": 566.747564682849,
+        "end": 604.347727657229
+      },
+      {
+        "label": "merchant-republic",
+        "start": 1646.23855188089,
+        "end": 1664.33380236105
+      },
+      {
+        "label": "open-cluster",
+        "start": 2040.7322744524,
+        "end": 1645.23990120425
+      },
+      {
+        "label": "resource-curse",
+        "start": 307.392074761303,
+        "end": 517.385715820655
+      },
+      {
+        "label": "shock-reform",
+        "start": 1044.09475446202,
+        "end": 1022.77718404003
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "linucb",
         "baseline": "myopic-oracle",
-        "mean_gap": -263.66387573834317,
-        "ci_low": -399.4584019749872,
-        "ci_high": -151.34572971692018,
-        "win_rate": 0.30952380952380953,
-        "matches": 42
+        "mean_gap": -321.749938770169,
+        "ci_low": -325.626336831359,
+        "ci_high": -317.863342549164,
+        "win_rate": 0.235271186440678,
+        "matches": 59000
       }
     ]
   },
   "linear-thompson": {
     "policy": "linear-thompson",
     "summary": {
-      "mean_cumulative_reward": 1995.8178160914506,
-      "mean_oracle_regret": 228.11138900998344,
-      "mean_population_hhi": 0.12343286232656515,
-      "mean_final_extraction": 0.1296895888208446,
-      "scenario_count": 2
+      "mean_cumulative_reward": 3163.29790117631,
+      "mean_oracle_regret": 185.778699279281,
+      "mean_population_hhi": 0.132807529295459,
+      "mean_final_extraction": 0.0723065963709251,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 2373.959909702363
+        "value": 3362.27974326988
       },
       {
         "label": "stress_500k",
-        "value": 1712.2112458832653
+        "value": 3127.48116959947
       }
     ],
     "distribution_bins": [
       {
-        "label": "907.1-1138.5",
-        "count": 2
-      },
-      {
-        "label": "1138.5-1369.8",
-        "count": 6
-      },
-      {
-        "label": "1369.8-1601.2",
-        "count": 2
-      },
-      {
-        "label": "1601.2-1832.6",
+        "label": "-1000.0-0.0",
         "count": 4
       },
       {
-        "label": "1832.6-2064.0",
-        "count": 5
+        "label": "0.0-1000.0",
+        "count": 1874
       },
       {
-        "label": "2064.0-2295.3",
-        "count": 8
+        "label": "1000.0-2000.0",
+        "count": 11808
       },
       {
-        "label": "2295.3-2526.7",
-        "count": 8
+        "label": "2000.0-3000.0",
+        "count": 18115
       },
       {
-        "label": "2526.7-2758.1",
-        "count": 7
+        "label": "3000.0-4000.0",
+        "count": 9321
+      },
+      {
+        "label": "4000.0-5000.0",
+        "count": 12446
+      },
+      {
+        "label": "5000.0-6000.0",
+        "count": 2389
+      },
+      {
+        "label": "6000.0-7000.0",
+        "count": 2195
+      },
+      {
+        "label": "7000.0-8000.0",
+        "count": 848
       }
     ],
     "heatmap": {
@@ -739,90 +917,110 @@
         "LinTS"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 805.0306658076549,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 1707.69332969071,
+        "end": 2005.36040126349
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 539.0892677096591
+        "label": "baseline",
+        "start": 743.699723924599,
+        "end": 951.906187836408
+      },
+      {
+        "label": "botswana",
+        "start": 1994.8355111113,
+        "end": 2189.19773841833
+      },
+      {
+        "label": "megacity-trap",
+        "start": 917.821990468736,
+        "end": 928.506968858478
+      },
+      {
+        "label": "merchant-republic",
+        "start": 1981.78791060662,
+        "end": 1789.45434128461
+      },
+      {
+        "label": "open-cluster",
+        "start": 2069.38266065468,
+        "end": 1733.46538701899
+      },
+      {
+        "label": "resource-curse",
+        "start": 530.750072366083,
+        "end": 699.239078025342
+      },
+      {
+        "label": "shock-reform",
+        "start": 1143.07067257642,
+        "end": 1087.15161768589
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "linear-thompson",
         "baseline": "myopic-oracle",
-        "mean_gap": -228.11138900998347,
-        "ci_low": -353.7073917453283,
-        "ci_high": -134.62582610483358,
-        "win_rate": 0.30952380952380953,
-        "matches": 42
+        "mean_gap": -185.778699279281,
+        "ci_low": -189.197946599365,
+        "ci_high": -182.485074927345,
+        "win_rate": 0.244491525423729,
+        "matches": 59000
       }
     ]
   },
   "whittle-index": {
     "policy": "whittle-index",
     "summary": {
-      "mean_cumulative_reward": 2370.695270773658,
-      "mean_oracle_regret": -146.76606567222433,
-      "mean_population_hhi": 0.07159219412340827,
-      "mean_final_extraction": 0.1494524929936651,
-      "scenario_count": 2
+      "mean_cumulative_reward": 3375.63158793225,
+      "mean_oracle_regret": -26.5549874766602,
+      "mean_population_hhi": 0.0765187200365127,
+      "mean_final_extraction": 0.075600657000491,
+      "scenario_count": 9
     },
     "cohort_reward_items": [
       {
         "label": "historical_90k",
-        "value": 3033.942810827006
+        "value": 3693.78181949158
       },
       {
         "label": "stress_500k",
-        "value": 1873.2596157336473
+        "value": 3318.36454625157
       }
     ],
     "distribution_bins": [
       {
-        "label": "1175.1-1419.9",
-        "count": 3
+        "label": "-6000.0--4000.0",
+        "count": 6
       },
       {
-        "label": "1419.9-1664.7",
-        "count": 7
-      },
-      {
-        "label": "1664.7-1909.6",
-        "count": 4
-      },
-      {
-        "label": "1909.6-2154.4",
-        "count": 3
-      },
-      {
-        "label": "2154.4-2399.3",
-        "count": 5
-      },
-      {
-        "label": "2399.3-2644.1",
-        "count": 1
-      },
-      {
-        "label": "2644.1-2889.0",
-        "count": 2
-      },
-      {
-        "label": "2889.0-3133.8",
+        "label": "-4000.0--2000.0",
         "count": 17
+      },
+      {
+        "label": "-2000.0-0.0",
+        "count": 1569
+      },
+      {
+        "label": "0.0-2000.0",
+        "count": 12570
+      },
+      {
+        "label": "2000.0-4000.0",
+        "count": 23693
+      },
+      {
+        "label": "4000.0-6000.0",
+        "count": 14988
+      },
+      {
+        "label": "6000.0-8000.0",
+        "count": 6157
       }
     ],
     "heatmap": {
@@ -837,36 +1035,60 @@
         "Whittle"
       ],
       "data": [
-        [
-          50.0,
-          50.0,
-          50.0,
-          50.0,
-          50.0
-        ]
+        [50, 50, 50, 50, 50]
       ]
     },
     "scenario_gap_items": [
       {
-        "label": "baseline",
-        "start": 1465.0135669322979,
-        "end": 0.0
+        "label": "balanced-urban-system",
+        "start": 2549.54585133388,
+        "end": 2582.15589258946
       },
       {
-        "label": "ucb-bait",
-        "start": 0.0,
-        "end": 700.1376375600406
+        "label": "baseline",
+        "start": 1456.13437907359,
+        "end": 1593.28355521093
+      },
+      {
+        "label": "botswana",
+        "start": 1901.25369282782,
+        "end": 2119.98575045344
+      },
+      {
+        "label": "megacity-trap",
+        "start": 1369.95282072801,
+        "end": 1376.71986013412
+      },
+      {
+        "label": "merchant-republic",
+        "start": 3245.48040810764,
+        "end": 2795.43287075845
+      },
+      {
+        "label": "open-cluster",
+        "start": 2802.21257917878,
+        "end": 2475.22722871855
+      },
+      {
+        "label": "resource-curse",
+        "start": 58.0632669280598,
+        "end": 203.887883119934
+      },
+      {
+        "label": "shock-reform",
+        "start": 597.624603685154,
+        "end": 796.769282477518
       }
     ],
     "paired_vs_oracle": [
       {
         "policy": "whittle-index",
         "baseline": "myopic-oracle",
-        "mean_gap": 146.76606567222436,
-        "ci_low": 106.23429526365106,
-        "ci_high": 185.62664774505456,
-        "win_rate": 0.8809523809523809,
-        "matches": 42
+        "mean_gap": 26.5549874766602,
+        "ci_low": 21.9846642873292,
+        "ci_high": 31.6361194528896,
+        "win_rate": 0.700237288135593,
+        "matches": 59000
       }
     ]
   }

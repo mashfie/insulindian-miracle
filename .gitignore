@@ -5,6 +5,10 @@ Cargo.lock
 # Data & Results
 /results/*
 !/results/.gitkeep
+!/results/cohorts/
+/results/cohorts/**
+!/results/cohorts/manifests/
+!/results/cohorts/manifests/*.json
 *.parquet
 *.jsonl
 
@@ -22,3 +26,4 @@ Cargo.lock
 *.pem
 .env*
 .vercel
+.env*.local

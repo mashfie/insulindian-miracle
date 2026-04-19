@@ -6,7 +6,6 @@ import { ProseHtml } from "@/components/prose-html";
 import { SectionNav } from "@/components/section-nav";
 import { StatsTable } from "@/components/figures";
 import type { ScenarioPage } from "@/lib/content/types";
-import { SITE_ROUTES } from "@/lib/navigation";
 
 type ScenarioViewProps = {
   page: ScenarioPage;
