@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/aboreto": "^5.2.7",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "@fontsource/space-mono": "^5.2.9",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "heerich": "^0.9.0",

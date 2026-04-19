@@ -29,7 +29,9 @@ You may use only the following source classes:
 1. Repo documents:
    - `docs/**/*.md`
 2. Repo results:
-   - `results/ucb-bait-boomtown-v4.json`
+   - `web/content/source/results/ucb-bait-cohort.json`
+   - `web/content/source/results/cohort-synthesis.json`
+   - `web/content/source/results/policy-dossiers.json`
    - `results/whittle-run.json`
 3. Repo bibliography metadata:
    - `research/index.json`

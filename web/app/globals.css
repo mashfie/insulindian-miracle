@@ -14,9 +14,9 @@
   --surface-strong: #f3e2d9;
   --hero-height: min(100vh, 68rem);
   --hero-overlap: -30vh;
-  --font-heading: "Bodoni 72", "Bodoni MT Poster Compressed", Didot, "Baskerville Display PT", "Times New Roman", serif;
-  --font-body: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-suisse-mono: "Cascadia Mono", "IBM Plex Mono", "Lucida Console", monospace;
+  --font-heading: "Aboreto", "Bodoni 72", Didot, serif;
+  --font-body: "Space Grotesk", "Suisse Intl", "Suisse", sans-serif;
+  --font-suisse-mono: "Space Mono", "Suisse Intl Mono", "Cascadia Mono", monospace;
   --font-ui: var(--font-heading);
   --font-mono: var(--font-suisse-mono);
   --page-width: 78rem;
