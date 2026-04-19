@@ -50,6 +50,8 @@ enum Commands {
         output: String,
         #[arg(short, long)]
         limit: Option<usize>,
+        #[arg(long)]
+        offset: Option<usize>,
     },
     /// List available scenarios
     Scenarios,
@@ -124,9 +126,10 @@ fn main() {
             policies,
             output,
             limit,
+            offset,
         } => {
             println!("Starting sweep: {} -> {}", input, output);
-            if let Err(e) = run_sweep_rust_core(input, policies, output, *limit) {
+            if let Err(e) = run_sweep_rust_core(input, policies, output, *limit, *offset) {
                 eprintln!("Sweep failed: {e}");
                 std::process::exit(1);
             }

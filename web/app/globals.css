@@ -14,8 +14,11 @@
   --surface-strong: #f3e2d9;
   --hero-height: min(100vh, 68rem);
   --hero-overlap: -30vh;
-  --font-ui: var(--font-heading), sans-serif;
-  --font-mono: var(--font-suisse-mono), monospace;
+  --font-heading: "Bodoni 72", "Bodoni MT Poster Compressed", Didot, "Baskerville Display PT", "Times New Roman", serif;
+  --font-body: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-suisse-mono: "Cascadia Mono", "IBM Plex Mono", "Lucida Console", monospace;
+  --font-ui: var(--font-heading);
+  --font-mono: var(--font-suisse-mono);
   --page-width: 78rem;
   color-scheme: light;
 }

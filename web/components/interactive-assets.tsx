@@ -5,6 +5,10 @@ import { Heerich } from "heerich";
 import { FigureMeta } from "@/components/figures";
 import type { FigureRef } from "@/lib/content/types";
 
+type HeerichWithDecals = Heerich & {
+  defineDecal: (name: string, decal: { content: string }) => void;
+};
+
 function extent(values: number[]) {
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -435,18 +439,18 @@ export function HeerichBarChart3D({
   color?: [number, number, number];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const camera = { type: "oblique" as const, angle: 30, distance: 20 };
   const tile = 16;
   
   const svgString = useMemo(() => {
     const maxVal = Math.max(...data.flat());
+    const camera = { type: "oblique" as const, angle: 30, distance: 20 };
     
     const hr = new Heerich({
       tile,
       camera,
-    });
+    }) as HeerichWithDecals;
 
-    (hr as any).defineDecal("data-decal", {
+    hr.defineDecal("data-decal", {
       content: '<path d="M 0.2 0.2 L 0.8 0.2 M 0.5 0.2 L 0.5 0.8 M 0.2 0.8 L 0.8 0.8" stroke="var(--ink)" stroke-opacity="0.3" stroke-width="0.05" fill="none" vector-effect="non-scaling-stroke"/>'
     });
     
@@ -522,20 +526,20 @@ export function HeerichSurface3D({
   color?: [number, number, number];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const camera = { type: "oblique" as const, angle: 45, distance: 22 };
   const tile = 14;
   
   const svgString = useMemo(() => {
     const w = data[0]?.length || 1;
     const h = data.length || 1;
     const maxStack = 8;
+    const camera = { type: "oblique" as const, angle: 45, distance: 22 };
     
     const hr = new Heerich({
       tile,
       camera,
-    });
+    }) as HeerichWithDecals;
 
-    (hr as any).defineDecal("surface-decal", {
+    hr.defineDecal("surface-decal", {
       content: '<path d="M 0.1 0.1 L 0.9 0.9 M 0.9 0.1 L 0.1 0.9" stroke="rgba(255,255,255,0.4)" stroke-width="0.05" fill="none" vector-effect="non-scaling-stroke"/>'
     });
     
@@ -614,16 +618,16 @@ export function HeerichScatter3D({
   points: Array<{ x: number; y: number; z: number; color?: string; size?: number }>;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const camera = { type: "perspective" as const, angle: 30, distance: 40 };
   const tile = 20;
   
   const svgString = useMemo(() => {
+    const camera = { type: "perspective" as const, angle: 30, distance: 40 };
     const hr = new Heerich({
       tile,
       camera,
-    });
+    }) as HeerichWithDecals;
     
-    (hr as any).defineDecal("scatter-decal", {
+    hr.defineDecal("scatter-decal", {
       content: '<circle cx="0.5" cy="0.5" r="0.2" fill="rgba(255,255,255,0.8)" stroke="none" vector-effect="non-scaling-stroke"/>'
     });
 
@@ -807,13 +811,18 @@ export function HeatmapFigure({
   colorRamp = ["#fde2d5", "var(--accent)"],
 }: {
   figure: FigureRef;
-  data: number[][]; // 2D array [y][x]
-  labelsX: string[];
-  labelsY: string[];
+  data: number[][] | number[];
+  labelsX: string[] | string;
+  labelsY: string[] | string;
   colorRamp?: [string, string];
 }) {
   const [progress, setProgress] = useState(0);
   const [hoveredCell, setHoveredCell] = useState<{x: number, y: number} | null>(null);
+  const xLabels = Array.isArray(labelsX) ? labelsX : [labelsX];
+  const yLabels = Array.isArray(labelsY) ? labelsY : [labelsY];
+  const rows = Array.isArray(data)
+    ? data.map((row) => (Array.isArray(row) ? row : [row]))
+    : [];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -828,29 +837,29 @@ export function HeatmapFigure({
     return () => clearInterval(timer);
   }, [data]);
 
-  const maxVal = Math.max(...data.flat(), 1);
+  const maxVal = Math.max(...rows.flat(), 1);
   
   const startX = 60;
   const startY = 24;
   const areaW = 340;
   const areaH = 188;
   
-  const cellW = areaW / labelsX.length;
-  const cellH = areaH / labelsY.length;
+  const cellW = areaW / xLabels.length;
+  const cellH = areaH / yLabels.length;
 
   return (
     <figure className="figure-card">
       <svg viewBox="0 0 420 240" role="img" aria-label={figure.title}>
         
         {/* Y Axis Labels */}
-        {labelsY.map((l, y) => (
+        {yLabels.map((l, y) => (
           <text key={y} x={startX - 10} y={startY + y * cellH + cellH / 2 + 3} textAnchor="end" fill="var(--ink-soft)" fontFamily="var(--font-ui)" fontSize="9" letterSpacing="0.05em">
             {l.toUpperCase()}
           </text>
         ))}
 
         {/* X Axis Labels */}
-        {labelsX.map((l, x) => (
+        {xLabels.map((l, x) => (
           <text key={x} x={startX + x * cellW + cellW / 2} y={startY + areaH + 16} textAnchor="middle" fill="var(--ink-soft)" fontFamily="var(--font-ui)" fontSize="9" letterSpacing="0.05em">
             {l.toUpperCase()}
           </text>
@@ -859,12 +868,12 @@ export function HeatmapFigure({
         {/* Top readout */}
         {hoveredCell !== null && progress > 0.9 && (
            <text x={startX + areaW} y={14} textAnchor="end" fill="var(--ink)" fontFamily="var(--font-ui)" fontSize="10" letterSpacing="0.05em" fontWeight="bold">
-             {labelsX[hoveredCell.x]} × {labelsY[hoveredCell.y]}: {data[hoveredCell.y][hoveredCell.x].toFixed(1)}
+             {xLabels[hoveredCell.x]} x {yLabels[hoveredCell.y]}: {rows[hoveredCell.y][hoveredCell.x].toFixed(1)}
            </text>
         )}
 
         {/* Grid Cells */}
-        {data.map((row, y) => {
+        {rows.map((row, y) => {
           return row.map((val, x) => {
             const intensity = (val / maxVal) * progress;
             const isHovered = hoveredCell?.x === x && hoveredCell?.y === y;

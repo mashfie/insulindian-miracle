@@ -1,6 +1,5 @@
 import { HeroScene } from "@/components/hero-scene";
 import { getReferenceEntries } from "@/lib/content/repository";
-import { SITE_ROUTES } from "@/lib/navigation";
 
 export default async function ReferencesPage() {
   const references = await getReferenceEntries();

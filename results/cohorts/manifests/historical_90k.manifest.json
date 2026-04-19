@@ -1,0 +1,15 @@
+{
+  "cohort": "historical_90k",
+  "description": "Canonical nine-scenario suite with 1,000 matched seeds per scenario and oracle support.",
+  "config_count": 9000,
+  "execution_count": 90000,
+  "materialized_rows": 90000,
+  "materialized_parts": 1,
+  "policies": ["myopic-oracle", "epsilon-greedy", "ucb1", "discounted-ucb", "sliding-window-ucb", "gaussian-thompson", "discounted-gaussian-thompson", "linucb", "linear-thompson", "whittle-index"],
+  "policy_count": 10,
+  "scenario_supported": true,
+  "oracle_supported": true,
+  "input_jsonl": "results/cohorts/historical_90k_configs.jsonl",
+  "output_parquet": "results/cohorts/historical_90k.parquet",
+  "output_parts": []
+}

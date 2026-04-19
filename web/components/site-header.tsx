@@ -17,7 +17,7 @@ export function SiteHeader() {
     const crumbs = [{ href: "/", label: "Archive" }];
 
     let currentPath = "";
-    segments.forEach((segment, index) => {
+    segments.forEach((segment) => {
       currentPath += `/${segment}/`;
       
       // Try to find a matching route label
