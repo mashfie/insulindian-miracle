@@ -998,7 +998,7 @@ h3 {
 .index-grid {
   display: grid;
   gap: 1.25rem;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .reference-grid {
@@ -1117,8 +1117,7 @@ h3 {
 }
 
 @media (max-width: 48rem) {
-  .reference-grid,
-  .index-grid {
+  .reference-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1539,3 +1538,4 @@ h3 {
   line-height: 1.6;
   color: var(--ink-soft);
 }
+
