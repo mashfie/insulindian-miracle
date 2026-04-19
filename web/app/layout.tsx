@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import "@fontsource/aboreto/400.css";
+import "@fontsource/space-grotesk/400.css";
+import "@fontsource/space-grotesk/500.css";
+import "@fontsource/space-mono/400.css";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
