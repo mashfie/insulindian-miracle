@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { HeroScene } from "@/components/hero-scene";
-import { FadeIn, StaggerChildren, StaggerItem } from "@/components/animations";
+import { FadeIn } from "@/components/animations";
 
 type CatalogItem = {
   href: string;
@@ -27,17 +27,17 @@ export function CatalogGrid({
           <h1 className="headline">{title}</h1>
           <p className="dek">{description}</p>
         </FadeIn>
-        <StaggerChildren as="section" className="index-grid">
+        <ol className="index-grid">
           {items.map((item) => (
-            <StaggerItem key={item.href}>
+            <li key={item.href}>
               <Link href={item.href} className="index-card">
                 <div className="index-card__meta">{item.meta}</div>
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
               </Link>
-            </StaggerItem>
+            </li>
           ))}
-        </StaggerChildren>
+        </ol>
       </article>
     </main>
   );

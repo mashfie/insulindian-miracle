@@ -1,0 +1,662 @@
+{
+  "generatedAt": "2026-04-28T10:52:26.134Z",
+  "scenarios": {
+    "balanced-urban-system": {
+      "scenario": {
+        "name": "balanced-urban-system",
+        "description": "Secondary-city bonuses and lower primacy rewards produce a polycentric landscape.",
+        "overrides": []
+      },
+      "cohort_runs": 5000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 4818.70919186756,
+          "myopic_oracle_gap": 304.322545381944,
+          "oracle_regret": 304.322545381944,
+          "cohort_runs": 5000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 5140.81321379269,
+          "myopic_oracle_gap": -17.7814765431872,
+          "oracle_regret": -17.7814765431872,
+          "cohort_runs": 5000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 3435.65527985462,
+          "myopic_oracle_gap": 1687.37645739488,
+          "oracle_regret": 1687.37645739488,
+          "cohort_runs": 5000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 2975.17547227361,
+          "myopic_oracle_gap": 2147.8562649759,
+          "oracle_regret": 2147.8562649759,
+          "cohort_runs": 5000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 4641.86944244478,
+          "myopic_oracle_gap": 481.162294804722,
+          "oracle_regret": 481.162294804722,
+          "cohort_runs": 5000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 4479.16245867326,
+          "myopic_oracle_gap": 643.86927857625,
+          "oracle_regret": 643.86927857625,
+          "cohort_runs": 5000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 5275.72213822842,
+          "myopic_oracle_gap": -152.690400978913,
+          "oracle_regret": -152.690400978913,
+          "cohort_runs": 5000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 2696.04245549585,
+          "myopic_oracle_gap": 2426.98928175366,
+          "oracle_regret": 2426.98928175366,
+          "cohort_runs": 5000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 5271.67633983419,
+          "myopic_oracle_gap": -148.644602584688,
+          "oracle_regret": -148.644602584688,
+          "cohort_runs": 5000
+        }
+      }
+    },
+    "baseline": {
+      "scenario": {
+        "name": "baseline",
+        "description": "Default peninsula dynamics with moderate resource rents and modest institutional drift.",
+        "overrides": []
+      },
+      "cohort_runs": 3000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 2779.94324336647,
+          "myopic_oracle_gap": 175.152910771127,
+          "oracle_regret": 175.152910771127,
+          "cohort_runs": 3000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 2906.67574073716,
+          "myopic_oracle_gap": 48.4204134004362,
+          "oracle_regret": 48.4204134004362,
+          "cohort_runs": 3000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 1683.81593589892,
+          "myopic_oracle_gap": 1271.28021823868,
+          "oracle_regret": 1271.28021823868,
+          "cohort_runs": 3000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 1760.72491807622,
+          "myopic_oracle_gap": 1194.37123606138,
+          "oracle_regret": 1194.37123606138,
+          "cohort_runs": 3000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 2391.67133315284,
+          "myopic_oracle_gap": 563.424820984755,
+          "oracle_regret": 563.424820984755,
+          "cohort_runs": 3000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 2223.59191549038,
+          "myopic_oracle_gap": 731.504238647217,
+          "oracle_regret": 731.504238647217,
+          "cohort_runs": 3000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 2975.59479344119,
+          "myopic_oracle_gap": -20.4986393035891,
+          "oracle_regret": -20.4986393035891,
+          "cohort_runs": 3000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 1509.16729995371,
+          "myopic_oracle_gap": 1445.92885418389,
+          "oracle_regret": 1445.92885418389,
+          "cohort_runs": 3000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 3056.73446311886,
+          "myopic_oracle_gap": -101.638308981261,
+          "oracle_regret": -101.638308981261,
+          "cohort_runs": 3000
+        }
+      }
+    },
+    "botswana": {
+      "scenario": {
+        "name": "botswana",
+        "description": "Resource endowment under stronger institutional buffers and producer-friendly governance.",
+        "overrides": []
+      },
+      "cohort_runs": 4000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 4903.19728072067,
+          "myopic_oracle_gap": 558.812716306726,
+          "oracle_regret": 558.812716306726,
+          "cohort_runs": 4000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 5416.97889980356,
+          "myopic_oracle_gap": 45.0310972238406,
+          "oracle_regret": 45.0310972238406,
+          "cohort_runs": 4000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 3299.68647255878,
+          "myopic_oracle_gap": 2162.32352446862,
+          "oracle_regret": 2162.32352446862,
+          "cohort_runs": 4000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 3243.09031636331,
+          "myopic_oracle_gap": 2218.91968066408,
+          "oracle_regret": 2218.91968066408,
+          "cohort_runs": 4000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 5114.01546924822,
+          "myopic_oracle_gap": 347.994527779179,
+          "oracle_regret": 347.994527779179,
+          "cohort_runs": 4000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 5007.06299692404,
+          "myopic_oracle_gap": 454.947000103356,
+          "oracle_regret": 454.947000103356,
+          "cohort_runs": 4000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 5557.55002582032,
+          "myopic_oracle_gap": -95.5400287929269,
+          "oracle_regret": -95.5400287929269,
+          "cohort_runs": 4000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 2973.40828765664,
+          "myopic_oracle_gap": 2488.60170937075,
+          "oracle_regret": 2488.60170937075,
+          "cohort_runs": 4000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 5038.71102370368,
+          "myopic_oracle_gap": 423.298973323721,
+          "oracle_regret": 423.298973323721,
+          "cohort_runs": 4000
+        }
+      }
+    },
+    "megacity-trap": {
+      "scenario": {
+        "name": "megacity-trap",
+        "description": "Urban primacy and overstretch pressure penalize excessive concentration.",
+        "overrides": []
+      },
+      "cohort_runs": 8000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 2685.92341222648,
+          "myopic_oracle_gap": 104.942593055558,
+          "oracle_regret": 104.942593055558,
+          "cohort_runs": 8000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 2868.28065321533,
+          "myopic_oracle_gap": -77.4146479332887,
+          "oracle_regret": -77.4146479332887,
+          "cohort_runs": 8000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 1553.09077385313,
+          "myopic_oracle_gap": 1237.77523142891,
+          "oracle_regret": 1237.77523142891,
+          "cohort_runs": 8000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 1833.23643722692,
+          "myopic_oracle_gap": 957.629568055119,
+          "oracle_regret": 957.629568055119,
+          "cohort_runs": 8000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 2522.79771326182,
+          "myopic_oracle_gap": 268.068292020221,
+          "oracle_regret": 268.068292020221,
+          "cohort_runs": 8000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 2195.27407398749,
+          "myopic_oracle_gap": 595.59193129455,
+          "oracle_regret": 595.59193129455,
+          "cohort_runs": 8000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 2893.98286349328,
+          "myopic_oracle_gap": -103.116858211242,
+          "oracle_regret": -103.116858211242,
+          "cohort_runs": 8000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 1595.62636670206,
+          "myopic_oracle_gap": 1195.23963857998,
+          "oracle_regret": 1195.23963857998,
+          "cohort_runs": 8000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 2971.50034691042,
+          "myopic_oracle_gap": -180.634341628378,
+          "oracle_regret": -180.634341628378,
+          "cohort_runs": 8000
+        }
+      }
+    },
+    "merchant-republic": {
+      "scenario": {
+        "name": "merchant-republic",
+        "description": "Commercial network geography with port-led coordination and reduced resource salience.",
+        "overrides": []
+      },
+      "cohort_runs": 6000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 5014.18628232131,
+          "myopic_oracle_gap": 688.706655534793,
+          "oracle_regret": 688.706655534793,
+          "cohort_runs": 6000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 5646.9680063808,
+          "myopic_oracle_gap": 55.9249314753002,
+          "oracle_regret": 55.9249314753002,
+          "cohort_runs": 6000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 3741.67140468327,
+          "myopic_oracle_gap": 1961.22153317283,
+          "oracle_regret": 1961.22153317283,
+          "cohort_runs": 6000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 3407.82670071696,
+          "myopic_oracle_gap": 2295.06623713914,
+          "oracle_regret": 2295.06623713914,
+          "cohort_runs": 6000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 5096.22683135495,
+          "myopic_oracle_gap": 606.666106501156,
+          "oracle_regret": 606.666106501156,
+          "cohort_runs": 6000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 4936.03482246436,
+          "myopic_oracle_gap": 766.858115391748,
+          "oracle_regret": 766.858115391748,
+          "cohort_runs": 6000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 5829.00518817144,
+          "myopic_oracle_gap": -126.112250315333,
+          "oracle_regret": -126.112250315333,
+          "cohort_runs": 6000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 3274.71689518333,
+          "myopic_oracle_gap": 2428.17604267277,
+          "oracle_regret": 2428.17604267277,
+          "cohort_runs": 6000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 6145.15768883331,
+          "myopic_oracle_gap": -442.264750977211,
+          "oracle_regret": -442.264750977211,
+          "cohort_runs": 6000
+        }
+      }
+    },
+    "open-cluster": {
+      "scenario": {
+        "name": "open-cluster",
+        "description": "Trade-cluster externalities reward accessible networked sites rather than extractive rent.",
+        "overrides": []
+      },
+      "cohort_runs": 5000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 4558.68186037273,
+          "myopic_oracle_gap": 462.104294815387,
+          "oracle_regret": 462.104294815387,
+          "cohort_runs": 5000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 5062.87431504571,
+          "myopic_oracle_gap": -42.0881598575945,
+          "oracle_regret": -42.0881598575945,
+          "cohort_runs": 5000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 3281.75036815043,
+          "myopic_oracle_gap": 1739.03578703769,
+          "oracle_regret": 1739.03578703769,
+          "cohort_runs": 5000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 3128.47188109137,
+          "myopic_oracle_gap": 1892.31427409675,
+          "oracle_regret": 1892.31427409675,
+          "cohort_runs": 5000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 4720.89745518075,
+          "myopic_oracle_gap": 299.888700007367,
+          "oracle_regret": 299.888700007367,
+          "cohort_runs": 5000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 4644.58698928851,
+          "myopic_oracle_gap": 376.199165899612,
+          "oracle_regret": 376.199165899612,
+          "cohort_runs": 5000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 5193.46412746256,
+          "myopic_oracle_gap": -172.677972274435,
+          "oracle_regret": -172.677972274435,
+          "cohort_runs": 5000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 2920.24861343463,
+          "myopic_oracle_gap": 2100.53754175349,
+          "oracle_regret": 2100.53754175349,
+          "cohort_runs": 5000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 5460.87291224522,
+          "myopic_oracle_gap": -440.086757057101,
+          "oracle_regret": -440.086757057101,
+          "cohort_runs": 5000
+        }
+      }
+    },
+    "resource-curse": {
+      "scenario": {
+        "name": "resource-curse",
+        "description": "Resource rents generate short-run cashflow while weakening institutional buffers.",
+        "overrides": []
+      },
+      "cohort_runs": 9000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 2221.50766270523,
+          "myopic_oracle_gap": -646.226366507742,
+          "oracle_regret": -646.226366507742,
+          "cohort_runs": 9000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 2381.34062527363,
+          "myopic_oracle_gap": -806.059329076149,
+          "oracle_regret": -806.059329076149,
+          "cohort_runs": 9000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 964.588547394869,
+          "myopic_oracle_gap": 610.692748802617,
+          "oracle_regret": 610.692748802617,
+          "cohort_runs": 9000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 1491.56965456197,
+          "myopic_oracle_gap": 83.7116416355199,
+          "oracle_regret": 83.7116416355199,
+          "cohort_runs": 9000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 1911.58782841005,
+          "myopic_oracle_gap": -336.306532212563,
+          "oracle_regret": -336.306532212563,
+          "cohort_runs": 9000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 1725.1228400498,
+          "myopic_oracle_gap": -149.84154385231,
+          "oracle_regret": -149.84154385231,
+          "cohort_runs": 9000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 2415.28023600013,
+          "myopic_oracle_gap": -839.998939802649,
+          "oracle_regret": -839.998939802649,
+          "cohort_runs": 9000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 1231.06975101351,
+          "myopic_oracle_gap": 344.211545183973,
+          "oracle_regret": 344.211545183973,
+          "cohort_runs": 9000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 1418.75489900102,
+          "myopic_oracle_gap": 156.52639719647,
+          "oracle_regret": 156.52639719647,
+          "cohort_runs": 9000
+        }
+      }
+    },
+    "shock-reform": {
+      "scenario": {
+        "name": "shock-reform",
+        "description": "Institutional shock and reform dynamics turn crisis into a possible adaptive reset.",
+        "overrides": []
+      },
+      "cohort_runs": 8000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 3361.33664738231,
+          "myopic_oracle_gap": -42.5654917886507,
+          "oracle_regret": -42.5654917886507,
+          "cohort_runs": 8000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 3496.20571341342,
+          "myopic_oracle_gap": -177.434557819763,
+          "oracle_regret": -177.434557819763,
+          "cohort_runs": 8000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 1882.7168756627,
+          "myopic_oracle_gap": 1436.05427993095,
+          "oracle_regret": 1436.05427993095,
+          "cohort_runs": 8000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 2269.41259500481,
+          "myopic_oracle_gap": 1049.35856058884,
+          "oracle_regret": 1049.35856058884,
+          "cohort_runs": 8000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 3110.49925057393,
+          "myopic_oracle_gap": 208.271905019722,
+          "oracle_regret": 208.271905019722,
+          "cohort_runs": 8000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 3041.79963136951,
+          "myopic_oracle_gap": 276.971524224147,
+          "oracle_regret": 276.971524224147,
+          "cohort_runs": 8000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 3535.07051207636,
+          "myopic_oracle_gap": -216.299356482706,
+          "oracle_regret": -216.299356482706,
+          "cohort_runs": 8000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 2016.35775102672,
+          "myopic_oracle_gap": 1302.41340456693,
+          "oracle_regret": 1302.41340456693,
+          "cohort_runs": 8000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 2788.2339486552,
+          "myopic_oracle_gap": 530.537206938458,
+          "oracle_regret": 530.537206938458,
+          "cohort_runs": 8000
+        }
+      }
+    },
+    "ucb-bait": {
+      "scenario": {
+        "name": "ucb-bait",
+        "description": "Short-run resource returns spike hard while institutional decay accelerates behind them.",
+        "overrides": []
+      },
+      "cohort_runs": 11000,
+      "policies": {
+        "discounted-gaussian-thompson": {
+          "policy": "discounted-gaussian-thompson",
+          "cumulative_reward": 1825.43655694563,
+          "myopic_oracle_gap": -108.062472013824,
+          "oracle_regret": -108.062472013824,
+          "cohort_runs": 11000
+        },
+        "discounted-ucb": {
+          "policy": "discounted-ucb",
+          "cumulative_reward": 1909.29049113512,
+          "myopic_oracle_gap": -191.916406203311,
+          "oracle_regret": -191.916406203311,
+          "cohort_runs": 11000
+        },
+        "epsilon-greedy": {
+          "policy": "epsilon-greedy",
+          "cumulative_reward": 990.250987533505,
+          "myopic_oracle_gap": 727.123097398305,
+          "oracle_regret": 727.123097398305,
+          "cohort_runs": 11000
+        },
+        "gaussian-thompson": {
+          "policy": "gaussian-thompson",
+          "cumulative_reward": 1311.13428991869,
+          "myopic_oracle_gap": 406.239795013117,
+          "oracle_regret": 406.239795013117,
+          "cohort_runs": 11000
+        },
+        "linear-thompson": {
+          "policy": "linear-thompson",
+          "cumulative_reward": 1758.33078639247,
+          "myopic_oracle_gap": -40.9567014606587,
+          "oracle_regret": -40.9567014606587,
+          "cohort_runs": 11000
+        },
+        "linucb": {
+          "policy": "linucb",
+          "cumulative_reward": 1750.50853885214,
+          "myopic_oracle_gap": -33.1344539203342,
+          "oracle_regret": -33.1344539203342,
+          "cohort_runs": 11000
+        },
+        "sliding-window-ucb": {
+          "policy": "sliding-window-ucb",
+          "cumulative_reward": 1903.7162165652,
+          "myopic_oracle_gap": -186.342131633389,
+          "oracle_regret": -186.342131633389,
+          "cohort_runs": 11000
+        },
+        "ucb1": {
+          "policy": "ucb1",
+          "cumulative_reward": 1155.00863711696,
+          "myopic_oracle_gap": 562.365447814853,
+          "oracle_regret": 562.365447814853,
+          "cohort_runs": 11000
+        },
+        "whittle-index": {
+          "policy": "whittle-index",
+          "cumulative_reward": 1859.71412317278,
+          "myopic_oracle_gap": -142.340038240973,
+          "oracle_regret": -142.340038240973,
+          "cohort_runs": 11000
+        }
+      }
+    }
+  }
+}

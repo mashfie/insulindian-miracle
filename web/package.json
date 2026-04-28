@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/build-comparisons.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:comparisons": "node scripts/build-comparisons.mjs"
   },
   "dependencies": {
     "@fontsource/aboreto": "^5.2.7",

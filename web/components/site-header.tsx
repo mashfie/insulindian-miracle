@@ -34,6 +34,11 @@ export function SiteHeader() {
   }, [pathname]);
 
   return (
+    <>
+      <div className="running-head" aria-hidden="true">
+        <span>Insulindian Miracle &middot; Vol.&thinsp;1 &middot; Cohort Synthesis</span>
+        <span className="running-head__folio">n&thinsp;=&thinsp;1,590,000</span>
+      </div>
     <header className="site-header" data-open={open || undefined}>
       <div className="site-header__brand-zone">
         {breadcrumbs ? (
@@ -80,5 +85,6 @@ export function SiteHeader() {
         ))}
       </nav>
     </header>
+    </>
   );
 }
