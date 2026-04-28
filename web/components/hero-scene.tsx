@@ -659,7 +659,7 @@ export function HeroScene({ title, variant, slug }: HeroSceneProps) {
   }, [svgString]);
 
   return (
-    <section className="site-hero" aria-hidden="true" style={{ background: "var(--paper)" }}>
+    <section className="site-hero" aria-hidden="true" style={{ background: "transparent" }}>
       <div ref={containerRef} className="site-hero__inner" style={{ width: "100%", height: "100%" }} />
     </section>
   );

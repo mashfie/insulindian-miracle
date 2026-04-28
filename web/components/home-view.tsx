@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { HeroScene } from "@/components/hero-scene";
 import { ProseHtml } from "@/components/prose-html";
 import { SectionNav } from "@/components/section-nav";
+import { FadeIn, StaggerChildren, StaggerItem } from "@/components/animations";
 import type { ArchivePage } from "@/lib/content/types";
 import { SITE_ROUTES } from "@/lib/navigation";
 
@@ -23,7 +24,7 @@ export function HomeView({
     <main id="main-content" className="archive-page" data-variant={variant}>
       <HeroScene title={archive.title} variant={variant} />
       <article className="site-shell">
-        <section className="intro-grid motion-reveal" style={{ ["--reveal-order" as string]: 0 }}>
+        <FadeIn as="section" className="intro-grid" delay={0.1}>
           <div>
             <h1 className="headline">{archive.title}</h1>
             <p className="dek">{archive.dek}</p>
@@ -41,15 +42,15 @@ export function HomeView({
             }))}
             caption="The archive now proceeds as an evidence program: cohort accounting, model structure, estimands, policy morphology, and the refusal of false totality."
           />
-        </section>
+        </FadeIn>
 
-        <section className="figure-grid section-block">
+        <StaggerChildren as="section" className="figure-grid section-block">
           {visuals.slice(0, 2).map((visual, index) => (
-            <div key={index} className="motion-reveal" style={{ ["--reveal-order" as string]: index + 1 }}>
+            <StaggerItem key={index}>
               {visual}
-            </div>
+            </StaggerItem>
           ))}
-        </section>
+        </StaggerChildren>
 
         {archive.sections.map((section, index) => {
           const visual = visuals[(index + 2) % visuals.length];
@@ -57,17 +58,17 @@ export function HomeView({
 
           if (section.layout === "full") {
             return (
-              <section key={section.id} id={section.id} className="section-full motion-reveal" style={{ ["--reveal-order" as string]: index + 2 }}>
+              <FadeIn as="section" key={section.id} id={section.id} className="section-full" delay={0.2 + index * 0.1}>
                 <div className="section-kicker">Archive Chapter {String(index + 1).padStart(2, "0")}</div>
                 <h2>{section.title}</h2>
                 <ProseHtml html={section.html} />
                 {visual ? <div className="section-full__figure" style={{ marginTop: "2rem" }}>{visual}</div> : null}
-              </section>
+              </FadeIn>
             );
           }
 
           return (
-            <section key={section.id} id={section.id} className="section-row section-block motion-reveal" style={{ ["--reveal-order" as string]: index + 2 }}>
+            <FadeIn as="section" key={section.id} id={section.id} className="section-row section-block" delay={0.2 + index * 0.1}>
               <div className="section-row__text">
                 <div className="section-kicker">Archive Chapter {String(index + 1).padStart(2, "0")}</div>
                 <h2>{section.title}</h2>
@@ -88,11 +89,11 @@ export function HomeView({
                   </aside>
                 ) : null}
               </div>
-            </section>
+            </FadeIn>
           );
         })}
 
-        <footer className="site-footer">
+        <FadeIn as="footer" className="site-footer" delay={0.4}>
           <div className="site-footer__colophon">
             <div className="site-footer__identity">Insulindian Miracle Archive</div>
             <div className="footer-links">
@@ -103,7 +104,7 @@ export function HomeView({
               ))}
             </div>
           </div>
-        </footer>
+        </FadeIn>
       </article>
     </main>
   );
