@@ -1,19 +1,20 @@
 :root {
-  --paper: #fef5f0;
-  --paper-rim: #fde2d5;
+  --paper: #f8f1ea;
+  --paper-rim: #ecdfd1;
   --ink: #0d0d0d;
-  --ink-soft: rgba(13, 13, 13, 0.72);
-  --ink-faint: rgba(13, 13, 13, 0.46);
-  --line: rgba(13, 13, 13, 0.15);
-  --line-strong: rgba(13, 13, 13, 0.8);
-  --accent: #000000;
-  --accent-soft: rgba(0, 0, 0, 0.14);
+  --ink-soft: rgba(13, 13, 13, 0.78);
+  --ink-faint: rgba(13, 13, 13, 0.5);
+  --line: rgba(13, 13, 13, 0.18);
+  --line-strong: rgba(13, 13, 13, 0.78);
+  --accent: #3a2a1f;
+  --accent-soft: rgba(58, 42, 31, 0.12);
   --danger: #8a3824;
   --danger-soft: rgba(138, 56, 36, 0.14);
-  --surface: #f9ece5;
-  --surface-strong: #f3e2d9;
-  --hero-height: min(100vh, 68rem);
-  --hero-overlap: -30vh;
+  --surface: #f1e6db;
+  --surface-strong: #ead9c9;
+  --hero-height: min(78vh, 52rem);
+  --hero-overlap: -12vh;
+  --motion-scale: 0.5;
   --font-heading: "Aboreto", "Bodoni 72", Didot, serif;
   --font-body: "Space Grotesk", "Suisse Intl", "Suisse", sans-serif;
   --font-suisse-mono: "Space Mono", "Suisse Intl Mono", "Cascadia Mono", monospace;
@@ -29,7 +30,7 @@
 
 html {
   scroll-behavior: smooth;
-  font-size: clamp(15px, 0.55rem + 0.46vw, 19px);
+  font-size: clamp(16px, 0.5rem + 0.5vw, 18px);
   background: var(--paper);
 }
 
@@ -38,10 +39,7 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: var(--font-body);
-  background: 
-    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 20px 20px,
-    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px) 0 0 / 20px 20px,
-    var(--paper);
+  background: var(--paper);
 }
 
 a {
@@ -71,7 +69,7 @@ select {
 }
 
 ::selection {
-  background: var(--ink);
+  background: var(--accent);
   color: var(--paper);
 }
 
@@ -104,7 +102,7 @@ select {
   justify-content: space-between;
   gap: 1.5rem;
   padding: 0.72rem min(1.8rem, 3vw);
-  background: rgba(254, 245, 240, 0.88);
+  background: rgba(248, 241, 234, 0.9);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
 }
@@ -1539,3 +1537,359 @@ h3 {
   color: var(--ink-soft);
 }
 
+/* ============================================================
+   Report tone overrides (B-series polish, applied last so they win)
+   ============================================================ */
+
+.running-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0.55rem min(1.8rem, 3vw);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.running-head__folio {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Figure framing — reports show plates, not loose images */
+figure.exhibit,
+figure.plate {
+  margin: 0;
+  padding: 1.6rem clamp(1rem, 3vw, 2rem) 1.4rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 92%, var(--ink) 1%);
+  position: relative;
+}
+
+figure.exhibit::before,
+figure.plate::before {
+  content: "";
+  position: absolute;
+  inset: 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  pointer-events: none;
+}
+
+.exhibit__caption,
+.plate__caption,
+figure > figcaption {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+  border-top: 1px solid var(--line);
+  padding-top: 0.55rem;
+  margin-top: 1rem;
+}
+
+.exhibit__caption,
+.plate__caption {
+  border-top: none;
+  border-bottom: 1px solid var(--line);
+  padding-top: 0;
+  padding-bottom: 0.6rem;
+  margin: 0 0 1rem;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.exhibit__note {
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.exhibit__empty {
+  margin: 0;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+/* Chip-style policy toggles, also reused by atlas controls (B7) */
+.exhibit__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+  margin: 0 0 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+.chip {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font: 500 0.72rem/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.chip:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.chip--on,
+.chip[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* Exhibit table — the natural unit of a report */
+.exhibit__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.exhibit__table thead th {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: right;
+  padding: 0.55rem 0.6rem;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.exhibit__table thead th.exhibit__col-policy {
+  text-align: left;
+}
+
+.exhibit__table tbody tr + tr th,
+.exhibit__table tbody tr + tr td {
+  border-top: 1px solid var(--line);
+}
+
+.exhibit__row-label {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  text-align: left;
+  padding: 0.7rem 0.6rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.exhibit__cell-num {
+  text-align: right;
+  padding: 0.7rem 0.6rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.exhibit__cell-bar {
+  position: relative;
+  min-width: 12rem;
+}
+
+.exhibit__bar {
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: 0.35rem;
+  height: 2px;
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  pointer-events: none;
+}
+
+.exhibit__bar::after {
+  content: "";
+  display: block;
+  width: var(--w, 0%);
+  height: 100%;
+  background: var(--accent);
+}
+
+.exhibit__bar-value {
+  position: relative;
+}
+
+@media (max-width: 48rem) {
+  .exhibit__table thead th {
+    font-size: 0.62rem;
+  }
+  .exhibit__row-label,
+  .exhibit__cell-num {
+    font-size: 0.88rem;
+    padding: 0.55rem 0.45rem;
+  }
+  .exhibit__cell-bar {
+    min-width: 0;
+  }
+}
+
+/* B3 — contents-page card grid */
+.index-grid {
+  display: block;
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line-strong);
+  counter-reset: contents;
+}
+
+.index-grid > li,
+.index-grid > .index-card {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 1.2rem 0.2rem;
+  border-bottom: 1px solid var(--line);
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 140ms ease;
+  counter-increment: contents;
+  position: relative;
+}
+
+.index-grid > li::before,
+.index-grid > .index-card::before {
+  content: counter(contents, decimal-leading-zero) ".";
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  align-self: center;
+}
+
+.index-grid > li:hover,
+.index-grid > .index-card:hover {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+
+.index-grid h3,
+.index-grid .index-card__title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.25rem, 0.9rem + 1vw, 1.6rem);
+  line-height: 1.15;
+  margin: 0 0 0.25rem;
+  color: var(--ink);
+  letter-spacing: 0.005em;
+}
+
+.index-grid p,
+.index-grid .index-card__dek {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.index-grid .index-card__meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  align-self: center;
+  text-align: right;
+}
+
+.index-grid a {
+  text-decoration: none;
+  color: inherit;
+  display: contents;
+}
+
+@media (min-width: 64rem) {
+  .index-grid {
+    columns: 2;
+    column-gap: 3rem;
+    column-rule: 1px solid var(--line);
+  }
+
+  .index-grid > li,
+  .index-grid > .index-card {
+    break-inside: avoid;
+  }
+}
+
+/* B7 — Atlas viewport as a printed plate */
+figure.plate {
+  padding: 1.4rem;
+}
+
+.atlas__viewport,
+.atlas__narrative {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+figure.plate .atlas__viewport {
+  border: 1px solid var(--line) !important;
+  padding: 1rem !important;
+}
+
+/* B2 — masthead framing for hero scenes */
+.hero {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--line);
+  pointer-events: none;
+}
+
+.masthead-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0.6rem min(1.8rem, 3vw) 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Reduce hero overlap and let prose meet the masthead, not collide */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0;
+  }
+}

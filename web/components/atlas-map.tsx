@@ -122,19 +122,28 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
 
   return (
     <section className="atlas">
-      <div className="atlas__controls">
-        {chapters.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            data-active={entry.id === chapter.id}
-            onClick={() => handleChapterChange(entry.id)}
-          >
-            {entry.title.toUpperCase()}
-          </button>
-        ))}
+      <div className="atlas__controls exhibit__chips" role="group" aria-label="Atlas chapters">
+        {chapters.map((entry) => {
+          const isActive = entry.id === chapter.id;
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              className={`chip${isActive ? " chip--on" : ""}`}
+              aria-pressed={isActive}
+              data-active={isActive}
+              onClick={() => handleChapterChange(entry.id)}
+            >
+              {entry.title}
+            </button>
+          );
+        })}
       </div>
       <div className="atlas__grid">
+        <figure className="plate atlas__plate">
+          <figcaption className="plate__caption">
+            Plate I &middot; {chapter.title} &middot; Stratified terrain overlay
+          </figcaption>
         <div
           ref={viewportRef}
           className={`atlas__viewport${isDragging ? " is-dragging" : ""}`}
@@ -161,6 +170,7 @@ export function AtlasMap({ source, chapters }: AtlasMapProps) {
             </div>
           </div>
         </div>
+        </figure>
         <aside className="atlas__narrative">
           <div className="section-kicker">ATLAS CHAPTER</div>
           <h2 className="atlas__chapter-title">{chapter.title.toUpperCase()}</h2>
